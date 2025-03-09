@@ -1,4 +1,5 @@
 import express, { Request, Response, Router } from 'express';
+import validate from 'deep-email-validator';
 import {
   UserRequest,
   User,
@@ -6,6 +7,8 @@ import {
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
+  UpdateEmailRequest,
+  AddEmailRequest,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -15,6 +18,7 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
+import { isEmptyTypeAnnotation } from '@babel/types';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -43,6 +47,33 @@ const userController = (socket: FakeSOSocket) => {
     req.body.biography !== undefined;
 
   /**
+   * Validates that the request body contains all required fields to add an email.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddEmailBodyValid = (req: AddEmailRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.newEmail !== undefined &&
+    req.body.newEmail.trim() !== '';
+
+  /**
+   * Validates that the request body/param contains all required fields to add an email
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body and param contains valid user fields; otherwise, `false`.
+   */
+  //Repeated code.
+  const isUpdateEmailBodyValid = (req: UpdateEmailRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.newEmail !== undefined &&
+    req.body.newEmail.trim() !== '' &&
+    req.param.currEmail !== undefined &&
+    req.param.currEmail.trim() !== '';
+
+  /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
    * @param res The response, either returning the created user or an error.
@@ -60,6 +91,7 @@ const userController = (socket: FakeSOSocket) => {
       ...requestUser,
       dateJoined: new Date(),
       biography: requestUser.biography ?? '',
+      emails: requestUser.emails ?? [],
     };
 
     try {
@@ -236,6 +268,94 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds an emal to a user's account
+   * @param req The request containing the username and the email to add.
+   * @param res The response, either confirming the addition or returning an error.
+   * @returns A promise resolving to void
+   */
+  const addEmail = async (req: AddEmailRequest, res: Response): Promise<void> => {
+    try {
+      // Check that the given request is valid
+      if (!isAddEmailBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username, newEmail } = req.body;
+
+      const validateEmail = await validate(newEmail);
+
+      if (!validateEmail.valid) {
+        res.status(400).send('Invalid email');
+        return;
+      }
+
+      /**
+       * I feel like this is extra work but how do I work around the fact that updateUser wants a partial user?
+       */
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userEmails = foundUser.emails;
+      userEmails.push(newEmail);
+
+      const updatedUser = await updateUser(username, { emails: userEmails });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when updating user biography: ${error}`);
+    }
+  };
+
+  /**
+   * Replaces an existing email on a user's account with a new email
+   * @param req The request containing the username, the email to add, and the email to replace
+   * @param res The response, either confirming the replacement or returning an error.
+   * @returns A promise resolving to void
+   */
+  const replaceEmail = async (req: UpdateEmailRequest, res: Response): Promise<void> => {
+    try {
+      // Check that the given request is valid
+      if (!isUpdateEmailBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username, newEmail } = req.body;
+      const currEmail = req.param.currEmail;
+
+      const validateEmail = await validate(newEmail);
+
+      if (!validateEmail.valid) {
+        res.status(400).send('Invalid email');
+        return;
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userEmails = foundUser.emails;
+      if (!(currEmail in userEmails)) {
+        res.status(400).send('Provided email is not associated with user');
+      }
+
+      const updatedUser = await updateUser(username, { emails: userEmails });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when updating user biography: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -244,6 +364,8 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
+  router.patch('/addEmail', addEmail);
+  // router.post('/:email/replaceEmail/', replaceEmail);
   return router;
 };
 
