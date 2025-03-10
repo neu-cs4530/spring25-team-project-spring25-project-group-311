@@ -8,18 +8,21 @@ const mockUser: User = {
   username: 'user1',
   password: 'password',
   dateJoined: new Date('2024-12-03'),
+  emails: [],
 };
 
 const mockSafeUser: SafeDatabaseUser = {
   _id: new mongoose.Types.ObjectId(),
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
+  emails: [],
 };
 
 const mockUserJSONResponse = {
   _id: mockSafeUser._id.toString(),
   username: 'user1',
   dateJoined: new Date('2024-12-03').toISOString(),
+  emails: [],
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -38,12 +41,18 @@ describe('Test userController', () => {
         biography: 'This is a test biography',
       };
 
-      saveUserSpy.mockResolvedValueOnce({ ...mockSafeUser, biography: mockReqBody.biography });
+      saveUserSpy.mockResolvedValueOnce({
+        ...mockSafeUser,
+        biography: mockReqBody.biography,
+      });
 
       const response = await supertest(app).post('/user/signup').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ ...mockUserJSONResponse, biography: mockReqBody.biography });
+      expect(response.body).toEqual({
+        ...mockUserJSONResponse,
+        biography: mockReqBody.biography,
+      });
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
         biography: mockReqBody.biography,
@@ -179,7 +188,9 @@ describe('Test userController', () => {
         password: mockUser.password,
       };
 
-      loginUserSpy.mockResolvedValueOnce({ error: 'Error authenticating user' });
+      loginUserSpy.mockResolvedValueOnce({
+        error: 'Error authenticating user',
+      });
 
       const response = await supertest(app).post('/user/login').send(mockReqBody);
 
@@ -200,7 +211,9 @@ describe('Test userController', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ ...mockUserJSONResponse });
-      expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, { password: 'newPassword' });
+      expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, {
+        password: 'newPassword',
+      });
     });
 
     it('should return 400 for request missing username', async () => {
@@ -275,7 +288,9 @@ describe('Test userController', () => {
     });
 
     it('should return 500 if database error while searching username', async () => {
-      getUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error finding user' });
+      getUserByUsernameSpy.mockResolvedValueOnce({
+        error: 'Error finding user',
+      });
 
       const response = await supertest(app).get(`/user/getUser/${mockUser.username}`);
 
@@ -322,7 +337,9 @@ describe('Test userController', () => {
     });
 
     it('should return 500 if database error while searching username', async () => {
-      deleteUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error deleting user' });
+      deleteUserByUsernameSpy.mockResolvedValueOnce({
+        error: 'Error deleting user',
+      });
 
       const response = await supertest(app).delete(`/user/deleteUser/${mockUser.username}`);
 
@@ -406,6 +423,173 @@ describe('Test userController', () => {
       expect(response.text).toContain(
         'Error when updating user biography: Error: Error updating user',
       );
+    });
+  });
+
+  describe('POST /addEmail', () => {
+    it('should successfully add an email given correct arguments', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+      };
+
+      const userEmails = {
+        username: 'newUser',
+        password: 'randomPassword',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'john.doe@gmail.com',
+      };
+
+      const mockSafeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['john.doe@gmail.com'],
+      };
+
+      const mockUserEmailJSONResponse = {
+        _id: mockSafeUser._id.toString(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: ['john.doe@gmail.com'],
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      // Mock a successful updateUser call
+      updatedUserSpy.mockResolvedValueOnce(mockSafeUserEmails);
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockUserEmailJSONResponse);
+      // Ensure updateUser is called with the correct args
+      expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
+        newEmail: 'john.doe@gmail.com',
+      });
+    });
+
+    it('should return 400 for empty request', async () => {
+      const mockReqBody = {};
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        newEmail: 'john.doe@gmail.com',
+      };
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having empty username', async () => {
+      const mockReqBody = {
+        username: '',
+        newEmail: 'john.doe@gmail.com',
+      };
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request missing email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+      };
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having empty email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: '',
+      };
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having an invalid email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'abcefghijklmnopqrstuvwxyz',
+      };
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid email');
+    });
+
+    it('should return 500 if user does not exist', async () => {
+      getUserByUsernameSpy.mockResolvedValueOnce({
+        error: 'Error when getting user',
+      });
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'john.doe@gmail.com',
+      };
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual('Error when adding user email: Error when getting user');
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should return 500 if an error occurs while updating user', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+      };
+
+      const userEmails = {
+        username: 'newUser',
+        password: 'randomPassword',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'john.doe@gmail.com',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      // Mock a successful updateUser call
+      updatedUserSpy.mockResolvedValueOnce({
+        error: 'Error while updating user',
+      });
+
+      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual('Error when adding user email: Error while updating user');
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+      expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
+        newEmail: 'john.doe@gmail.com',
+      });
     });
   });
 });

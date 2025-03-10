@@ -18,7 +18,6 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
-import { isEmptyTypeAnnotation } from '@babel/types';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -70,8 +69,8 @@ const userController = (socket: FakeSOSocket) => {
     req.body.username.trim() !== '' &&
     req.body.newEmail !== undefined &&
     req.body.newEmail.trim() !== '' &&
-    req.param.currEmail !== undefined &&
-    req.param.currEmail.trim() !== '';
+    req.params.currEmail !== undefined &&
+    req.params.currEmail.trim() !== '';
 
   /**
    * Handles the creation of a new user account.
@@ -306,9 +305,16 @@ const userController = (socket: FakeSOSocket) => {
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
       }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
       res.status(200).json(updatedUser);
     } catch (error) {
-      res.status(500).send(`Error when updating user biography: ${error}`);
+      res.status(500).send(`Error when adding user email: ${error}`);
     }
   };
 
@@ -327,7 +333,7 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       const { username, newEmail } = req.body;
-      const currEmail = req.param.currEmail;
+      const currEmail = req.params.currEmail;
 
       const validateEmail = await validate(newEmail);
 
@@ -350,9 +356,15 @@ const userController = (socket: FakeSOSocket) => {
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
       }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
       res.status(200).json(updatedUser);
     } catch (error) {
-      res.status(500).send(`Error when updating user biography: ${error}`);
+      res.status(500).send(`Error when replacing user email: ${error}`);
     }
   };
 
@@ -364,8 +376,8 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
-  router.patch('/addEmail', addEmail);
-  // router.post('/:email/replaceEmail/', replaceEmail);
+  router.patch('/:email/replaceEmail', replaceEmail);
+  router.post('/addEmail', addEmail);
   return router;
 };
 

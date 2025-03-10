@@ -113,7 +113,7 @@ export interface AddEmailRequest extends Request {
  * - `currEmail`: The current email provided to be replaced (param).
  */
 export interface UpdateEmailRequest extends AddEmailRequest {
-  param: {
+  params: {
     currEmail: string;
   };
 }
