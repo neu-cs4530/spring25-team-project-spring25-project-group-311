@@ -47,7 +47,7 @@
     "lint:fix": "eslint . --fix",
     "test": "jest -w=1 --coverage --detectOpenHandles --detectLeaks",
     "debug-test": "jest -w=1 --coverage --detectOpenHandles",
-    "prebuild": "cd ..; npm run build --workspaces shared",
+    "prebuild": "cd ..; npm run build --workspace=shared",
     "build": "tsc",
     "start:prod": "node ./dist/server.js",
     "stryker": "stryker run",
