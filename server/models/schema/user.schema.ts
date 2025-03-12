@@ -8,7 +8,9 @@ import { Schema } from 'mongoose';
  * - `username`: The username of the user.
  * - `password`: The encrypted password securing the user's account.
  * - `dateJoined`: The date the user joined the platform.
+ * - `biography`: A short biography of the user.
  * - `emails`: The emails associated with this user (in the form of a list to allow for multiple emails)
+ * - `badges`: The badges the user has earned.
  */
 const userSchema: Schema = new Schema(
   {
@@ -28,6 +30,10 @@ const userSchema: Schema = new Schema(
       default: '',
     },
     emails: [{ type: String }],
+    badges: {
+      type: [String],
+      default: [],
+    },
   },
   { collection: 'User' },
 );

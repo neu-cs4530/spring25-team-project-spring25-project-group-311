@@ -9,6 +9,7 @@ import {
   UpdateBiographyRequest,
   UpdateEmailRequest,
   AddEmailRequest,
+  AddBadgeRequest,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -76,6 +77,7 @@ const userController = (socket: FakeSOSocket) => {
       dateJoined: new Date(),
       biography: requestUser.biography ?? '',
       emails: requestUser.emails ?? [],
+      badges: [],
     };
 
     try {
@@ -367,6 +369,40 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const addBadges = async (req: AddBadgeRequest, res: Response): Promise<void> => {
+    try {
+      const { username, badge } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userBadges = foundUser.badges;
+      if (userBadges.includes(badge)) {
+        res.status(400).send('Badge already associated with this user');
+        return;
+      }
+
+      userBadges.push(badge);
+
+      const updatedUser = await updateUser(username, { badges: userBadges });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding user badge: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -377,6 +413,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/updateBiography', updateBiography);
   router.patch('/:currEmail/replaceEmail', replaceEmail);
   router.post('/addEmail', addEmail);
+  router.post('/addBadges', addBadges);
   return router;
 };
 
