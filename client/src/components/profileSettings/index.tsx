@@ -17,6 +17,7 @@ const ProfileSettings: React.FC = () => {
     confirmNewPassword,
     successMessage,
     errorMessage,
+    emailToReplace,
     showConfirmation,
     pendingAction,
     canEditProfile,
@@ -24,6 +25,7 @@ const ProfileSettings: React.FC = () => {
     togglePasswordVisibility,
 
     setEditBioMode,
+    setEmailToReplace,
     setReplaceEmailMode,
     setAddEmailMode,
     setNewBio,
@@ -109,7 +111,7 @@ const ProfileSettings: React.FC = () => {
               <div>
                 {userData.emails.map(email => (
                   <div key={email}>
-                    <EmailDisplayItem email={email} />
+                    <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />
                     <button
                       className='replace-email-button'
                       style={{ marginLeft: '1rem' }}
@@ -154,10 +156,9 @@ const ProfileSettings: React.FC = () => {
             the current email, we put in the input text. Else we display the email as is.---- */}
             {replaceEmailMode && canEditProfile && (
               <div>
-                {userData.emails.map(email => (
-                  <div key={email}>
-                    email === emailToReplace ?
-                    <div>
+                {userData.emails.map(email =>
+                  email === emailToReplace ? (
+                    <div key={email}>
                       <input
                         className='input-text'
                         type='text'
@@ -167,26 +168,20 @@ const ProfileSettings: React.FC = () => {
                       <button
                         className='login-button'
                         style={{ marginLeft: '1rem' }}
-                        onClick={() => handleReplaceEmail(email)}>
-                        Add Email
+                        onClick={handleReplaceEmail}>
+                        Replace Email
                       </button>
                       <button
                         className='delete-button'
                         style={{ marginLeft: '1rem' }}
-                        onClick={() => setAddEmailMode(false)}>
+                        onClick={() => setReplaceEmailMode(false)}>
                         Cancel
                       </button>
                     </div>
-                    :
-                    <EmailDisplayItem email={email} />
-                    <button
-                      className='replace-email-button'
-                      style={{ marginLeft: '1rem' }}
-                      onClick={() => setReplaceEmailMode(true)}>
-                      Replace Email
-                    </button>
-                  </div>
-                ))}
+                  ) : (
+                    <EmailDisplayItem key={email} email={email} selectEmail={setEmailToReplace} />
+                  ),
+                )}
               </div>
             )}
 

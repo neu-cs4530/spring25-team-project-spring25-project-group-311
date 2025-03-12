@@ -7,8 +7,14 @@ import './index.css';
  * @param email: The email itself.
  * @param selectEmailToReplace: A function to select the email to as the email you want to replace.
  */
-const EmailDisplayItem = ({ email }: { email: string }) => (
-  <div className='emails-list-card'>
+const EmailDisplayItem = ({
+  email,
+  selectEmail,
+}: {
+  email: string;
+  selectEmail: (email: string) => void;
+}) => (
+  <div onClick={() => selectEmail(email)} className='emails-list-card'>
     <p>{email}</p>
   </div>
 );

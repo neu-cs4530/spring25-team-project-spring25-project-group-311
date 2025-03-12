@@ -28,6 +28,7 @@ const useProfileSettings = () => {
   const [newBio, setNewBio] = useState('');
   const [replaceEmailMode, setReplaceEmailMode] = useState(false);
   const [addEmailMode, setAddEmailMode] = useState(false);
+  const [emailToReplace, setEmailToReplace] = useState('');
   const [replacementEmail, setReplacementEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -150,7 +151,7 @@ const useProfileSettings = () => {
   /**
    * Handler for replacing an email.
    */
-  const handleReplaceEmail = async (emailToReplace: string) => {
+  const handleReplaceEmail = async () => {
     if (!username) return;
     try {
       // Await the async call to add the email
@@ -204,6 +205,8 @@ const useProfileSettings = () => {
     setNewBio,
     newEmail,
     setNewEmail,
+    emailToReplace,
+    setEmailToReplace,
     addEmailMode,
     setAddEmailMode,
     replacementEmail,
