@@ -106,6 +106,14 @@ const ProfileSettings: React.FC = () => {
               </div>
             )}
 
+            {/* ---- Badges Section ---- */}
+            {userData.badges.length > 0 && (
+              <p>
+                <strong>Badges:</strong> {userData.badges.join(', ')}
+              </p>
+            )}
+              
+
             {/* ---- Email Section ---- */}
             {!addEmailMode && !replaceEmailMode && (
               <div>
