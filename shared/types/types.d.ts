@@ -7,3 +7,4 @@ export * from './question';
 export * from './socket';
 export * from './tag';
 export * from './user';
+export * from './forum';
