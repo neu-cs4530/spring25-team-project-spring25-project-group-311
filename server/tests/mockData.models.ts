@@ -7,6 +7,7 @@ import {
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
   User,
+  Forum,
 } from '../types/types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 
@@ -198,4 +199,16 @@ export const safeUser: SafeDatabaseUser = {
   dateJoined: new Date('2024-12-03'),
   emails: [],
   badges: [],
+};
+
+export const forum: Forum = {
+  name: 'forum1',
+  description: 'this is a forum',
+  flairs: ['flair1'],
+  createDateTime: new Date('2024-12-03'),
+  createdBy: 'user1',
+  moderators: ['user1'],
+  members: ['user1'],
+  questions: [],
+  type: 'private',
 };
