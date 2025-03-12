@@ -33,8 +33,8 @@ const forumSchema: Schema = new Schema(
     createDateTime: {
       type: Date,
     },
-    moderators: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    moderators: [{ String }],
+    members: [{ String }],
     questions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
     type: {
       type: String,
