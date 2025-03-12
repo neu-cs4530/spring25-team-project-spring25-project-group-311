@@ -12,7 +12,6 @@ const ProfileSettings: React.FC = () => {
     replaceEmailMode,
     addEmailMode,
     replacementEmail,
-    emailToReplace,
     newEmail,
     newPassword,
     confirmNewPassword,
@@ -29,12 +28,14 @@ const ProfileSettings: React.FC = () => {
     setAddEmailMode,
     setNewBio,
     setNewEmail,
+    setReplacementEmail,
     setNewPassword,
     setConfirmNewPassword,
     setShowConfirmation,
-    setEmailToReplace,
 
     handleResetPassword,
+    handleAddEmail,
+    handleReplaceEmail,
     handleUpdateBiography,
     handleDeleteUser,
   } = useProfileSettings();
@@ -108,7 +109,7 @@ const ProfileSettings: React.FC = () => {
               <div>
                 {userData.emails.map(email => (
                   <div key={email}>
-                    <EmailDisplayItem email={email} selectEmailToReplace={setEmailToReplace} />
+                    <EmailDisplayItem email={email} />
                     <button
                       className='replace-email-button'
                       style={{ marginLeft: '1rem' }}
@@ -131,13 +132,13 @@ const ProfileSettings: React.FC = () => {
                 <input
                   className='input-text'
                   type='text'
-                  value={newBio}
+                  value={newEmail}
                   onChange={e => setNewEmail(e.target.value)}
                 />
                 <button
                   className='login-button'
                   style={{ marginLeft: '1rem' }}
-                  onClick={handleUpdateBiography}>
+                  onClick={handleAddEmail}>
                   Add Email
                 </button>
                 <button
@@ -156,14 +157,28 @@ const ProfileSettings: React.FC = () => {
                 {userData.emails.map(email => (
                   <div key={email}>
                     email === emailToReplace ?
-                    <input
-                      className='input-text'
-                      type='text'
-                      value={newBio}
-                      onChange={e => setNewBio(e.target.value)}
-                    />
+                    <div>
+                      <input
+                        className='input-text'
+                        type='text'
+                        value={replacementEmail}
+                        onChange={e => setReplacementEmail(e.target.value)}
+                      />
+                      <button
+                        className='login-button'
+                        style={{ marginLeft: '1rem' }}
+                        onClick={() => handleReplaceEmail(email)}>
+                        Add Email
+                      </button>
+                      <button
+                        className='delete-button'
+                        style={{ marginLeft: '1rem' }}
+                        onClick={() => setAddEmailMode(false)}>
+                        Cancel
+                      </button>
+                    </div>
                     :
-                    <EmailDisplayItem email={email} selectEmailToReplace={setEmailToReplace} />
+                    <EmailDisplayItem email={email} />
                     <button
                       className='replace-email-button'
                       style={{ marginLeft: '1rem' }}
