@@ -15,6 +15,7 @@ export * from '@fake-stack-overflow/shared/types/types';
 export type FakeSOSocket = Server<ClientToServerEvents, ServerToClientEvents>;
 
 export interface DatabaseReadStatus extends Document {
+  _id: ObjectId;
   userId: ObjectId;
   postId: ObjectId;
   read: boolean;

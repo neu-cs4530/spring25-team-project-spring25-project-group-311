@@ -8,6 +8,7 @@ import { DatabaseReadStatus } from '../../types/types';
 // Create spy instances for service methods
 const markAsReadSpy: jest.SpyInstance = jest.spyOn(readStatusService, 'markAsRead');
 const checkReadStatusSpy: jest.SpyInstance = jest.spyOn(readStatusService, 'checkReadStatus');
+const { ObjectId } = mongoose.Types;
 
 describe('readStatusController', () => {
   beforeEach(() => {
@@ -16,11 +17,12 @@ describe('readStatusController', () => {
 
   describe('POST /:postId/read', () => {
     it('should mark the post as read and return success', async () => {
-      const postId = new mongoose.Types.ObjectId().toString();
+      const postId = new ObjectId();
+      const userId = new ObjectId();
       const mockReadStatus: DatabaseReadStatus = {
-        _id: new mongoose.Types.ObjectId(),
-        userId: 'user123',
-        postId,
+        _id: new ObjectId(),
+        userId: userId,
+        postId: postId,
         read: true,
       };
 
