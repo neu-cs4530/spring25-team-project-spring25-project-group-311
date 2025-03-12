@@ -5,6 +5,8 @@ import {
   deleteUser,
   resetPassword,
   updateBiography,
+  addEmail,
+  replaceEmail,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -24,6 +26,11 @@ const useProfileSettings = () => {
   const [loading, setLoading] = useState(false);
   const [editBioMode, setEditBioMode] = useState(false);
   const [newBio, setNewBio] = useState('');
+  const [replaceEmailMode, setReplaceEmailMode] = useState(false);
+  const [addEmailMode, setAddEmailMode] = useState(false);
+  const [emailToReplace, setEmailToReplace] = useState('');
+  const [replacementEmail, setReplacementEmail] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -119,6 +126,52 @@ const useProfileSettings = () => {
   };
 
   /**
+   * Handler for adding an email.
+   */
+  const handleAddEmail = async () => {
+    if (!username) return;
+    try {
+      // Await the async call to add the email
+      const updatedUser = await addEmail(username, newEmail);
+      // Ensure state updates occur sequentially after the API call completes
+      await new Promise(resolve => {
+        setUserData(updatedUser); // Update the user data
+        setAddEmailMode(false); // Exit edit mode
+        resolve(null); // Resolve the promise
+      });
+
+      setSuccessMessage('Email added!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to add email.');
+      setSuccessMessage(null);
+    }
+  };
+
+  /**
+   * Handler for replacing an email.
+   */
+  const handleReplaceEmail = async () => {
+    if (!username) return;
+    try {
+      // Await the async call to add the email
+      const updatedUser = await replaceEmail(username, emailToReplace, replacementEmail);
+      // Ensure state updates occur sequentially after the API call completes
+      await new Promise(resolve => {
+        setUserData(updatedUser); // Update the user data
+        setReplaceEmailMode(false); // Exit edit mode
+        resolve(null); // Resolve the promise
+      });
+
+      setSuccessMessage('Email replaced!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to replace email.');
+      setSuccessMessage(null);
+    }
+  };
+
+  /**
    * Handler for deleting the user (triggers confirmation modal)
    */
   const handleDeleteUser = () => {
@@ -150,6 +203,16 @@ const useProfileSettings = () => {
     setEditBioMode,
     newBio,
     setNewBio,
+    newEmail,
+    setNewEmail,
+    addEmailMode,
+    setAddEmailMode,
+    replacementEmail,
+    setReplacementEmail,
+    replaceEmailMode,
+    emailToReplace,
+    setEmailToReplace,
+    setReplaceEmailMode,
     successMessage,
     errorMessage,
     showConfirmation,
@@ -162,6 +225,8 @@ const useProfileSettings = () => {
     handleResetPassword,
     handleUpdateBiography,
     handleDeleteUser,
+    handleAddEmail,
+    handleReplaceEmail,
   };
 };
 

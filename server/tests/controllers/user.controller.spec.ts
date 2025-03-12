@@ -57,6 +57,7 @@ describe('Test userController', () => {
         ...mockReqBody,
         biography: mockReqBody.biography,
         dateJoined: expect.any(Date),
+        emails: [],
       });
     });
 
@@ -489,13 +490,12 @@ describe('Test userController', () => {
       expect(response.text).toEqual('Invalid user body');
     });
 
-    it('should return 400 for not having a current email parameter', async () => {
+    it('should return 404 for not having a current email parameter', async () => {
       const mockReqBody = { username: 'newUser', newEmail: 'janeDoe@gmail.com' };
 
       const response = await supertest(app).patch('/user/replaceEmail').send(mockReqBody);
 
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid user body');
+      expect(response.status).toBe(404);
     });
 
     it('should return 400 for request missing username', async () => {
@@ -626,7 +626,9 @@ describe('Test userController', () => {
 
       // Mock a successful updateUser call
       updatedUserSpy.mockResolvedValueOnce({ error: 'Error while updating user' });
-      const response = await supertest(app).patch('/user/addEmail').send(mockReqBody);
+      const response = await supertest(app)
+        .patch('/user/janeSmith@gmail.com/replaceEmail')
+        .send(mockReqBody);
 
       expect(response.status).toBe(500);
       expect(response.text).toEqual('Error when replacing user email: Error while updating user');
@@ -655,21 +657,21 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'john.doe@gmail.com',
+        newEmail: 'raisa16h21@gmail.com',
       };
 
       const mockSafeUserEmails = {
         _id: new mongoose.Types.ObjectId(),
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
-        emails: ['john.doe@gmail.com'],
+        emails: ['raisa16h21@gmail.com'],
       };
 
       const mockUserEmailJSONResponse = {
         _id: mockSafeUser._id.toString(),
         username: 'newUser',
         dateJoined: new Date('2024-12-03').toISOString(),
-        emails: ['john.doe@gmail.com'],
+        emails: ['raisa16h21@gmail.com'],
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -683,7 +685,7 @@ describe('Test userController', () => {
       expect(response.body).toEqual(mockUserEmailJSONResponse);
       // Ensure updateUser is called with the correct args
       expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
-        newEmail: ['john.doe@gmail.com'],
+        newEmail: ['raisa16h21@gmail.com'],
       });
     });
 
@@ -698,7 +700,7 @@ describe('Test userController', () => {
 
     it('should return 400 for request missing username', async () => {
       const mockReqBody = {
-        newEmail: 'john.doe@gmail.com',
+        newEmail: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -709,7 +711,7 @@ describe('Test userController', () => {
     it('should return 400 for request having empty username', async () => {
       const mockReqBody = {
         username: '',
-        newEmail: 'john.doe@gmail.com',
+        newEmail: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -756,7 +758,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'john.doe@gmail.com',
+        newEmail: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -783,7 +785,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'john.doe@gmail.com',
+        newEmail: 'raisa16h21@gmail.com',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -799,7 +801,7 @@ describe('Test userController', () => {
       expect(response.text).toEqual('Error when adding user email: Error while updating user');
       expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
       expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
-        newEmail: ['john.doe@gmail.com'],
+        newEmail: ['raisa16h21@gmail.com'],
       });
     });
   });

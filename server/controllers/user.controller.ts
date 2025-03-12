@@ -62,7 +62,7 @@ const userController = (socket: FakeSOSocket) => {
    * @param req The incoming request containing user data.
    * @returns `true` if the body and param contains valid user fields; otherwise, `false`.
    */
-  //Repeated code.
+  // Repeated code.
   const isUpdateEmailBodyValid = (req: UpdateEmailRequest): boolean =>
     req.body !== undefined &&
     req.body.username !== undefined &&
@@ -289,7 +289,6 @@ const userController = (socket: FakeSOSocket) => {
         res.status(400).send('Invalid email');
         return;
       }
-
       /**
        * I feel like this is extra work but how do I work around the fact that updateUser wants a partial user?
        */
@@ -333,7 +332,7 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       const { username, newEmail } = req.body;
-      const currEmail = req.params.currEmail;
+      const { currEmail } = req.params;
 
       const validateEmail = await validate(newEmail);
 

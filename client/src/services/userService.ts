@@ -123,6 +123,47 @@ const updateBiography = async (
   return res.data;
 };
 
+/**
+ * Adds an email for the user
+ * @param username The unique username of the user
+ * @param newEmail The new email to add for this user
+ * @returns A promise resolving to the updated user
+ * @throws Error if the request fails
+ */
+const addEmail = async (username: string, newEmail: string): Promise<SafeDatabaseUser> => {
+  const res = await api.post(`${USER_API_URL}/addEmail`, {
+    username,
+    newEmail,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when adding email');
+  }
+  return res.data;
+};
+
+/**
+ * Replaces an email for the user
+ * @param username The unique username of the user
+ * @param currEmail The current email of this user to replace
+ * @param newEmail The new email to replace for this user
+ * @returns A promise resolving to the updated user
+ * @throws Error if the request fails
+ */
+const replaceEmail = async (
+  username: string,
+  currEmail: string,
+  newEmail: string,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/${currEmail}/replaceEmail`, {
+    username,
+    newEmail,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when replacing email');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -131,4 +172,6 @@ export {
   deleteUser,
   resetPassword,
   updateBiography,
+  addEmail,
+  replaceEmail,
 };
