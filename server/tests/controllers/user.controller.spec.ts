@@ -436,13 +436,6 @@ describe('Test userController', () => {
         emails: [],
       };
 
-      const userEmails = {
-        username: 'newUser',
-        password: 'randomPassword',
-        dateJoined: new Date('2024-12-03'),
-        emails: [],
-      };
-
       const mockReqBody = {
         username: 'newUser',
         newEmail: 'raisa16h21@gmail.com',
@@ -472,7 +465,7 @@ describe('Test userController', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockUserEmailJSONResponse);
       // Ensure updateUser is called with the correct args
-      expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
+      expect(updatedUserSpy).toHaveBeenCalledWith(safeUserEmails.username, {
         emails: ['raisa16h21@gmail.com'],
       });
     });
@@ -537,6 +530,27 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
       expect(response.status).toBe(400);
       expect(response.text).toEqual('Invalid email');
+    });
+
+    it('should return 400 if the email I am trying to add is already associated with this user', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['raisa16h21@gmail.com'],
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'raisa16h21@gmail.com',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Email already associated with this user');
     });
 
     it('should return 500 if user does not exist', async () => {
@@ -742,6 +756,29 @@ describe('Test userController', () => {
         .send(mockReqBody);
       expect(response.status).toBe(400);
       expect(response.text).toEqual('Provided email is not associated with user');
+    });
+
+    it('should return 400 if trying to replace email with a different email that is already associated with the user', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'emcd.ny@gmail.com',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Email already associated with this user');
     });
 
     it('should return 500 if user does not exist', async () => {

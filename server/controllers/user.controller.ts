@@ -283,6 +283,12 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       const userEmails = foundUser.emails;
+
+      if (userEmails.includes(newEmail)) {
+        res.status(400).send('Email already associated with this user');
+        return;
+      }
+
       userEmails.push(newEmail);
 
       const updatedUser = await updateUser(username, { emails: userEmails });
@@ -334,6 +340,11 @@ const userController = (socket: FakeSOSocket) => {
       const userEmails = foundUser.emails;
       if (userEmails.includes(currEmail) === false) {
         res.status(400).send('Provided email is not associated with user');
+        return;
+      }
+
+      if (userEmails.includes(newEmail)) {
+        res.status(400).send('Email already associated with this user');
         return;
       }
 
