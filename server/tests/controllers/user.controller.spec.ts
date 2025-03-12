@@ -61,6 +61,7 @@ describe('Test userController', () => {
         biography: mockReqBody.biography,
         dateJoined: expect.any(Date),
         emails: [],
+        badges: [],
       });
     });
 
@@ -458,6 +459,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['raisa16h21@gmail.com'],
+        badges: [],
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -645,6 +647,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
+        badges: [],
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -855,8 +858,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['eroev@gmail.com'],
         badges: ['badge1', 'badge2'],
-      }
-      
+      };
+
       const mockReqBody = {
         username: 'newUser',
         badge: 'badge3',
@@ -882,12 +885,12 @@ describe('Test userController', () => {
 
       updatedUserSpy.mockResolvedValueOnce(mockSafeUserBadges);
 
-      const response = await supertest(app).post('/user/addBadge').send(mockReqBody);
+      const response = await supertest(app).post('/user/addBadges').send(mockReqBody);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockUserBadgeJSONResponse);
       expect(updatedUserSpy).toHaveBeenCalledWith(safeUserBadges.username, {
-        badges: ['badge3']
+        badges: ['badge1','badge2','badge3'],
       });
     });
   });

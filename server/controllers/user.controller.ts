@@ -398,8 +398,7 @@ const userController = (socket: FakeSOSocket) => {
       });
 
       res.status(200).json(updatedUser);
-    }
-    catch (error) {
+    } catch (error) {
       res.status(500).send(`Error when adding user badge: ${error}`);
     }
   };
