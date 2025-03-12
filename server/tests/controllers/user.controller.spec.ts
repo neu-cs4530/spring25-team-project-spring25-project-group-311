@@ -890,7 +890,7 @@ describe('Test userController', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockUserBadgeJSONResponse);
       expect(updatedUserSpy).toHaveBeenCalledWith(safeUserBadges.username, {
-        badges: ['badge1','badge2','badge3'],
+        badges: ['badge1', 'badge2', 'badge3'],
       });
     });
   });
