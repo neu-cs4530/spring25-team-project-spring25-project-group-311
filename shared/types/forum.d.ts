@@ -13,8 +13,8 @@ export interface Forum {
   flairs: string[];
   createdBy: string;
   createDateTime: Date;
-  moderators: User[];
-  members: User[];
+  moderators: string[];
+  members: string[];
   questions: Question[];
   type: 'public' | 'private';
 }
