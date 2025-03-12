@@ -427,218 +427,6 @@ describe('Test userController', () => {
     });
   });
 
-  describe('PATCH /:email/replaceEmail', () => {
-    it('should successfully add an email given correct arguments', async () => {
-      const safeUserEmails = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['johnSmith@gmail.com', 'janeSmith@gmail.com'],
-      };
-
-      const userEmails = {
-        username: 'newUser',
-        password: 'randomPassword',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['johnSmith@gmail.com', 'janeSmith@gmail.com'],
-      };
-
-      const mockReqBody = {
-        username: 'newUser',
-        newEmail: 'janeDoe@gmail.com',
-      };
-
-      const mockSafeUserEmails = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['johnSmith@gmail.com', 'janeDoe@gmail.com'],
-      };
-
-      const mockUserEmailJSONResponse = {
-        _id: mockSafeUser._id.toString(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03').toISOString(),
-        emails: ['johnSmith@gmail.com', 'janeDoe@gmail.com'],
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
-
-      // Mock a successful updateUser call
-      updatedUserSpy.mockResolvedValueOnce(mockSafeUserEmails);
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockUserEmailJSONResponse);
-      // Ensure updateUser is called with the correct args
-      expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
-        newEmail: ['johnSmith@gmail.com', 'janeDoe@gmail.com'],
-      });
-    });
-
-    it('should return 400 for empty request', async () => {
-      const mockReqBody = {};
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid user body');
-    });
-
-    it('should return 404 for not having a current email parameter', async () => {
-      const mockReqBody = { username: 'newUser', newEmail: 'janeDoe@gmail.com' };
-
-      const response = await supertest(app).patch('/user/replaceEmail').send(mockReqBody);
-
-      expect(response.status).toBe(404);
-    });
-
-    it('should return 400 for request missing username', async () => {
-      const mockReqBody = {
-        newEmail: 'john.doe@gmail.com',
-      };
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid user body');
-    });
-
-    it('should return 400 for request having empty username', async () => {
-      const mockReqBody = {
-        username: '',
-        newEmail: 'john.doe@gmail.com',
-      };
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid user body');
-    });
-
-    it('should return 400 for request missing new email', async () => {
-      const mockReqBody = {
-        username: 'newUser',
-      };
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid user body');
-    });
-
-    it('should return 400 for request having empty new email', async () => {
-      const mockReqBody = {
-        username: 'newUser',
-        newEmail: '',
-      };
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid user body');
-    });
-
-    it('should return 400 for request having an invalid new email', async () => {
-      const mockReqBody = {
-        username: 'newUser',
-        newEmail: 'abcefghijklmnopqrstuvwxyz',
-      };
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid email');
-    });
-
-    it('should return 400 for request having a current email that is not associated with the user', async () => {
-      const safeUserEmails = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['johnSmith@gmail.com'],
-      };
-
-      const mockReqBody = {
-        username: 'newUser',
-        newEmail: 'janeDoe@gmail.com',
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Provided email is not associated with user');
-    });
-
-    it('should return 500 if user does not exist', async () => {
-      getUserByUsernameSpy.mockResolvedValueOnce({
-        error: 'Error when getting user',
-      });
-
-      const mockReqBody = {
-        username: 'newUser',
-        newEmail: 'john.doe@gmail.com',
-      };
-
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-
-      expect(response.status).toBe(500);
-      expect(response.text).toEqual('Error when replacing user email: Error when getting user');
-      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
-    });
-
-    it('should return 500 if an error occurs while updating user', async () => {
-      const safeUserEmails = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['johnSmith@gmail.com', 'janeSmith@gmail.com'],
-      };
-
-      const userEmails = {
-        username: 'newUser',
-        password: 'randomPassword',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['johnSmith@gmail.com', 'janeSmith@gmail.com'],
-      };
-
-      const mockReqBody = {
-        username: 'newUser',
-        newEmail: 'janeDoe@gmail.com',
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
-
-      // Mock a successful updateUser call
-      updatedUserSpy.mockResolvedValueOnce({ error: 'Error while updating user' });
-      const response = await supertest(app)
-        .patch('/user/janeSmith@gmail.com/replaceEmail')
-        .send(mockReqBody);
-
-      expect(response.status).toBe(500);
-      expect(response.text).toEqual('Error when replacing user email: Error while updating user');
-      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
-      expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
-        newEmail: ['johnSmith@gmail.com', 'janeDoe@gmail.com'],
-      });
-    });
-  });
-
   describe('POST /addEmail', () => {
     it('should successfully add an email given correct arguments', async () => {
       const safeUserEmails = {
@@ -661,14 +449,14 @@ describe('Test userController', () => {
       };
 
       const mockSafeUserEmails = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: safeUserEmails._id,
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com'],
       };
 
       const mockUserEmailJSONResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockSafeUserEmails._id.toString(),
         username: 'newUser',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['raisa16h21@gmail.com'],
@@ -685,7 +473,7 @@ describe('Test userController', () => {
       expect(response.body).toEqual(mockUserEmailJSONResponse);
       // Ensure updateUser is called with the correct args
       expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
-        newEmail: ['raisa16h21@gmail.com'],
+        emails: ['raisa16h21@gmail.com'],
       });
     });
 
@@ -764,7 +552,7 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
 
       expect(response.status).toBe(500);
-      expect(response.text).toEqual('Error when adding user email: Error when getting user');
+      expect(response.text).toEqual('Error when adding user email: Error: Error when getting user');
       expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
     });
 
@@ -798,10 +586,213 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
 
       expect(response.status).toBe(500);
-      expect(response.text).toEqual('Error when adding user email: Error while updating user');
+      expect(response.text).toEqual(
+        'Error when adding user email: Error: Error while updating user',
+      );
       expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
       expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
-        newEmail: ['raisa16h21@gmail.com'],
+        emails: ['raisa16h21@gmail.com'],
+      });
+    });
+  });
+  describe('PATCH /:email/replaceEmail', () => {
+    it('should successfully add an email given correct arguments', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'raisa16h21@gmail.com',
+      };
+
+      const mockSafeUserEmails = {
+        _id: safeUserEmails._id,
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
+      };
+
+      const mockUserEmailJSONResponse = {
+        _id: mockSafeUserEmails._id.toString(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      // Mock a successful updateUser call
+      updatedUserSpy.mockResolvedValueOnce(mockSafeUserEmails);
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockUserEmailJSONResponse);
+      // Ensure updateUser is called with the correct args
+      expect(updatedUserSpy).toHaveBeenCalledWith(safeUserEmails.username, {
+        emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
+      });
+    });
+
+    it('should return 400 for empty request', async () => {
+      const mockReqBody = {};
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 404 for not having a current email parameter', async () => {
+      const mockReqBody = { username: 'newUser', newEmail: 'raisa16h21@gmail.com' };
+
+      const response = await supertest(app).patch('/user/replaceEmail').send(mockReqBody);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        newEmail: 'raisa16h21@gmail.com',
+      };
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having empty username', async () => {
+      const mockReqBody = {
+        username: '',
+        newEmail: 'raisa16h21@gmail.com',
+      };
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request missing new email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+      };
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having empty new email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: '',
+      };
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having an invalid new email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'abcefghijklmnopqrstuvwxyz',
+      };
+
+      const response = await supertest(app)
+        .patch('/user/raisa16h21@gmail.com/replaceEmail')
+        .send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid email');
+    });
+
+    it('should return 400 for request having a current email that is not associated with the user', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['bhuiyan.r@northeastern.edu'],
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'raisa16h21@gmail.com',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      const response = await supertest(app)
+        .patch('/user/he.maxw@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Provided email is not associated with user');
+    });
+
+    it('should return 500 if user does not exist', async () => {
+      getUserByUsernameSpy.mockResolvedValueOnce({
+        error: 'Error when getting user',
+      });
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'raisa16h21@gmail.com',
+      };
+
+      const response = await supertest(app)
+        .patch('/user/bhuiyan.r@northeastern.edu/replaceEmail')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual(
+        'Error when replacing user email: Error: Error when getting user',
+      );
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should return 500 if an error occurs while updating user', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['emcd.ny@gmail.com', 'he.maxw@northeastern.edu'],
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        newEmail: 'raisa16h21@gmail.com',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      // Mock a successful updateUser call
+      updatedUserSpy.mockResolvedValueOnce({ error: 'Error while updating user' });
+      const response = await supertest(app)
+        .patch('/user/emcd.ny@gmail.com/replaceEmail')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual(
+        'Error when replacing user email: Error: Error while updating user',
+      );
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+      expect(updatedUserSpy).toHaveBeenCalledWith(safeUserEmails.username, {
+        emails: ['raisa16h21@gmail.com', 'he.maxw@northeastern.edu'],
       });
     });
   });

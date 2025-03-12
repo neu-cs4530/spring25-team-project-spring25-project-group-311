@@ -46,31 +46,16 @@ const userController = (socket: FakeSOSocket) => {
     req.body.biography !== undefined;
 
   /**
-   * Validates that the request body contains all required fields to add an email.
+   * Validates that the request body contains all required fields to add or replace an email.
    * @param req The incoming request containing user data.
    * @returns `true` if the body contains valid user fields; otherwise, `false`.
    */
-  const isAddEmailBodyValid = (req: AddEmailRequest): boolean =>
+  const isAddOrUpdateEmailBodyValid = (req: AddEmailRequest | UpdateEmailRequest): boolean =>
     req.body !== undefined &&
     req.body.username !== undefined &&
     req.body.username.trim() !== '' &&
     req.body.newEmail !== undefined &&
     req.body.newEmail.trim() !== '';
-
-  /**
-   * Validates that the request body/param contains all required fields to add an email
-   * @param req The incoming request containing user data.
-   * @returns `true` if the body and param contains valid user fields; otherwise, `false`.
-   */
-  // Repeated code.
-  const isUpdateEmailBodyValid = (req: UpdateEmailRequest): boolean =>
-    req.body !== undefined &&
-    req.body.username !== undefined &&
-    req.body.username.trim() !== '' &&
-    req.body.newEmail !== undefined &&
-    req.body.newEmail.trim() !== '' &&
-    req.params.currEmail !== undefined &&
-    req.params.currEmail.trim() !== '';
 
   /**
    * Handles the creation of a new user account.
@@ -276,7 +261,7 @@ const userController = (socket: FakeSOSocket) => {
   const addEmail = async (req: AddEmailRequest, res: Response): Promise<void> => {
     try {
       // Check that the given request is valid
-      if (!isAddEmailBodyValid(req)) {
+      if (!isAddOrUpdateEmailBodyValid(req)) {
         res.status(400).send('Invalid user body');
         return;
       }
@@ -326,7 +311,7 @@ const userController = (socket: FakeSOSocket) => {
   const replaceEmail = async (req: UpdateEmailRequest, res: Response): Promise<void> => {
     try {
       // Check that the given request is valid
-      if (!isUpdateEmailBodyValid(req)) {
+      if (!isAddOrUpdateEmailBodyValid(req)) {
         res.status(400).send('Invalid user body');
         return;
       }
@@ -347,9 +332,13 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       const userEmails = foundUser.emails;
-      if (!(currEmail in userEmails)) {
+      if (userEmails.includes(currEmail) === false) {
         res.status(400).send('Provided email is not associated with user');
+        return;
       }
+
+      const currEmailIndx = userEmails.indexOf(currEmail);
+      userEmails[currEmailIndx] = newEmail;
 
       const updatedUser = await updateUser(username, { emails: userEmails });
       if ('error' in updatedUser) {
@@ -375,7 +364,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
-  router.patch('/:email/replaceEmail', replaceEmail);
+  router.patch('/:currEmail/replaceEmail', replaceEmail);
   router.post('/addEmail', addEmail);
   return router;
 };
