@@ -5,7 +5,7 @@ import { Question } from './question';
 
 /**
  * Represents a forum in the database.
- * 
+ *
  */
 export interface Forum {
   name: string;
@@ -21,7 +21,7 @@ export interface Forum {
 
 /**
  * Represents a forum in the database.
- * 
+ *
  */
 export interface DatabaseForum extends Forum {
   _id: ObjectId;
