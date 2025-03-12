@@ -29,3 +29,5 @@ export interface DatabaseForum extends Forum {
   members: ObjectId[];
   questions: ObjectId[];
 }
+
+export type ForumResponse = DatabaseForum | { error: string };
