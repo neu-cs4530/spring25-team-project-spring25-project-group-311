@@ -74,7 +74,9 @@
   /* Buttons: 
      Adjust margins so they're not all bunched up horizontally */
   .login-button,
-  .delete-button {
+  .delete-button, 
+  .replace-email-button, 
+  .add-email-button{
     margin-top: 15px;
     margin-right: 10px;
     padding: 10px 20px;
@@ -110,6 +112,18 @@
   
   .delete-button:active {
     background-color: #990000;
+  }
+
+  /* Button to replace email */
+  .replace-email-button {
+    background-color: grey;
+    color: white;
+  }
+
+  /* Button to add email */
+  .add-email-button {
+    background-color: purple;
+    color: white;
   }
 
   .profile-card .success-message {
