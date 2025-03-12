@@ -9,6 +9,7 @@ const mockUser: User = {
   password: 'password',
   dateJoined: new Date('2024-12-03'),
   emails: [],
+  badges: [],
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -16,6 +17,7 @@ const mockSafeUser: SafeDatabaseUser = {
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
   emails: [],
+  badges: [],
 };
 
 const mockUserJSONResponse = {
@@ -23,6 +25,7 @@ const mockUserJSONResponse = {
   username: 'user1',
   dateJoined: new Date('2024-12-03').toISOString(),
   emails: [],
+  badges: [],
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -434,6 +437,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: [],
+        badges: [],
       };
 
       const mockReqBody = {
@@ -446,6 +450,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com'],
+        badges: [],
       };
 
       const mockUserEmailJSONResponse = {
@@ -538,6 +543,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com'],
+        badges: [],
       };
 
       const mockReqBody = {
@@ -576,6 +582,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: [],
+        badges: [],
       };
 
       const userEmails = {
@@ -583,6 +590,7 @@ describe('Test userController', () => {
         password: 'randomPassword',
         dateJoined: new Date('2024-12-03'),
         emails: [],
+        badges: [],
       };
 
       const mockReqBody = {
@@ -616,6 +624,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
+        badges: [],
       };
 
       const mockReqBody = {
@@ -628,6 +637,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
+        badges: [],
       };
 
       const mockUserEmailJSONResponse = {
@@ -742,6 +752,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu'],
+        badges: [],
       };
 
       const mockReqBody = {
@@ -764,6 +775,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
+        badges: [],
       };
 
       const mockReqBody = {
@@ -808,6 +820,7 @@ describe('Test userController', () => {
         username: 'newUser',
         dateJoined: new Date('2024-12-03'),
         emails: ['emcd.ny@gmail.com', 'he.maxw@northeastern.edu'],
+        badges: [],
       };
 
       const mockReqBody = {
@@ -830,6 +843,51 @@ describe('Test userController', () => {
       expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
       expect(updatedUserSpy).toHaveBeenCalledWith(safeUserEmails.username, {
         emails: ['raisa16h21@gmail.com', 'he.maxw@northeastern.edu'],
+      });
+    });
+  });
+
+  describe('POST /addBadge', () => {
+    it('should successfully add a badge given correct arguments', async () => {
+      const safeUserBadges = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['eroev@gmail.com'],
+        badges: ['badge1', 'badge2'],
+      }
+      
+      const mockReqBody = {
+        username: 'newUser',
+        badge: 'badge3',
+      };
+
+      const mockSafeUserBadges = {
+        _id: safeUserBadges._id,
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['eroev@gmail.com'],
+        badges: ['badge1', 'badge2', 'badge3'],
+      };
+
+      const mockUserBadgeJSONResponse = {
+        _id: mockSafeUserBadges._id.toString(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: ['eroev@gmail.com'],
+        badges: ['badge1', 'badge2', 'badge3'],
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserBadges);
+
+      updatedUserSpy.mockResolvedValueOnce(mockSafeUserBadges);
+
+      const response = await supertest(app).post('/user/addBadge').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockUserBadgeJSONResponse);
+      expect(updatedUserSpy).toHaveBeenCalledWith(safeUserBadges.username, {
+        badges: ['badge3']
       });
     });
   });
