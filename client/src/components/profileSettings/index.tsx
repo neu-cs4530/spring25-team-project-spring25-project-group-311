@@ -112,7 +112,6 @@ const ProfileSettings: React.FC = () => {
                 <strong>Badges:</strong> {userData.badges.join(', ')}
               </p>
             )}
-              
 
             {/* ---- Email Section ---- */}
             {!addEmailMode && !replaceEmailMode && (
