@@ -199,6 +199,8 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
+    emails: [],
+    badges: [],
   };
 
   return await UserModel.create(userDetail);
