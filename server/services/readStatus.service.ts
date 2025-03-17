@@ -1,4 +1,5 @@
 import ReadStatus from '../models/readStatus.model'; // Import your ReadStatus model
+import { DatabaseReadStatus, DatabaseReadStatusResponse } from '../types/types';
 
 /**
  * Marks a post as read for a specific user.
@@ -6,13 +7,20 @@ import ReadStatus from '../models/readStatus.model'; // Import your ReadStatus m
  * @param postId The ID of the post.
  * @returns A promise resolving to the updated or newly created read status document.
  */
-export const markAsRead = async (userId: string, postId: string): Promise<any> => {
+export const markAsRead = async (
+  userId: string,
+  postId: string,
+): Promise<DatabaseReadStatusResponse> => {
   try {
-    const result = await ReadStatus.findOneAndUpdate(
+    const result: DatabaseReadStatus | null = await ReadStatus.findOneAndUpdate(
       { userId, postId },
       { read: true },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
+
+    if (!result) {
+      throw Error('Error marking as read');
+    }
     return result;
   } catch (error) {
     return { error: 'Error occured' };
@@ -25,10 +33,16 @@ export const markAsRead = async (userId: string, postId: string): Promise<any> =
  * @param postId The ID of the post.
  * @returns A promise resolving to the read status document if found, or null if not found.
  */
-export const checkReadStatus = async (userId: string, postId: string): Promise<any> => {
+export const checkReadStatus = async (
+  userId: string,
+  postId: string,
+): Promise<DatabaseReadStatusResponse> => {
   try {
-    const result = await ReadStatus.findOne({ userId, postId });
-    return result ? { read: result.read } : { read: false }; // Ensure a consistent return structure
+    const result: DatabaseReadStatus | null = await ReadStatus.findOne({ userId, postId });
+    if (!result) {
+      throw Error('Error checking status');
+    }
+    return result; // Ensure a consistent return structure
   } catch (error) {
     return { error: 'Error occured' };
   }

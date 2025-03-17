@@ -8,7 +8,6 @@ import { DatabaseReadStatus } from '../../types/types';
 // Create spy instances for service methods
 const markAsReadSpy: jest.SpyInstance = jest.spyOn(readStatusService, 'markAsRead');
 const checkReadStatusSpy: jest.SpyInstance = jest.spyOn(readStatusService, 'checkReadStatus');
-const { ObjectId } = mongoose.Types;
 
 describe('readStatusController', () => {
   beforeEach(() => {
@@ -17,18 +16,21 @@ describe('readStatusController', () => {
 
   describe('POST /:postId/read', () => {
     it('should mark the post as read and return success', async () => {
-      const postId = new ObjectId();
-      const userId = new ObjectId();
+      const postIdVal = new mongoose.Types.ObjectId();
+      const userId = new mongoose.Types.ObjectId();
       const mockReadStatus: DatabaseReadStatus = {
-        _id: new ObjectId(),
-        userId: userId,
-        postId: postId,
+        _id: new mongoose.Types.ObjectId(),
+        userId,
+        postId: postIdVal,
         read: true,
       };
 
+      const postId = postIdVal.toString();
       markAsReadSpy.mockResolvedValueOnce(mockReadStatus);
 
-      const response = await supertest(app).post(`/${postId}/read`).send({ userId: 'user123' });
+      const response = await supertest(app)
+        .post(`/read-status/${postId.toString()}/read`)
+        .send({ user: { _id: 'user123' } });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: 'Post marked as read', postId });
@@ -38,7 +40,9 @@ describe('readStatusController', () => {
       const postId = new mongoose.Types.ObjectId().toString();
       markAsReadSpy.mockRejectedValueOnce(new Error('Error marking read'));
 
-      const response = await supertest(app).post(`/${postId}/read`).send({ userId: 'user123' });
+      const response = await supertest(app)
+        .post(`/read-status/${postId}/read`)
+        .send({ user: { _id: 'user123' } });
 
       expect(response.status).toBe(500);
       expect(response.text).toContain('Error processing your request');
@@ -52,7 +56,9 @@ describe('readStatusController', () => {
 
       checkReadStatusSpy.mockResolvedValueOnce(mockReadStatus);
 
-      const response = await supertest(app).get(`/${postId}`);
+      const response = await supertest(app)
+        .get(`/read-status/${postId}`)
+        .send({ user: { _id: 'user123' } });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ readStatus: true });
@@ -62,7 +68,9 @@ describe('readStatusController', () => {
       const postId = new mongoose.Types.ObjectId().toString();
       checkReadStatusSpy.mockRejectedValueOnce(new Error('Error fetching read status'));
 
-      const response = await supertest(app).get(`/${postId}`);
+      const response = await supertest(app)
+        .get(`/read-status/${postId}`)
+        .send({ user: { _id: 'user123' } });
 
       expect(response.status).toBe(500);
       expect(response.text).toContain('Error processing your request');

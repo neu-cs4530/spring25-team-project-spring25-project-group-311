@@ -3,7 +3,7 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from '@fake-stack-overflow/shared/types/types';
-import { Document, ObjectId } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 // export * from '../../shared/src/types/types';
 export * from '@fake-stack-overflow/shared/types/types';
@@ -14,9 +14,12 @@ export * from '@fake-stack-overflow/shared/types/types';
  */
 export type FakeSOSocket = Server<ClientToServerEvents, ServerToClientEvents>;
 
-export interface DatabaseReadStatus extends Document {
+export interface DatabaseReadStatus {
   _id: ObjectId;
   userId: ObjectId;
   postId: ObjectId;
   read: boolean;
 }
+
+export type DatabaseReadStatusResponse = DatabaseReadStatus | { error: string };
+export type ReadStatusResponse = boolean | { error: string };

@@ -3,13 +3,18 @@ import { markAsRead, checkReadStatus } from '../services/readStatus.service';
 
 // Extending the Express request to include user data
 interface AuthRequest extends Request {
-  user: { _id: string };
+  body: {
+    user: { _id: string };
+  };
+  params: {
+    postId: string;
+  };
 }
 
 export const readStatusController = (router: Router = express.Router()) => {
   // Middleware to ensure user is authenticated
-  const authenticate = (req: AuthRequest, res: Response, next: Function) => {
-    if (!req.user || !req.user._id) {
+  const authenticate = (req: AuthRequest, res: Response, next: () => unknown) => {
+    if (!req.body.user || !req.body.user._id) {
       res.status(401).send('User not authenticated');
       return;
     }
@@ -17,7 +22,7 @@ export const readStatusController = (router: Router = express.Router()) => {
   };
 
   router.post('/:postId/read', authenticate, async (req: AuthRequest, res: Response) => {
-    const userId = req.user._id; // Extracted user ID from the authenticated user
+    const userId = req.body.user._id; // Extracted user ID from the authenticated user
     const { postId } = req.params;
 
     try {
@@ -28,12 +33,12 @@ export const readStatusController = (router: Router = express.Router()) => {
       }
       res.status(200).json({ message: 'Post marked as read', postId });
     } catch (error) {
-      res.status(500).json({ message: 'Error processing your request', error: error.message });
+      res.status(500).json({ message: 'Error processing your request', error });
     }
   });
 
   router.get('/:postId', authenticate, async (req: AuthRequest, res: Response) => {
-    const userId = req.user._id; // Extracted user ID from the authenticated user
+    const userId = req.body.user._id; // Extracted user ID from the authenticated user
     const { postId } = req.params;
 
     try {
@@ -44,7 +49,7 @@ export const readStatusController = (router: Router = express.Router()) => {
       }
       res.status(200).json({ readStatus: result.read });
     } catch (error) {
-      res.status(500).json({ message: 'Error processing your request', error: error.message });
+      res.status(500).json({ message: 'Error processing your request', error });
     }
   });
 
