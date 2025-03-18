@@ -1,7 +1,8 @@
 import { Request } from 'express';
 import { ObjectId } from 'mongodb';
 import { User, DatabaseUser } from './user';
-import { Question } from './question';
+import { PopulatedDatabaseQuestion, Question } from './question';
+import { PopulatedDatabaseChat } from './chat';
 
 /**
  * Represents a forum in the database.
@@ -15,7 +16,7 @@ export interface Forum {
   createDateTime: Date;
   moderators: string[];
   members: string[];
-  questions: Question[];
+  questions: PopulatedDatabaseQuestion[];
   type: 'public' | 'private';
 }
 
