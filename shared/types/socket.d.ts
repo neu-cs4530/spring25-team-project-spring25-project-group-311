@@ -4,6 +4,7 @@ import { DatabaseMessage } from './message';
 import { PopulatedDatabaseQuestion } from './question';
 import { SafeDatabaseUser } from './user';
 import { BaseMove, GameInstance, GameInstanceID, GameMove, GameState } from './game';
+import { DatabaseNotification } from './notification';
 
 /**
  * Payload for an answer update event.
@@ -83,6 +84,11 @@ export interface UserUpdatePayload {
   type: 'created' | 'deleted' | 'updated';
 }
 
+export interface NotificationUpdatePayload {
+  notification: DatabaseNotification;
+  type: 'created' | 'sent';
+}
+
 /**
  * Interface representing the payload for a game move operation, which contains:
  * - `gameID`: The ID of the game being played.
@@ -133,4 +139,5 @@ export interface ServerToClientEvents {
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
+  notificationUpdate: (notification: NotificationUpdatePayload) => void;
 }
