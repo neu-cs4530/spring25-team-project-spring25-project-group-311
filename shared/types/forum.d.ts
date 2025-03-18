@@ -16,6 +16,7 @@ export interface Forum {
   createDateTime: Date;
   moderators: string[];
   members: string[];
+  awaitingMembers: string[];
   questions: PopulatedDatabaseQuestion[];
   type: 'public' | 'private';
 }
@@ -28,6 +29,7 @@ export interface DatabaseForum extends Forum {
   _id: ObjectId;
   moderators: ObjectId[];
   members: ObjectId[];
+  awaitingMembers: ObjectId[];
   questions: ObjectId[];
 }
 

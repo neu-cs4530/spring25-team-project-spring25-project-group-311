@@ -35,6 +35,7 @@ const forumSchema: Schema = new Schema(
     },
     moderators: [{ String }],
     members: [{ String }],
+    awaitingMembers: [{ String }],
     questions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
     type: {
       type: String,
