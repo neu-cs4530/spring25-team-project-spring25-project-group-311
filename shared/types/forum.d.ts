@@ -17,6 +17,7 @@ export interface Forum {
   moderators: string[];
   members: string[];
   awaitingMembers: string[];
+  bannedMembers: string[];
   questions: PopulatedDatabaseQuestion[];
   type: 'public' | 'private';
 }
@@ -30,6 +31,7 @@ export interface DatabaseForum extends Forum {
   moderators: ObjectId[];
   members: ObjectId[];
   awaitingMembers: ObjectId[];
+  bannedMembers: ObjectId[];
   questions: ObjectId[];
 }
 
