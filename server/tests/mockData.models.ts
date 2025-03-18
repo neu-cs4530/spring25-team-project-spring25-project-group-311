@@ -219,6 +219,8 @@ export const forum: Forum = {
   createdBy: 'user1',
   moderators: ['user1'],
   members: ['user1'],
+  awaitingMembers: [],
+  bannedMembers: [],
   questions: [],
   type: 'private',
 };
