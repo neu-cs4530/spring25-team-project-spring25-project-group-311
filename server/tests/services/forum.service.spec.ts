@@ -36,7 +36,7 @@ describe('Forum model', () => {
         awaitingMembers: [],
         bannedMembers: [],
         questions: [],
-        type: 'public'
+        type: 'public',
       };
 
       mockingoose(ForumModel).toReturn(savedForum, 'create');
@@ -45,8 +45,5 @@ describe('Forum model', () => {
 
       expect(newForum).toBeDefined();
     });
-
-    
   });
-
 });
