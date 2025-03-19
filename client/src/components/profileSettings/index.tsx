@@ -108,14 +108,20 @@ const ProfileSettings: React.FC = () => {
 
             {/* ---- Badges Section ---- */}
             {userData.badges.length > 0 && (
-              <p>
-                <strong>Badges:</strong> {userData.badges.join(', ')}
-              </p>
+              <div style={{ margin: '1rem 0' }}>
+                <p>
+                  {userData.badges.map(img => <img src={img} alt="image not found"/>)}
+                </p>
+                {/* <button
+                  onClick={() => ()}>
+                  Pin Badge
+                </button> */}
+              </div>
             )}
 
             {/* ---- Email Section ---- */}
             {!addEmailMode && !replaceEmailMode && (
-              <div>
+              <div> 
                 {userData.emails.map(email => (
                   <div key={email}>
                     <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />
