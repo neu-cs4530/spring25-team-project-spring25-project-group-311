@@ -928,8 +928,4 @@ describe('Test userController', () => {
       });
     });
   });
-
-  describe('PATCH /changeSubscription', () => {
-    it('should successfully');
-  });
 });
