@@ -27,6 +27,7 @@ const populateQuestion = async (questionID: string): Promise<PopulatedDatabaseQu
     tags: DatabaseTag[];
     answers: PopulatedDatabaseAnswer[];
     comments: DatabaseComment[];
+    readStatus: boolean;
   }>([
     { path: 'tags', model: TagModel },
     {

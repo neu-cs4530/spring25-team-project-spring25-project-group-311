@@ -5,3 +5,11 @@
 .question_list:last-child {
   border-bottom: #000000 1px dashed;
 }
+
+.read {
+  color: purple;
+}
+
+.unread {
+  color: blue;
+}

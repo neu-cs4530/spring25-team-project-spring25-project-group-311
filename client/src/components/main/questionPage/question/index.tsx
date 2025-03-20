@@ -12,6 +12,7 @@ import { PopulatedDatabaseQuestion } from '../../../../types/types';
  */
 interface QuestionProps {
   question: PopulatedDatabaseQuestion;
+  readStatus: boolean;
 }
 
 /**
@@ -20,8 +21,11 @@ interface QuestionProps {
  * and clicking on a tag triggers the clickTag function.
  *
  * @param q - The question object containing question details.
+ * @param readStatus - Boolean indiciating if question has been read
  */
-const QuestionView = ({ question }: QuestionProps) => {
+const QuestionView = ({ question, readStatus }: QuestionProps) => {
+  console.log(`Question ID: ${question._id}, Read Status: ${readStatus}`); // Check read status
+
   const navigate = useNavigate();
 
   /**
@@ -45,6 +49,7 @@ const QuestionView = ({ question }: QuestionProps) => {
     navigate(`/question/${questionID}`);
   };
 
+  const titleClass = readStatus ? 'postTitle read' : 'postTitle';
   return (
     <div
       className='question right_padding'
@@ -58,7 +63,7 @@ const QuestionView = ({ question }: QuestionProps) => {
         <div>{question.views.length} views</div>
       </div>
       <div className='question_mid'>
-        <div className='postTitle'>{question.title}</div>
+        <div className={titleClass}>{question.title}</div>
         <div className='question_tags'>
           {question.tags.map(tag => (
             <button

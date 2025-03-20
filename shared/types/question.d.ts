@@ -64,6 +64,7 @@ export interface PopulatedDatabaseQuestion
   tags: DatabaseTag[];
   answers: PopulatedDatabaseAnswer[];
   comments: DatabaseComment[];
+  readStatus: boolean;
 }
 
 /**

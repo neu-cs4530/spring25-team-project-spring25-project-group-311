@@ -52,6 +52,7 @@ export const getQuestionsByOrder = async (
       tags: DatabaseTag[];
       answers: PopulatedDatabaseAnswer[];
       comments: DatabaseComment[];
+      readStatus: boolean;
     }>([
       { path: 'tags', model: TagModel },
       { path: 'answers', model: AnswerModel, populate: { path: 'comments', model: CommentModel } },
@@ -134,6 +135,7 @@ export const fetchAndIncrementQuestionViewsById = async (
       tags: DatabaseTag[];
       answers: PopulatedDatabaseAnswer[];
       comments: DatabaseComment[];
+      readStatus: boolean;
     }>([
       { path: 'tags', model: TagModel },
       { path: 'answers', model: AnswerModel, populate: { path: 'comments', model: CommentModel } },

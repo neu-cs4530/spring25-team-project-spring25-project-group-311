@@ -18,6 +18,14 @@
   color: cornflowerblue;
 }
 
+.postTitle:hover {
+  text-decoration: underline;
+}
+
+.postTitle.read {
+  color: purple;
+}
+
 .question_tags {
   margin-top: 1%;
 }
