@@ -7,8 +7,9 @@ import {
   updateBiography,
   addEmail,
   replaceEmail,
+  subscribeNotifs,
 } from '../services/userService';
-import { SafeDatabaseUser } from '../types/types';
+import { SafeDatabaseUser, SubscriptionType } from '../types/types';
 import useUserContext from './useUserContext';
 
 /**
@@ -172,6 +173,27 @@ const useProfileSettings = () => {
   };
 
   /**
+   * Handler for setting the subscription
+   */
+  const handleSubscription = async (type: SubscriptionType) => {
+    if (!username) return;
+    try {
+      // Await the async call to subscribe to notification
+      const subscribedUser = await subscribeNotifs(username, type);
+      await new Promise(resolve => {
+        setUserData(subscribedUser); // Update the user data
+        resolve(null); // Resolve the promise
+      });
+
+      setSuccessMessage('Subscription changed!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to change subscription.');
+      setSuccessMessage(null);
+    }
+  };
+
+  /**
    * Handler for deleting the user (triggers confirmation modal)
    */
   const handleDeleteUser = () => {
@@ -227,6 +249,7 @@ const useProfileSettings = () => {
     handleDeleteUser,
     handleAddEmail,
     handleReplaceEmail,
+    handleSubscription,
   };
 };
 
