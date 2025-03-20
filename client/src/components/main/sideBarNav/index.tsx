@@ -8,15 +8,23 @@ import { NavLink, useLocation } from 'react-router-dom';
  * triggers corresponding functions when the menu items are clicked.
  */
 const SideBarNav = () => {
-  const [showOptions, setShowOptions] = useState<boolean>(false);
+  const [showMessageOptions, setShowMessageOptions] = useState<boolean>(false);
+  const [showForumOptions, setShowForumOptions] = useState<boolean>(false);
   const location = useLocation();
 
-  const toggleOptions = () => {
-    setShowOptions(!showOptions);
+  const toggleMessageOptions = () => {
+    setShowMessageOptions(!showMessageOptions);
   };
 
-  const isActiveOption = (path: string) =>
+  const toggleForumOptions = () => {
+    setShowForumOptions(!showForumOptions);
+  };
+
+  const isActiveMessageOption = (path: string) =>
     location.pathname === path ? 'message-option-selected ' : '';
+
+  const isActiveForumOption = (path: string) =>
+    location.pathname === path ? 'forum-option-selected ' : '';
 
   return (
     <div id='sideBarNav' className='sideBarNav'>
@@ -36,20 +44,41 @@ const SideBarNav = () => {
         to='/messaging'
         id='menu_messaging'
         className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}
-        onClick={toggleOptions}>
+        onClick={toggleMessageOptions}>
         Messaging
       </NavLink>
-      {showOptions && (
+      {showMessageOptions && (
         <div className='additional-options'>
           <NavLink
             to='/messaging'
-            className={`menu_button message-options ${isActiveOption('/messaging')}`}>
+            className={`menu_button message-options ${isActiveMessageOption('/messaging')}`}>
             Global Messages
           </NavLink>
           <NavLink
             to='/messaging/direct-message'
-            className={`menu_button message-options ${isActiveOption('/messaging/direct-message')}`}>
+            className={`menu_button message-options ${isActiveMessageOption('/messaging/direct-message')}`}>
             Direct Messages
+          </NavLink>
+        </div>
+      )}
+      <NavLink
+        to='/forums'
+        id='menu_forum'
+        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}
+        onClick={toggleForumOptions}>
+        Forums
+      </NavLink>
+      {showForumOptions && (
+        <div className='additional-options'>
+          <NavLink
+            to='/forums'
+            className={`menu_button message-options ${isActiveForumOption('/messaging')}`}>
+            Explore forums
+          </NavLink>
+          <NavLink
+            to='/forums/selected-forum'
+            className={`menu_button message-options ${isActiveForumOption('/messaging/direct-message')}`}>
+            Forum
           </NavLink>
         </div>
       )}
