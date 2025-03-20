@@ -472,6 +472,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['raisa16h21@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -670,6 +672,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
