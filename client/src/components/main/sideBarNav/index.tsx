@@ -78,7 +78,7 @@ const SideBarNav = () => {
           <NavLink
             to='/forums/focused-forum'
             className={`menu_button message-options ${isActiveForumOption('/forums/selected-forum')}`}>
-            Focused Form
+            Focused Forum
           </NavLink>
         </div>
       )}
