@@ -72,13 +72,13 @@ const SideBarNav = () => {
         <div className='additional-options'>
           <NavLink
             to='/forums'
-            className={`menu_button message-options ${isActiveForumOption('/messaging')}`}>
+            className={`menu_button message-options ${isActiveForumOption('/forums')}`}>
             Explore forums
           </NavLink>
           <NavLink
-            to='/forums/selected-forum'
-            className={`menu_button message-options ${isActiveForumOption('/messaging/direct-message')}`}>
-            Forum
+            to='/forums/focused-forum'
+            className={`menu_button message-options ${isActiveForumOption('/forums/selected-forum')}`}>
+            Focused Form
           </NavLink>
         </div>
       )}
