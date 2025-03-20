@@ -36,7 +36,12 @@
   width: max-content;
 }
 
-.message-option-selected,
+.message-option-selected {
+  background: #3090e2;
+  color: white;
+  width: 110%;
+}
+
 .forum-option-selected {
   background: #3090e2;
   color: white;
