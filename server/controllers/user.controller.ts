@@ -10,6 +10,8 @@ import {
   UpdateEmailRequest,
   AddEmailRequest,
   AddBadgeRequest,
+  SubscribeToNotification,
+  UserResponse,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -78,6 +80,8 @@ const userController = (socket: FakeSOSocket) => {
       biography: requestUser.biography ?? '',
       emails: requestUser.emails ?? [],
       badges: [],
+      browserNotif: false,
+      emailNotif: false,
     };
 
     try {
@@ -276,9 +280,7 @@ const userController = (socket: FakeSOSocket) => {
         res.status(400).send('Invalid email');
         return;
       }
-      /**
-       * I feel like this is extra work but how do I work around the fact that updateUser wants a partial user?
-       */
+
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
@@ -369,6 +371,12 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds a badge to the user's account
+   * @param req The request containing the username and the badge to add
+   * @param res The response, either confirming the new badge or an error.
+   * @returns A promise resolving to void.
+   */
   const addBadges = async (req: AddBadgeRequest, res: Response): Promise<void> => {
     try {
       const { username, badge } = req.body;
@@ -403,6 +411,47 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Subscribes/unsubscribe a user to notifications
+   * @param req The request containing the username and the notification type
+   * @param res The response, either confirming the subscription or an error.
+   * @returns A promise resolving to void.
+   */
+  const changeNotifSubscription = async (
+    req: SubscribeToNotification,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const { username } = req.body;
+      const { notifType } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let updatedUser: UserResponse;
+      if (notifType.type === 'browser') {
+        updatedUser = await updateUser(username, { browserNotif: !foundUser.browserNotif });
+      } else {
+        updatedUser = await updateUser(username, { emailNotif: !foundUser.emailNotif });
+      }
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when changing subscription to notification: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -414,6 +463,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/:currEmail/replaceEmail', replaceEmail);
   router.post('/addEmail', addEmail);
   router.post('/addBadges', addBadges);
+  router.patch('/changeSubscription', changeNotifSubscription);
   return router;
 };
 

@@ -34,6 +34,12 @@ const userSchema: Schema = new Schema(
       type: [String],
       default: [],
     },
+    browserNotif: {
+      type: Boolean,
+    },
+    emailNotif: {
+      type: Boolean,
+    },
   },
   { collection: 'User' },
 );

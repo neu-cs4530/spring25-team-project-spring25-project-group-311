@@ -2,6 +2,7 @@ import React from 'react';
 import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
+import NotificationToggleItem from './notificationToggleItem';
 
 const ProfileSettings: React.FC = () => {
   const {
@@ -40,6 +41,7 @@ const ProfileSettings: React.FC = () => {
     handleReplaceEmail,
     handleUpdateBiography,
     handleDeleteUser,
+    handleSubscription,
   } = useProfileSettings();
 
   if (loading) {
@@ -106,6 +108,11 @@ const ProfileSettings: React.FC = () => {
               </div>
             )}
 
+            <p>
+              <strong>Date Joined:</strong>{' '}
+              {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
+            </p>
+
             {/* ---- Badges Section ---- */}
             {userData.badges.length > 0 && (
               <p>
@@ -116,6 +123,7 @@ const ProfileSettings: React.FC = () => {
             {/* ---- Email Section ---- */}
             {!addEmailMode && !replaceEmailMode && (
               <div>
+                <h4>Emails</h4>
                 {userData.emails.map(email => (
                   <div key={email}>
                     <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />
@@ -192,10 +200,20 @@ const ProfileSettings: React.FC = () => {
               </div>
             )}
 
-            <p>
-              <strong>Date Joined:</strong>{' '}
-              {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
-            </p>
+            {/* ---- Toggling Notifications Section ---- */}
+            {canEditProfile && (
+              <>
+                <h4>Notifications</h4>
+                <NotificationToggleItem
+                  notifType={{ type: 'browser' }}
+                  toggleNotif={handleSubscription}
+                />
+                <NotificationToggleItem
+                  notifType={{ type: 'email' }}
+                  toggleNotif={handleSubscription}
+                />
+              </>
+            )}
 
             {/* ---- Reset Password Section ---- */}
             {canEditProfile && (

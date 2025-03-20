@@ -25,6 +25,8 @@ export interface User extends UserCredentials {
   biography?: string;
   emails: string[];
   badges: string[];
+  browserNotif: boolean;
+  emailNotif: boolean;
 }
 
 /**
@@ -130,5 +132,26 @@ export interface AddBadgeRequest extends Request {
   body: {
     username: string;
     badge: string;
+  };
+}
+
+/**
+ * Represents the two types of notifications a user can have
+ * - `browser`: Browser-side notifications
+ * - `email`: Notifications via email
+ */
+export interface SubscriptionType {
+  type: 'browser' | 'email';
+}
+
+/**
+ * Express request for subscribing to notifications
+ * - `username`: The username of the user to subscribe
+ * - `notifType`: The type of notification the user is subscribing to.
+ */
+export interface SubscribeToNotification extends Request {
+  body: {
+    username: string;
+    notifType: SubscriptionType;
   };
 }

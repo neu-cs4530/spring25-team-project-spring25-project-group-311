@@ -10,6 +10,8 @@ const mockUser: User = {
   dateJoined: new Date('2024-12-03'),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -18,6 +20,8 @@ const mockSafeUser: SafeDatabaseUser = {
   dateJoined: new Date('2024-12-03'),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
 };
 
 const mockUserJSONResponse = {
@@ -26,6 +30,8 @@ const mockUserJSONResponse = {
   dateJoined: new Date('2024-12-03').toISOString(),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -62,6 +68,8 @@ describe('Test userController', () => {
         dateJoined: expect.any(Date),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       });
     });
 
@@ -439,6 +447,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -452,6 +462,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockUserEmailJSONResponse = {
@@ -546,6 +558,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -585,6 +599,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const userEmails = {
@@ -593,6 +609,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -627,6 +645,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -640,6 +660,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockUserEmailJSONResponse = {
@@ -756,6 +778,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -779,6 +803,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -824,6 +850,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['emcd.ny@gmail.com', 'he.maxw@northeastern.edu'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -858,6 +886,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['eroev@gmail.com'],
         badges: ['badge1', 'badge2'],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockReqBody = {
@@ -871,6 +901,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['eroev@gmail.com'],
         badges: ['badge1', 'badge2', 'badge3'],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       const mockUserBadgeJSONResponse = {
@@ -879,6 +911,8 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['eroev@gmail.com'],
         badges: ['badge1', 'badge2', 'badge3'],
+        browserNotif: false,
+        emailNotif: false,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserBadges);
@@ -893,5 +927,9 @@ describe('Test userController', () => {
         badges: ['badge1', 'badge2', 'badge3'],
       });
     });
+  });
+
+  describe('PATCH /changeSubscription', () => {
+    it('should successfully');
   });
 });

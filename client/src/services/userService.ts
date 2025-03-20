@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { UserCredentials, SafeDatabaseUser } from '../types/types';
+import { UserCredentials, SafeDatabaseUser, SubscriptionType } from '../types/types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
@@ -164,6 +164,20 @@ const replaceEmail = async (
   return res.data;
 };
 
+const subscribeNotifs = async (
+  username: string,
+  notifType: SubscriptionType,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/changeSubscription`, {
+    username,
+    notifType,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when changing subscriptions to notifications');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -174,4 +188,5 @@ export {
   updateBiography,
   addEmail,
   replaceEmail,
+  subscribeNotifs,
 };
