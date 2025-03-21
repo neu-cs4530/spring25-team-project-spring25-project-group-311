@@ -21,6 +21,12 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
+import {
+  getQuestionsByOrder,
+  filterQuestionsByAskedBy,
+  getUpvotesAndDownVotesBy,
+} from '../services/question.service';
+import { getAllAnswers } from '../services/answer.service';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -82,6 +88,9 @@ const userController = (socket: FakeSOSocket) => {
       badges: [],
       browserNotif: false,
       emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [],
+      numUpvotesDownvotes: 0,
     };
 
     try {
@@ -452,6 +461,77 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets a list of all questions asked by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a list of questions or an error.
+   * @returns A promise resolving to void.
+   */
+  const getQuestionsAsked = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const allQuestions = await getQuestionsByOrder('newest');
+      const userQuestions = await filterQuestionsByAskedBy(allQuestions, username);
+      res.status(200).send(userQuestions);
+    } catch (error) {
+      res.status(500).send(`Error when getting questions asked: ${error}`);
+    }
+  };
+
+  /**
+   * Gets a list of all the answers given by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a list of answers or an error
+   * @returns A promise resolving to void.
+   */
+  const getAnswersGiven = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const allAnswers = await getAllAnswers();
+      const userAnswers = allAnswers.filter(a => a.ansBy === username);
+      res.status(200).send(userAnswers);
+    } catch (error) {
+      res.status(500).send(`Error when getting answers given: ${error}`);
+    }
+  };
+
+  /**
+   * Gets the count of all votes (up and down votes) made by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a count of votes or an error
+   * @returns A promise resolving to void.
+   */
+  const getUpvotesAndDownVotes = async (
+    req: UserByUsernameRequest,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const upAndDownVoteCount = await getUpvotesAndDownVotesBy(username);
+      res.status(200).send(upAndDownVoteCount);
+    } catch (error) {
+      res.status(500).send(`Error when getting number of up and down votes: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -464,6 +544,9 @@ const userController = (socket: FakeSOSocket) => {
   router.post('/addEmail', addEmail);
   router.post('/addBadges', addBadges);
   router.patch('/changeSubscription', changeNotifSubscription);
+  router.get('/getQuestionsAsked', getQuestionsAsked);
+  router.get('/getAnswersGiven', getAnswersGiven);
+  router.get('/getVoteCount', getUpvotesAndDownVotes);
   return router;
 };
 
