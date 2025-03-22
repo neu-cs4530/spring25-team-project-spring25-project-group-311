@@ -1,6 +1,9 @@
-import { ObjectId } from 'mongodb';
 import ForumModel from '../models/forum.model';
-import { Forum, DatabaseForum, ForumResponse } from '../types/types';
+import { Forum, DatabaseForum, ForumResponse, PopulatedDatabaseQuestion } from '../types/types';
+import QuestionModel from '../models/questions.model';
+import AnswerModel from '../models/answers.model';
+import CommentModel from '../models/comments.model';
+import TagModel from '../models/tags.model';
 
 /**
  * Saves a new forum to the database.
@@ -33,11 +36,57 @@ export const getForumByName = async (forumName: string): Promise<ForumResponse> 
     const forum: DatabaseForum | null = await ForumModel.findOne({ name: forumName });
 
     if (!forum) {
-      throw Error('User not found');
+      throw Error('Forum not found');
     }
 
     return forum;
   } catch (error) {
     return { error: `Error occurred when finding forum: ${error}` };
+  }
+};
+
+/**
+ * Generates the top 5 posts for a given forum
+ * @param forumName the name of the forum we want to get the top 5 posts from.
+ * @returns {Promise<PopulatedDatabaseQuestion[]>} - Resolves with a list of populated database questions
+ */
+export const getTopFivePosts = async (forumName: string): Promise<PopulatedDatabaseQuestion[]> => {
+  try {
+    const forum = await ForumModel.findOne({ name: forumName }).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([
+      {
+        path: 'questions',
+        model: QuestionModel,
+        populate: { path: 'answers', model: AnswerModel },
+      },
+      {
+        path: 'questions',
+        model: QuestionModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      {
+        path: 'questions',
+        model: QuestionModel,
+        populate: { path: 'tags', model: TagModel },
+      },
+    ]);
+
+    if (!forum) {
+      throw Error('Forum not found');
+    }
+
+    const forumPosts = forum.questions.sort((a, b) => {
+      if (a.upVotes > b.upVotes) {
+        return 1;
+      }
+      if (a.upVotes < b.upVotes) {
+        return -1;
+      }
+      return 0;
+    });
+    return forumPosts.slice(0, 5);
+  } catch (error) {
+    return [];
   }
 };
