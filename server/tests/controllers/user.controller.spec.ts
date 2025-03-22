@@ -12,6 +12,9 @@ const mockUser: User = {
   badges: [],
   browserNotif: false,
   emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -22,6 +25,9 @@ const mockSafeUser: SafeDatabaseUser = {
   badges: [],
   browserNotif: false,
   emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 const mockUserJSONResponse = {
@@ -32,6 +38,9 @@ const mockUserJSONResponse = {
   badges: [],
   browserNotif: false,
   emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -70,6 +79,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       });
     });
 
@@ -449,6 +461,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -464,6 +479,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockUserEmailJSONResponse = {
@@ -474,6 +492,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -562,6 +583,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -603,6 +627,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const userEmails = {
@@ -613,6 +640,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -649,6 +679,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -664,6 +697,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockUserEmailJSONResponse = {
@@ -674,6 +710,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -784,6 +823,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -809,6 +851,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -856,6 +901,9 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -892,6 +940,9 @@ describe('Test userController', () => {
         badges: ['badge1', 'badge2'],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -907,6 +958,9 @@ describe('Test userController', () => {
         badges: ['badge1', 'badge2', 'badge3'],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockUserBadgeJSONResponse = {
@@ -917,6 +971,9 @@ describe('Test userController', () => {
         badges: ['badge1', 'badge2', 'badge3'],
         browserNotif: false,
         emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserBadges);

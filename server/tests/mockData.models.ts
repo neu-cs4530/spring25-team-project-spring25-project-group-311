@@ -193,6 +193,9 @@ export const user: User = {
   badges: [],
   browserNotif: false,
   emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -203,6 +206,9 @@ export const safeUser: SafeDatabaseUser = {
   badges: [],
   browserNotif: false,
   emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 export const forum: Forum = {
