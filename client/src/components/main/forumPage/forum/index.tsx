@@ -6,4 +6,3 @@ interface ForumProps {
   f: Forum;
   clickForum: (forumName: string) => void;
 }
-
