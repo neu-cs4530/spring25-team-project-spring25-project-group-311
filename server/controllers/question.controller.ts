@@ -8,6 +8,7 @@ import {
   VoteRequest,
   FakeSOSocket,
   PopulatedDatabaseQuestion,
+  MarkQuestionAsReadRequest,
 } from '../types/types';
 import {
   addVoteToQuestion,
@@ -19,6 +20,7 @@ import {
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
+import QuestionModel from '../models/questions.model';
 
 const questionController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -236,12 +238,35 @@ const questionController = (socket: FakeSOSocket) => {
     voteQuestion(req, res, 'downvote');
   };
 
+  const markQuestionAsRead = async (
+    req: MarkQuestionAsReadRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { qid } = req.params;
+    try {
+      const updatedQuestion = await QuestionModel.findByIdAndUpdate(
+        qid,
+        { readStatus: true },
+        { new: true },
+      );
+      if (!updatedQuestion) {
+        res.status(404).send('Question not found');
+        return;
+      }
+      res.status(200).json({ message: 'Question marked as read', data: updatedQuestion });
+    } catch (error) {
+      console.error('Error updating read status:', error);
+      res.status(500).send('Error updating read status');
+    }
+  };
+
   // add appropriate HTTP verbs and their endpoints to the router
   router.get('/getQuestion', getQuestionsByFilter);
   router.get('/getQuestionById/:qid', getQuestionById);
   router.post('/addQuestion', addQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
+  router.patch('/markQuestionAsRead/:qid', markQuestionAsRead);
 
   return router;
 };

@@ -132,3 +132,13 @@ export interface VoteRequest extends Request {
     username: string;
   };
 }
+
+/**
+ * Interface for the request body when marking a question as read.
+ * - `qid`: The unique identifier of the question being marked as read (params).
+ */
+export interface MarkQuestionAsReadRequest extends Request {
+  params: {
+    qid: string;
+  };
+}

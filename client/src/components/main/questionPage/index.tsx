@@ -4,13 +4,26 @@ import QuestionHeader from './header';
 import QuestionView from './question';
 import useQuestionPage from '../../../hooks/useQuestionPage';
 
-/**
- * QuestionPage component renders a page displaying a list of questions
- * based on filters such as order and search terms.
- * It includes a header with order buttons and a button to ask a new question.
- */
 const QuestionPage = () => {
   const { titleText, qlist, setQuestionOrder } = useQuestionPage();
+
+  const handleUpdateReadStatus = async (id: object) => {
+    try {
+      const response = await fetch(`/question/markAsRead/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update read status');
+      }
+      // Optionally update local state to reflect the change
+      console.log('Read status updated');
+    } catch (error) {
+      console.error('Error updating read status:', error);
+    }
+  };
 
   return (
     <>
@@ -20,10 +33,15 @@ const QuestionPage = () => {
         setQuestionOrder={setQuestionOrder}
       />
       <div id='question_list' className='question_list'>
-        {qlist.map(q => (
-          <QuestionView question={q} key={String(q._id)} readStatus={q.readStatus} />
+        {qlist.map(question => (
+          <QuestionView
+            key={question._id.toString()}
+            question={question}
+            onUpdateReadStatus={handleUpdateReadStatus}
+          />
         ))}
       </div>
+
       {titleText === 'Search Results' && !qlist.length && (
         <div className='bold_title right_padding'>No Questions Found</div>
       )}

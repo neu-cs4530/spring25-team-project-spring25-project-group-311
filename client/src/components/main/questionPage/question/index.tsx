@@ -12,7 +12,7 @@ import { PopulatedDatabaseQuestion } from '../../../../types/types';
  */
 interface QuestionProps {
   question: PopulatedDatabaseQuestion;
-  readStatus: boolean;
+  onUpdateReadStatus: (questionId: ObjectId) => void;
 }
 
 /**
@@ -23,10 +23,15 @@ interface QuestionProps {
  * @param q - The question object containing question details.
  * @param readStatus - Boolean indiciating if question has been read
  */
-const QuestionView = ({ question, readStatus }: QuestionProps) => {
-  console.log(`Question ID: ${question._id}, Read Status: ${readStatus}`); // Check read status
+const QuestionView = ({ question, onUpdateReadStatus }: QuestionProps) => {
+  console.log(`Question ID: ${question._id}, Read Status: ${onUpdateReadStatus}`); // Check read status
 
   const navigate = useNavigate();
+
+  const handleQuestionClick = () => {
+    onUpdateReadStatus(question._id);
+    navigate(`/question/${question._id}`);
+  };
 
   /**
    * Function to navigate to the home page with the specified tag as a search parameter.
@@ -49,14 +54,14 @@ const QuestionView = ({ question, readStatus }: QuestionProps) => {
     navigate(`/question/${questionID}`);
   };
 
-  const titleClass = readStatus ? 'postTitle read' : 'postTitle';
+  const titleClass = question.readStatus ? 'postTitle read' : 'postTitle';
+
   return (
     <div
       className='question right_padding'
       onClick={() => {
-        if (question._id) {
-          handleAnswer(question._id);
-        }
+        handleQuestionClick();
+        handleAnswer(question._id);
       }}>
       <div className='postStats'>
         <div>{question.answers.length || 0} answers</div>
