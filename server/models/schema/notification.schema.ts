@@ -25,7 +25,7 @@ const notificationSchema: Schema = new Schema(
     },
     user: {
       type: Schema.Types.ObjectId,
-      ref: 'Message',
+      ref: 'User',
     },
     sent: {
       type: Boolean,
