@@ -9,22 +9,14 @@ import { NavLink, useLocation } from 'react-router-dom';
  */
 const SideBarNav = () => {
   const [showMessageOptions, setShowMessageOptions] = useState<boolean>(false);
-  // const [showForumOptions, setShowForumOptions] = useState<boolean>(false);
   const location = useLocation();
 
   const toggleMessageOptions = () => {
     setShowMessageOptions(!showMessageOptions);
   };
 
-  // const toggleForumOptions = () => {
-  //   setShowForumOptions(!showForumOptions);
-  // };
-
   const isActiveMessageOption = (path: string) =>
     location.pathname === path ? 'message-option-selected ' : '';
-
-  // const isActiveForumOption = (path: string) =>
-  //   location.pathname === path ? 'forum-option-selected ' : '';
 
   return (
     <div id='sideBarNav' className='sideBarNav'>
@@ -67,20 +59,6 @@ const SideBarNav = () => {
         className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
         Forums
       </NavLink>
-      {/* {showForumOptions && (
-        <div className='additional-options'>
-          <NavLink
-            to='/forums'
-            className={`menu_button message-options ${isActiveForumOption('/forums')}`}>
-            Explore forums
-          </NavLink>
-          <NavLink
-            to='/forums/focused-forum'
-            className={`menu_button message-options ${isActiveForumOption('/forums/focused-forum')}`}>
-            Focused Forum
-          </NavLink>
-        </div>
-      )} */}
       <NavLink
         to='/users'
         id='menu_users'
