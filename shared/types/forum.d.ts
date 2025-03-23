@@ -18,7 +18,7 @@ export interface Forum {
   members: string[];
   awaitingMembers: string[];
   bannedMembers: string[];
-  questions: PopulatedDatabaseQuestion[];
+  questions: Question[];
   type: 'public' | 'private';
 }
 
