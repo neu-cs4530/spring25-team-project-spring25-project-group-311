@@ -1,6 +1,7 @@
 import { PopulatedDatabaseAnswer } from './answer';
 import { PopulatedDatabaseChat } from './chat';
 import { DatabaseMessage } from './message';
+import { DatabaseForum } from './forum';
 import { PopulatedDatabaseQuestion } from './question';
 import { SafeDatabaseUser } from './user';
 import { BaseMove, GameInstance, GameInstanceID, GameMove, GameState } from './game';
@@ -84,6 +85,16 @@ export interface UserUpdatePayload {
 }
 
 /**
+ * Payload for a forum update event.
+ * - `forum`: The updated forum object.
+ * - `type`: The type of modification (`'created'`, `'deleted'`, or `'updated'`).
+ */
+export interface ForumUpdatePayload {
+  forum: DatabaseForum;
+  type: 'created' | 'deleted' | 'updated';
+}
+
+/**
  * Interface representing the payload for a game move operation, which contains:
  * - `gameID`: The ID of the game being played.
  * - `move`: The move being made in the game, defined by `GameMove`.
@@ -118,6 +129,7 @@ export interface ClientToServerEvents {
  * - `commentUpdate`: Server sends updated comment for a question or answer.
  * - `messageUpdate`: Server sends updated message.
  * - `userUpdate`: Server sends updated user status.
+ * - `forumUpdate`: Server sends updated forum status.
  * - `gameUpdate`: Server sends updated game state.
  * - `gameError`: Server sends error message related to game operation.
  * - `chatUpdate`: Server sends updated chat.
@@ -130,6 +142,7 @@ export interface ServerToClientEvents {
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;
+  forumUpdate: (forum: ForumUpdatePayload) => void;
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
