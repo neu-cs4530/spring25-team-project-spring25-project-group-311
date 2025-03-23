@@ -96,6 +96,7 @@ export interface ForumUpdatePayload {
 }
 
 /**
+ * Interface representing the payload for a game move operation, which contains:
  * Payload for a notification update event.
  * - `notification`: The updated notification object.
  * - `type`: The type of modification (`'created'`, `'read'`)
@@ -153,7 +154,6 @@ export interface ServerToClientEvents {
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;
-  forumUpdate: (forum: PopulatedDatabaseForum) => void;
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
