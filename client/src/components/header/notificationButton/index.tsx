@@ -20,20 +20,22 @@ const NotificationButton = () => {
   return (
     <>
       {error && <div className='direct-message-error'>{error}</div>}
-      <FaBell
-        style={unreadBrowserNotifs.length > 0 ? { color: 'red' } : { color: 'blue' }}
-        onClick={() => setShowBrowserNotifs(show => !show)}></FaBell>
-      {showBrowserNotifs && (
-        <div className='browser-notif-list'>
-          {unreadBrowserNotifs.map(bNotif => (
-            <NotificationCard
-              key={String(bNotif._id)}
-              notification={bNotif}
-              handleReadNotification={() => handleReadNotification(bNotif._id)}
-            />
-          ))}
-        </div>
-      )}
+      <div>
+        <FaBell
+          style={unreadBrowserNotifs.length > 0 ? { color: 'red' } : { color: 'blue' }}
+          onClick={() => setShowBrowserNotifs(show => !show)}></FaBell>
+        {showBrowserNotifs && (
+          <div className='browser-notif-list'>
+            {unreadBrowserNotifs.map(bNotif => (
+              <NotificationCard
+                key={String(bNotif._id)}
+                notification={bNotif}
+                handleReadNotification={() => handleReadNotification(bNotif._id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 };
