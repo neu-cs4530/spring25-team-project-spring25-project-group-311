@@ -62,3 +62,13 @@ export interface GetUserNotificationRequest extends Request {
     username: string;
   };
 }
+
+/**
+ * Type representing a read notification request with the notification in the parameter.
+ * - `notifID`: The ID of the notification we want to read. (param)
+ */
+export interface ReadNotificationRequest extends Request {
+  params: {
+    notifID: string;
+  };
+}

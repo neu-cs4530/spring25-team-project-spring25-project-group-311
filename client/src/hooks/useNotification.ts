@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { DatabaseNotification, NotificationUpdatePayload } from '@fake-stack-overflow/shared';
+import { ObjectId } from 'mongodb';
 import useUserContext from './useUserContext';
-import { getUserNotifs } from '../services/notificationService';
+import { getUserNotifs, readNotif } from '../services/notificationService';
 
 /**
  * useNotification is a custom hook that provides state and functions for giving notifications
@@ -9,14 +10,28 @@ import { getUserNotifs } from '../services/notificationService';
  */
 const useNotification = () => {
   const { user, socket } = useUserContext();
-  const [showNotifs, setShowNotifs] = useState<boolean>(false);
-  const [unreadNotifs, setUnreadNotifs] = useState<DatabaseNotification[]>([]);
+  const [showBrowserNotifs, setShowBrowserNotifs] = useState<boolean>(false);
+  const [unreadBrowserNotifs, setUnreadBrowserNotifs] = useState<DatabaseNotification[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Function to read notification
+   */
+  const handleReadNotification = async (notifId: ObjectId | undefined) => {
+    if (!notifId) {
+      setError('Invalid notification ID');
+      return;
+    }
+
+    await readNotif(notifId);
+  };
+
   useEffect(() => {
-    const fetchUnreadNotifs = async () => {
-      const userUnreadNotifs = await getUserNotifs(user.username);
-      setUnreadNotifs(userUnreadNotifs);
+    const fetchUnreadBrowserNotifs = async () => {
+      const userUnreadNotifs = (await getUserNotifs(user.username)).filter(
+        n => n.type === 'browser' && n.read === false,
+      );
+      setUnreadBrowserNotifs(userUnreadNotifs);
     };
 
     const handleNotificationUpdate = (notifUpdate: NotificationUpdatePayload) => {
@@ -25,13 +40,15 @@ const useNotification = () => {
       switch (type) {
         case 'created': {
           if (notification.user === user) {
-            setUnreadNotifs(prevUnreadNotifs => [notification, ...prevUnreadNotifs]);
+            setUnreadBrowserNotifs(prevUnreadNotifs => [notification, ...prevUnreadNotifs]);
           }
           return;
         }
         case 'read': {
           if (notification.user === user) {
-            setUnreadNotifs(prevUnreadNotifs => prevUnreadNotifs.filter(n => n !== notification));
+            setUnreadBrowserNotifs(prevUnreadNotifs =>
+              prevUnreadNotifs.filter(n => n !== notification),
+            );
           }
           return;
         }
@@ -41,7 +58,7 @@ const useNotification = () => {
       }
     };
 
-    fetchUnreadNotifs();
+    fetchUnreadBrowserNotifs();
 
     socket.on('notificationUpdate', handleNotificationUpdate);
 
@@ -51,10 +68,11 @@ const useNotification = () => {
   }, [user, socket]);
 
   return {
-    showNotifs,
-    setShowNotifs,
-    unreadNotifs,
+    showBrowserNotifs,
+    setShowBrowserNotifs,
+    unreadBrowserNotifs,
     error,
+    handleReadNotification,
   };
 };
 

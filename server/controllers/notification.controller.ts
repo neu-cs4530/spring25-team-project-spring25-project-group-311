@@ -4,8 +4,13 @@ import {
   FakeSOSocket,
   GetUserNotificationRequest,
   Notification,
+  ReadNotificationRequest,
 } from '../types/types';
-import { getUserNotifs, saveNotification } from '../services/notification.service';
+import {
+  getUserNotifs,
+  readNotification,
+  saveNotification,
+} from '../services/notification.service';
 
 /**
  * The controller handles notification related routes.
@@ -85,8 +90,32 @@ const notificationController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Route to read a notification given the ID
+   * @param req The request containing the notification ID in the parameter
+   * @param res The response, either returning the read notification or an error.
+   */
+  const readNotif = async (req: ReadNotificationRequest, res: Response): Promise<void> => {
+    try {
+      const { notifID } = req.params;
+      const readNf = await readNotification(notifID);
+
+      if ('error' in readNf) {
+        throw Error(readNf.error);
+      }
+      socket.emit('notificationUpdate', {
+        notification: readNf,
+        type: 'read',
+      });
+      res.status(200).json(readNf);
+    } catch (error) {
+      res.status(500).send(`Error when reading notification: ${error}`);
+    }
+  };
+
   router.post('/createNotif', createNotification);
   router.get('/getUserNotifs/:username', getUserNotifications);
+  router.patch('/readNotif/:notifID', readNotif);
 };
 
 export default notificationController;

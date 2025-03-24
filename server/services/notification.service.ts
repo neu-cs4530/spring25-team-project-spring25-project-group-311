@@ -51,14 +51,10 @@ export const getUserNotifs = async (username: string): Promise<DatabaseNotificat
  * @param notif the notification to send
  * @returns {Promise<NotificationResponse>} Resolves to the read notification or an error.
  */
-export const readNotif = async (notif: DatabaseNotification): Promise<NotificationResponse> => {
+export const readNotification = async (notifID: string): Promise<NotificationResponse> => {
   try {
-    if (notif.read) {
-      throw Error('Cannot send an already sent notification');
-    }
-
     const updatedNotif = await NotificationModel.findOneAndUpdate(
-      { _id: notif._id },
+      { _id: notifID },
       { $set: { read: true } },
       { new: true },
     );
