@@ -13,14 +13,14 @@ const getForums = async (): Promise<DatabaseForum[]> => {
 };
 
 /**
- * Function to get a forum by its name
+ * Function to get a forum by its id
  *
- * @param forum - The unique identifier of the forum
+ * @param forumId - The unique identifier of the forum
  * @returns {Promise<Forum>} The forum object
  * @throws Error if there is an issue fetching the forum.
  */
-const getForumByName = async (forum: string): Promise<DatabaseForum> => {
-  const res = await api.get(`${FORUM_API_URL}/getForum/${forum}`);
+const getForumById = async (forumId: string): Promise<DatabaseForum> => {
+  const res = await api.get(`${FORUM_API_URL}/getForum/${forumId}`);
   if (res.status !== 200) {
     throw new Error('Error when fetching forum');
   }
@@ -83,4 +83,4 @@ const deleteForum = async (forum: string): Promise<Forum> => {
   return res.data;
 };
 
-export { getForums, getForumByName, createForum, updateForum, deleteForum };
+export { getForums, getForumById, createForum, updateForum, deleteForum };

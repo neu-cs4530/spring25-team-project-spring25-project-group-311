@@ -1,6 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import { ForumRequest, ForumByNameRequest, FakeSOSocket } from '../types/types';
-import { saveForum, getForumByName, getForumsList } from '../services/forum.service';
+import { saveForum, getForumById, getForumsList } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 
 const forumController = (socket: FakeSOSocket) => {
@@ -94,7 +94,7 @@ const forumController = (socket: FakeSOSocket) => {
         return;
       }
 
-      const forum = await getForumByName(forumName);
+      const forum = await getForumById(forumName);
 
       if ('error' in forum) {
         throw Error(forum.error);

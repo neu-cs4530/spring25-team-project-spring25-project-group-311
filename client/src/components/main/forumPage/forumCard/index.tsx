@@ -41,18 +41,6 @@ const ForumView = ({ forum }: ForumProps) => {
       <div className='forum_mid'>
         <div className='forumTitle'>{forum.name}</div>
         <div className='forumDescription'>{forum.description}</div>
-        <div className='forum_flairs'>
-          {forum.flairs.map((flair, index) => (
-            <button
-              key={index}
-              className='forum_flair_button'
-              onClick={e => {
-                e.stopPropagation();
-              }}>
-              {flair}
-            </button>
-          ))}
-        </div>
       </div>
       <div className='lastActivity'>
         <div className='forum_creator'>{forum.createdBy}</div>
