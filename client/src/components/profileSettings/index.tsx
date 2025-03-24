@@ -109,19 +109,37 @@ const ProfileSettings: React.FC = () => {
             {/* ---- Badges Section ---- */}
             {userData.badges.length > 0 && (
               <div style={{ margin: '1rem 0' }}>
-                <p>
-                  {userData.badges.map(img => <img src={img} alt="image not found"/>)}
-                </p>
-                {/* <button
-                  onClick={() => ()}>
-                  Pin Badge
-                </button> */}
+              <p>
+                {userData.badges.map(img => (
+                <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
+                  <img src={img} alt='image not found' />
+                  <button
+                  className='pin-button'
+                  style={{ display: 'block', marginTop: '0.5rem' }}
+                  // Pinning a badge to the user's profile
+                  onClick={() => {
+                    const usernameElement = document.querySelector('p strong');
+                    if (usernameElement) {
+                    const pinnedBadge = document.createElement('img');
+                    pinnedBadge.src = img;
+                    pinnedBadge.alt = 'Pinned badge';
+                    pinnedBadge.style.marginLeft = '1rem';
+                    pinnedBadge.style.height = '20px';
+                    pinnedBadge.style.width = '20px';
+                    usernameElement.parentNode?.appendChild(pinnedBadge);
+                    }
+                  }}>
+                  Pin
+                  </button>
+                </div>
+                ))}
+              </p>
               </div>
             )}
 
             {/* ---- Email Section ---- */}
             {!addEmailMode && !replaceEmailMode && (
-              <div> 
+              <div>
                 {userData.emails.map(email => (
                   <div key={email}>
                     <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />

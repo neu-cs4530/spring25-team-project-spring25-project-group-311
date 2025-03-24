@@ -9,12 +9,23 @@ import useUserContext from '../../hooks/useUserContext';
  * The search bar allows the user to input a query and navigate to the search results page
  * when they press Enter.
  */
-const Header = () => {
+const Header = ({ userBadges }: { userBadges: string[] }) => {
   const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
   const { user: currentUser } = useUserContext();
+
+  const getBackgroundColor = () => {
+    if (userBadges.length === 0) return 'white';
+    if (userBadges.length === 1) return 'lightblue';
+    if (userBadges.length === 2) return 'lightgreen';
+    return '#dddddd';
+  };
+
   const navigate = useNavigate();
   return (
-    <div id='header' className='header'>
+    <div
+      id='header'
+      className='header'
+      style={{ '--header-background': getBackgroundColor() } as React.CSSProperties}>
       <div></div>
       <div className='title'>Fake Stack Overflow</div>
       <input
