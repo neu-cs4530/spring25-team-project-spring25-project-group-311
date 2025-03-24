@@ -260,3 +260,19 @@ export const addVoteToQuestion = async (
     };
   }
 };
+
+/**
+ * Gets the number of upvotes and downvotes made by a person
+ * @param username - The username of the person whose upvotes/downvotes we want to count
+ * @returns {Promise<number>} - The number of upvotes + downvotes
+ */
+export const getUpvotesAndDownVotesBy = async (username: string): Promise<number> => {
+  try {
+    const upvotes = await QuestionModel.find({ upVotes: username });
+    const downvotes = await QuestionModel.find({ downVotes: username });
+
+    return upvotes.length + downvotes.length;
+  } catch (error) {
+    return 0;
+  }
+};

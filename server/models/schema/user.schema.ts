@@ -34,6 +34,17 @@ const userSchema: Schema = new Schema(
       type: [String],
       default: [],
     },
+    browserNotif: {
+      type: Boolean,
+    },
+    emailNotif: {
+      type: Boolean,
+    },
+    questionsAsked: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
+    answersGiven: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
+    numUpvotesDownvotes: {
+      type: Number,
+    },
   },
   { collection: 'User' },
 );
