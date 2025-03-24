@@ -4,12 +4,6 @@ import api from './config';
 
 const FORUM_API_URL = `${process.env.REACT_APP_SERVER_URL}/forum`;
 
-/**
- * Function to get all forums
- *
- * @returns {Promise<Forum[]>} Array of forums
- * @throws Error if there is an issue fetching forums.
- */
 const getForums = async (): Promise<DatabaseForum[]> => {
   const res = await api.get(`${FORUM_API_URL}/getForums`);
   if (res.status !== 200) {
