@@ -39,9 +39,35 @@ export const getUserNotifs = async (username: string): Promise<DatabaseNotificat
       throw Error('No user found');
     }
 
-    const userNotifs = await NotificationModel.find({ username });
+    const userNotifs = await NotificationModel.find({ user });
     return userNotifs;
   } catch (error) {
     return [];
+  }
+};
+
+/**
+ * Reads notification
+ * @param notif the notification to send
+ * @returns {Promise<NotificationResponse>} Resolves to the read notification or an error.
+ */
+export const readNotif = async (notif: DatabaseNotification): Promise<NotificationResponse> => {
+  try {
+    if (notif.read) {
+      throw Error('Cannot send an already sent notification');
+    }
+
+    const updatedNotif = await NotificationModel.findOneAndUpdate(
+      { _id: notif._id },
+      { $set: { read: true } },
+      { new: true },
+    );
+
+    if (!updatedNotif) {
+      throw Error('Error sending notificatin');
+    }
+    return updatedNotif;
+  } catch (error) {
+    return { error: `Error occurred when saving notification: ${error}` };
   }
 };

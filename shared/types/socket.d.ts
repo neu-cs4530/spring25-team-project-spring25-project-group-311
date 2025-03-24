@@ -84,9 +84,14 @@ export interface UserUpdatePayload {
   type: 'created' | 'deleted' | 'updated';
 }
 
+/**
+ * Payload for a notification update event.
+ * - `notification`: The updated notification object.
+ * - `type`: The type of modification (`'created'`, `'read'`)
+ */
 export interface NotificationUpdatePayload {
   notification: DatabaseNotification;
-  type: 'created' | 'sent';
+  type: 'created' | 'read';
 }
 
 /**
