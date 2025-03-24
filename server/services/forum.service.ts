@@ -1,6 +1,6 @@
 // import { ObjectId } from 'mongodb';
 import ForumModel from '../models/forum.model';
-import { DatabaseUser, Forum, DatabaseForum, ForumResponse, ForumsResponse } from '../types/types';
+import { Forum, DatabaseForum, ForumResponse, ForumsResponse } from '../types/types';
 
 /**
  * Saves a new forum to the database.
@@ -25,15 +25,15 @@ export const saveForum = async (forum: Forum): Promise<ForumResponse> => {
 /**
  * Retrieves a forum from the database by its name.
  *
- * @param {string} forumName - The name of the forum to find.
+ * @param {string} forumId - The name of the forum to find.
  * @returns {Promise<ForumResponse>} - Resolves with the found forum or an error message.
  */
-export const getForumByName = async (forumName: string): Promise<ForumResponse> => {
+export const getForumById = async (forumId: string): Promise<ForumResponse> => {
   try {
-    const forum: DatabaseForum | null = await ForumModel.findOne({ name: forumName });
+    const forum: DatabaseForum | null = await ForumModel.findOne({ _id: forumId });
 
     if (!forum) {
-      throw Error('User not found');
+      throw Error('Forum not found');
     }
 
     return forum;
