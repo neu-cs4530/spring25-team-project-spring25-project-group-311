@@ -14,6 +14,7 @@ import questionController from './controllers/question.controller';
 import tagController from './controllers/tag.controller';
 import commentController from './controllers/comment.controller';
 import { FakeSOSocket } from './types/types';
+import forumController from './controllers/forum.controller';
 import userController from './controllers/user.controller';
 import messageController from './controllers/message.controller';
 import chatController from './controllers/chat.controller';
@@ -78,6 +79,7 @@ app.get('/', (_: Request, res: Response) => {
 
 app.use('/question', questionController(socket));
 app.use('/tag', tagController());
+app.use('/forum', forumController(socket))
 app.use('/answer', answerController(socket));
 app.use('/comment', commentController(socket));
 app.use('/messaging', messageController(socket));
