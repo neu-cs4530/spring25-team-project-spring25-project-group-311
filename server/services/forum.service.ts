@@ -1,6 +1,6 @@
 // import { ObjectId } from 'mongodb';
 import ForumModel from '../models/forum.model';
-import { Forum, DatabaseForum, ForumResponse } from '../types/types';
+import { DatabaseUser, Forum, DatabaseForum, ForumResponse, ForumsResponse } from '../types/types';
 
 /**
  * Saves a new forum to the database.
@@ -39,5 +39,20 @@ export const getForumByName = async (forumName: string): Promise<ForumResponse> 
     return forum;
   } catch (error) {
     return { error: `Error occurred when finding forum: ${error}` };
+  }
+};
+
+/**
+ * Retrieves all forums from the database.
+ *
+ * @param {DatabaseUser} user - The user making the request (for authorization purposes).
+ * @returns {Promise<ForumsResponse>} Array of forums or an error message.
+ */
+export const getForumsList = async (): Promise<ForumsResponse> => {
+  try {
+    const forums: DatabaseForum[] = await ForumModel.find();
+    return forums;
+  } catch (error) {
+    return { error: `Error occurred when retrieving forums: ${error}` };
   }
 };
