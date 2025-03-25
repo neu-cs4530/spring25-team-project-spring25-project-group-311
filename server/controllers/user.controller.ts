@@ -67,6 +67,17 @@ const userController = (socket: FakeSOSocket) => {
     req.body.newEmail.trim() !== '';
 
   /**
+   * Validates that the request body contains all required fields to change a subscription.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isChangeSubscriptionBodyValid = (req: SubscribeToNotification): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.notifType !== undefined;
+
+  /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
    * @param res The response, either returning the created user or an error.
@@ -431,6 +442,11 @@ const userController = (socket: FakeSOSocket) => {
     res: Response,
   ): Promise<void> => {
     try {
+      if (!isChangeSubscriptionBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
       const { username } = req.body;
       const { notifType } = req.body;
 
@@ -440,7 +456,7 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       let updatedUser: UserResponse;
-      if (notifType.type === 'browser') {
+      if (notifType === 'browser') {
         updatedUser = await updateUser(username, { browserNotif: !foundUser.browserNotif });
       } else {
         updatedUser = await updateUser(username, { emailNotif: !foundUser.emailNotif });
