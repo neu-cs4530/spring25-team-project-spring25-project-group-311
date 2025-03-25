@@ -28,7 +28,6 @@ describe('Forum model', () => {
       const forum: Forum = {
         name: 'Forum',
         description: 'This is a forum',
-        flairs: [],
         createdBy: 'user123',
         createDateTime: new Date(),
         moderators: ['user123'],

@@ -4,7 +4,6 @@ import {
   ForumByNameRequest,
   FakeSOSocket,
   ForumMembershipRequest,
-  DatabaseForum,
   PopulatedDatabaseForum,
   PopulatedForumResponse,
 } from '../types/types';
