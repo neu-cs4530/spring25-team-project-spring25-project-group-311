@@ -9,7 +9,6 @@ import { Question } from './question';
 export interface Forum {
   name: string;
   description: string;
-  flairs: string[];
   createdBy: string;
   createDateTime: Date;
   moderators: string[];
@@ -24,7 +23,7 @@ export interface Forum {
  * Represents a forum in the database.
  *
  */
-export interface DatabaseForum extends Forum {
+export interface DatabaseForum extends Omit<Forum, 'questions'> {
   _id: ObjectId;
   questions: ObjectId[];
 }
@@ -38,12 +37,12 @@ export interface ForumRequest extends Request {
 }
 
 /**
- * Express request for querying a forum by its name.
+ * Express request for querying a forum by its id.
  * - `forumName`: The forum name provided as a route parameter.
  */
-export interface ForumByNameRequest extends Request {
+export interface ForumByIdRequest extends Request {
   params: {
-    forumName: string;
+    forumId: string;
   };
 }
 
@@ -52,7 +51,7 @@ export interface ForumByNameRequest extends Request {
  */
 export interface ForumMembershipRequest extends Request {
   body: {
-    forumName: string;
+    forumId: string;
     username: string;
   };
 }
