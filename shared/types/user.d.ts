@@ -34,6 +34,7 @@ export interface User extends UserCredentials {
   badges: string[];
   browserNotif: boolean;
   emailNotif: boolean;
+  emailFrequency?: string;
   questionsAsked: Question[];
   answersGiven: Answer[];
   numUpvotesDownvotes: number;
@@ -158,5 +159,16 @@ export interface SubscribeToNotification extends Request {
   body: {
     username: string;
     notifType: 'browser' | 'email';
+    emailFrequency?: 'weekly' | 'daily' | 'monthly' | 'hourly';
+  };
+}
+
+/**
+ * Express request for sending an email to the user regarding their forums
+ * - `username`: The username of the user to email (param)
+ */
+export interface SendEmailNotif extends Request {
+  body: {
+    username: string;
   };
 }

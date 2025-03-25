@@ -164,7 +164,17 @@ const replaceEmail = async (
   return res.data;
 };
 
+/**
+ * Subscribes/unsubscribes a user from notifications.
+ * @param username The unique username of the user.
+ * @param notifType The type of notification a user wants (should be browser or email)
+ * @returns A promsie resolving to the updated user
+ * @throws Error if the request fails or if an invalid notification type is given
+ */
 const subscribeNotifs = async (username: string, notifType: string): Promise<SafeDatabaseUser> => {
+  if (notifType !== 'browser' && notifType !== 'email') {
+    throw new Error('Not a valid notification type');
+  }
   const res = await api.patch(`${USER_API_URL}/changeSubscription`, {
     username,
     notifType,
@@ -173,6 +183,19 @@ const subscribeNotifs = async (username: string, notifType: string): Promise<Saf
     throw new Error('Error when changing subscriptions to notifications');
   }
   return res.data;
+};
+
+/**
+ * Sends out an email to the user.
+ * @param username The unique username of the user.
+ */
+const sendEmails = async (username: string): Promise<void> => {
+  const res = await api.patch(`${USER_API_URL}/sendEmail`, {
+    username,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when changing subscriptions to notifications');
+  }
 };
 
 export {
@@ -186,4 +209,5 @@ export {
   addEmail,
   replaceEmail,
   subscribeNotifs,
+  sendEmails,
 };

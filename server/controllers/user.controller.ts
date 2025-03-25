@@ -12,6 +12,7 @@ import {
   AddBadgeRequest,
   SubscribeToNotification,
   UserResponse,
+  SendEmailNotif,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -27,6 +28,11 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const schedule = require('node-schedule');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nodemailer = require('nodemailer');
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -449,6 +455,7 @@ const userController = (socket: FakeSOSocket) => {
 
       const { username } = req.body;
       const { notifType } = req.body;
+      const { emailFrequency } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
@@ -459,7 +466,10 @@ const userController = (socket: FakeSOSocket) => {
       if (notifType === 'browser') {
         updatedUser = await updateUser(username, { browserNotif: !foundUser.browserNotif });
       } else {
-        updatedUser = await updateUser(username, { emailNotif: !foundUser.emailNotif });
+        updatedUser = await updateUser(username, {
+          emailNotif: !foundUser.emailNotif,
+          emailFrequency,
+        });
       }
 
       if ('error' in updatedUser) {
@@ -548,6 +558,72 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Sends out an email to the user regarding the top 5 posts in each of their forum.
+   * @param req The request containing the username
+   * @param res The response, either providing the email sent or an error
+   * @returns A promise resolving to void.
+   */
+  const sendEmail = async (req: SendEmailNotif, res: Response): Promise<void> => {
+    try {
+      const { username } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      if (!foundUser.emailNotif) {
+        throw Error('User not subscribed to email notifs');
+      }
+
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+          user: 'raisa16h21@gmail.com',
+          pass: 'uqby iszq gtfa chld',
+        },
+      });
+
+      // Email content
+      const mailOptions = {
+        from: 'raisa16h21@gmail.com',
+        to: foundUser.emails[0],
+        subject: 'FakeStackOverflow Email Digest',
+        text: 'Hello, these here is a summary of all your forums',
+      };
+
+      let howOftenToSend;
+      switch (foundUser.emailFrequency) {
+        case 'weekly':
+          howOftenToSend = '30 18 * * 2';
+          break;
+        case 'daily':
+          howOftenToSend = '30 18 * * *';
+          break;
+        case 'monthly':
+          howOftenToSend = '30 18 1 * *';
+          break;
+        case 'hourly':
+          howOftenToSend = '30 * * * *';
+          break;
+        default:
+          throw Error('not a valid frequency');
+      }
+
+      const email = schedule.scheduleJob(howOftenToSend, () => {
+        transporter.sendMail(mailOptions, (error: Error) => {
+          if (error) {
+            throw Error('Error sending out email');
+          }
+        });
+      });
+      res.status(200).send(email);
+    } catch (error) {
+      res.status(500).send(`Error when sending email : ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -563,6 +639,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getQuestionsAsked', getQuestionsAsked);
   router.get('/getAnswersGiven', getAnswersGiven);
   router.get('/getVoteCount', getUpvotesAndDownVotes);
+  router.post('/sendEmail', sendEmail);
   return router;
 };
 

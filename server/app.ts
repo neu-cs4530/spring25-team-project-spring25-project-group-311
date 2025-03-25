@@ -21,6 +21,11 @@ import gameController from './controllers/game.controller';
 import readStatusController from './controllers/readStatus.controller';
 import notificationController from './controllers/notification.controller';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const schedule = require('node-schedule');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nodemailer = require('nodemailer');
+
 dotenv.config();
 
 const MONGO_URL = `${process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'}/fake_so`;
@@ -42,6 +47,39 @@ function startServer() {
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
+}
+
+function sendEmail() {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: 'raisa16h21@gmail.com',
+      pass: 'uqby iszq gtfa chld',
+    },
+  });
+
+  // Email content
+  const mailOptions = {
+    from: 'raisa16h21@gmail.com',
+    to: 'raisa16h21@gmail.com',
+    subject: 'Test Email',
+    text: 'Cool beans!',
+  };
+
+  schedule.scheduleJob('45 14 * * 2', () => {
+    // "0 22 * ​​* 5" runs every Friday at 22:00
+    console.log('Weekly email sending scheduled.');
+    transporter.sendMail(mailOptions, (error: Error) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ');
+      }
+    });
+  });
+  // Send email
 }
 
 socket.on('connection', socket => {
@@ -88,4 +126,4 @@ app.use('/read-status', readStatusController());
 app.use('/notification', notificationController(socket));
 
 // Export the app instance
-export { app, server, startServer };
+export { app, server, startServer, sendEmail };

@@ -206,6 +206,26 @@ const ProfileSettings: React.FC = () => {
                 <h4>Notifications</h4>
                 <NotificationToggleItem notifType={'browser'} toggleNotif={handleSubscription} />
                 <NotificationToggleItem notifType={'email'} toggleNotif={handleSubscription} />
+                {userData.emailNotif && (
+                  <div>
+                    <div>
+                      <input type='radio' value='weekly' checked />
+                      <label>Weekly</label>
+                    </div>
+                    <div>
+                      <input type='radio' value='hourly' />
+                      <label>Hourly</label>
+                    </div>
+                    <div>
+                      <input type='radio' value='monthly' />
+                      <label>Monthly</label>
+                      <div>
+                        <input type='radio' value='daily' />
+                        <label>Daily</label>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             )}
 

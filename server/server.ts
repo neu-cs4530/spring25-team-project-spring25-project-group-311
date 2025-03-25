@@ -1,8 +1,7 @@
 // // Run this script to launch the server.
 
-import {server, app, startServer} from './app'
+import { server, app, startServer, sendEmail } from './app';
 
 startServer();
-export {app, server};
-
-
+sendEmail();
+export { app, server };

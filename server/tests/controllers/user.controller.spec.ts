@@ -1036,6 +1036,7 @@ describe('Test userController', () => {
       const mockReqBody = {
         username: 'user1',
         notifType: 'email',
+        emailFrequency: 'hourly',
       };
 
       const emailNotifUser = {
@@ -1046,12 +1047,13 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: true,
+        emailFrequency: 'hourly',
         questionsAsked: [],
         answersGiven: [],
         numUpvotesDownvotes: 0,
       };
 
-      const mockBrowserNotifResponse = {
+      const mockEmailNotifResponse = {
         _id: emailNotifUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
@@ -1059,6 +1061,7 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: true,
+        emailFrequency: 'hourly',
         questionsAsked: [],
         answersGiven: [],
         numUpvotesDownvotes: 0,
@@ -1070,7 +1073,7 @@ describe('Test userController', () => {
       const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockBrowserNotifResponse);
+      expect(response.body).toEqual(mockEmailNotifResponse);
     });
 
     it('should opt a user out for browser subscriptions', async () => {

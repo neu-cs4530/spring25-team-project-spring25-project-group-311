@@ -8,6 +8,8 @@
     "shared"
   ],
   "dependencies": {
+    "node-schedule": "^2.1.1",
+    "nodemailer": "^6.10.0",
     "react-icons": "^5.5.0"
   }
 }

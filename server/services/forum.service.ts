@@ -1,9 +1,17 @@
-import ForumModel from '../models/forum.model';
-import { Forum, DatabaseForum, ForumResponse, PopulatedDatabaseQuestion } from '../types/types';
-import QuestionModel from '../models/questions.model';
+// import { ObjectId } from 'mongodb';
 import AnswerModel from '../models/answers.model';
 import CommentModel from '../models/comments.model';
+import ForumModel from '../models/forum.model';
+import QuestionModel from '../models/questions.model';
 import TagModel from '../models/tags.model';
+import {
+  Forum,
+  DatabaseForum,
+  ForumResponse,
+  ForumsResponse,
+  PopulatedDatabaseQuestion,
+} from '../types/types';
+import { updateUser } from './user.service';
 
 /**
  * Saves a new forum to the database.
@@ -28,12 +36,12 @@ export const saveForum = async (forum: Forum): Promise<ForumResponse> => {
 /**
  * Retrieves a forum from the database by its name.
  *
- * @param {string} forumName - The name of the forum to find.
+ * @param {string} forumId - The name of the forum to find.
  * @returns {Promise<ForumResponse>} - Resolves with the found forum or an error message.
  */
-export const getForumByName = async (forumName: string): Promise<ForumResponse> => {
+export const getForumById = async (forumId: string): Promise<ForumResponse> => {
   try {
-    const forum: DatabaseForum | null = await ForumModel.findOne({ name: forumName });
+    const forum: DatabaseForum | null = await ForumModel.findOne({ _id: forumId });
 
     if (!forum) {
       throw Error('Forum not found');
@@ -42,6 +50,89 @@ export const getForumByName = async (forumName: string): Promise<ForumResponse> 
     return forum;
   } catch (error) {
     return { error: `Error occurred when finding forum: ${error}` };
+  }
+};
+
+/**
+ * Retrieves all forums from the database.
+ *
+ * @returns {Promise<ForumsResponse>} Array of forums or an error message.
+ */
+export const getForumsList = async (): Promise<ForumsResponse> => {
+  try {
+    const forums: DatabaseForum[] = await ForumModel.find();
+    return forums;
+  } catch (error) {
+    return { error: `Error occurred when retrieving forums: ${error}` };
+  }
+};
+
+export const addUserToForum = async (fid: string, username: string): Promise<ForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    if (forum.members.includes(username)) {
+      return forum;
+    }
+
+    let updatedForum: DatabaseForum | null;
+    if (forum.type === 'public') {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { members: username } },
+        { new: true },
+      );
+    } else if (forum.type === 'private') {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { awaitingMembers: username } },
+        { new: true },
+      );
+    } else {
+      throw Error('Invalid forum type');
+    }
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when adding user to forum: ${error}` };
+  }
+};
+
+export const removeUserFromForum = async (
+  fid: string,
+  username: string,
+): Promise<ForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    if (!forum.members.includes(username)) {
+      return forum;
+    }
+
+    const updatedForum = await ForumModel.findOneAndUpdate(
+      { _id: fid },
+      { $pull: { members: username } },
+      { new: true },
+    );
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when removing user from forum: ${error}` };
   }
 };
 

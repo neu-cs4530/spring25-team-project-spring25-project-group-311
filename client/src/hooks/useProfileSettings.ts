@@ -8,6 +8,7 @@ import {
   addEmail,
   replaceEmail,
   subscribeNotifs,
+  sendEmails,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -186,6 +187,9 @@ const useProfileSettings = () => {
         resolve(null); // Resolve the promise
       });
 
+      if (type === 'email') {
+        await sendEmails(username);
+      }
       setSuccessMessage('Subscription changed!');
       setErrorMessage(null);
     } catch (error) {
@@ -193,6 +197,20 @@ const useProfileSettings = () => {
       setSuccessMessage(null);
     }
   };
+
+  const handleChangeFrequency = async (frequency: string) => {
+    if (!username) return;
+    if (
+      frequency !== 'weekly' &&
+      frequency !== 'hourly' &&
+      frequency !== 'monthly' &&
+      frequency !== 'daily'
+    ) return;
+
+    try {
+      
+    }
+  }
 
   /**
    * Handler for deleting the user (triggers confirmation modal)
