@@ -9,7 +9,7 @@ import { Schema } from 'mongoose';
  * - `text`: The detailed content of the notification.
  * - `type`: The type of notification, either email or browser-side.
  * - `user`: The user that the notification will be sent to.
- * - `sent`: Boolean representing whether message was sent (true for yes, false for no).
+ * - `read`: Boolean representing whether message was read (true for yes, false for no).
  */
 const notificationSchema: Schema = new Schema(
   {
@@ -25,9 +25,9 @@ const notificationSchema: Schema = new Schema(
     },
     user: {
       type: Schema.Types.ObjectId,
-      ref: 'Message',
+      ref: 'User',
     },
-    sent: {
+    read: {
       type: Boolean,
     },
   },
