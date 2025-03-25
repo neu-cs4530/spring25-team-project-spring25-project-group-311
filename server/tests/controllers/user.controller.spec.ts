@@ -994,7 +994,7 @@ describe('Test userController', () => {
     it('should opt a user in for browser subscriptions', async () => {
       const mockReqBody = {
         username: 'user1',
-        notifType: { type: 'browser' },
+        notifType: 'browser',
       };
 
       const browserNotifUser = {
@@ -1035,7 +1035,7 @@ describe('Test userController', () => {
     it('should opt a user in for email subscriptions', async () => {
       const mockReqBody = {
         username: 'user1',
-        notifType: { type: 'email' },
+        notifType: 'email',
       };
 
       const emailNotifUser = {
@@ -1089,7 +1089,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'user1',
-        notifType: { type: 'browser' },
+        notifType: 'browser',
       };
 
       const browserNotifUser = {
@@ -1143,7 +1143,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'user1',
-        notifType: { type: 'email' },
+        notifType: 'email',
       };
 
       const emailNotifUser = {
@@ -1192,7 +1192,7 @@ describe('Test userController', () => {
 
     it('should return a 400 error if there is no username', async () => {
       const mockReqBody = {
-        notifType: { type: 'browser' },
+        notifType: 'browser',
       };
 
       const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
@@ -1204,7 +1204,7 @@ describe('Test userController', () => {
     it('should return a 400 error if there is a blank username', async () => {
       const mockReqBody = {
         username: '',
-        notifType: { type: 'browser' },
+        notifType: 'browser',
       };
 
       const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
@@ -1227,7 +1227,7 @@ describe('Test userController', () => {
     it('should return a 500 error if there is no user associated with the given username', async () => {
       const mockReqBody = {
         username: 'user1',
-        notifType: { type: 'email' },
+        notifType: 'email',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error getting user' });
@@ -1244,7 +1244,7 @@ describe('Test userController', () => {
     it('should return a 500 error if there is an error with updating the user', async () => {
       const mockReqBody = {
         username: 'user1',
-        notifType: { type: 'browser' },
+        notifType: 'browser',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);

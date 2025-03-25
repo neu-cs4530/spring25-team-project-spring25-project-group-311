@@ -4,6 +4,7 @@ import {
   FakeSOSocket,
   GetUserNotificationRequest,
   Notification,
+  PopulatedDatabaseNotification,
   ReadNotificationRequest,
 } from '../types/types';
 import {
@@ -11,6 +12,7 @@ import {
   readNotification,
   saveNotification,
 } from '../services/notification.service';
+import { populateDocument } from '../utils/database.util';
 
 /**
  * The controller handles notification related routes.
@@ -32,7 +34,8 @@ const notificationController = (socket: FakeSOSocket) => {
     req.body.title !== '' &&
     req.body.text !== undefined &&
     req.body.text !== '' &&
-    req.body.user !== undefined;
+    req.body.user !== undefined &&
+    req.body.type !== undefined;
 
   /**
    * Handles the creation of a notification.
@@ -62,11 +65,17 @@ const notificationController = (socket: FakeSOSocket) => {
         throw new Error(result.error);
       }
 
+      const populatedNotification = await populateDocument(result._id.toString(), 'notification');
+
+      if ('error' in populatedNotification) {
+        throw new Error(populatedNotification.error);
+      }
+
       socket.emit('notificationUpdate', {
-        notification: result,
+        notification: populatedNotification as PopulatedDatabaseNotification,
         type: 'created',
       });
-      res.status(200).json(result);
+      res.status(200).json(populatedNotification);
     } catch (error) {
       res.status(500).send(`Error when saving notification: ${error}`);
     }
@@ -84,7 +93,16 @@ const notificationController = (socket: FakeSOSocket) => {
     try {
       const { username } = req.params;
       const result = await getUserNotifs(username);
-      res.status(200).json(result);
+      const populatedNotifs = await Promise.all(
+        result.map(n => populateDocument(n._id.toString(), 'notification')),
+      );
+
+      populatedNotifs.forEach(pn => {
+        if ('error' in pn) {
+          throw new Error(pn.error);
+        }
+      });
+      res.status(200).json(populatedNotifs);
     } catch (error) {
       res.status(500).send(`Error when getting user notification: ${error}`);
     }
@@ -103,11 +121,18 @@ const notificationController = (socket: FakeSOSocket) => {
       if ('error' in readNf) {
         throw Error(readNf.error);
       }
+
+      const populatedReadNf = await populateDocument(readNf._id.toString(), 'notification');
+
+      if ('error' in populatedReadNf) {
+        throw Error(populatedReadNf.error);
+      }
+
       socket.emit('notificationUpdate', {
-        notification: readNf,
+        notification: populatedReadNf as PopulatedDatabaseNotification,
         type: 'read',
       });
-      res.status(200).json(readNf);
+      res.status(200).json(populatedReadNf);
     } catch (error) {
       res.status(500).send(`Error when reading notification: ${error}`);
     }
@@ -116,6 +141,7 @@ const notificationController = (socket: FakeSOSocket) => {
   router.post('/createNotif', createNotification);
   router.get('/getUserNotifs/:username', getUserNotifications);
   router.patch('/readNotif/:notifID', readNotif);
+  return router;
 };
 
 export default notificationController;

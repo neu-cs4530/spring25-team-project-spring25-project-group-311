@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DatabaseNotification, Notification } from '@fake-stack-overflow/shared';
+import { Notification, PopulatedDatabaseNotification } from '@fake-stack-overflow/shared';
 import { ObjectId } from 'mongodb';
 import api from './config';
 
@@ -11,7 +11,7 @@ const NOTIFICATION_API_URL = `${process.env.REACT_APP_SERVER_URL}/notification`;
  * @returns A given user's notifications
  * @throws Error if there is an issue getting notifs.
  */
-const getUserNotifs = async (username: string): Promise<DatabaseNotification[]> => {
+const getUserNotifs = async (username: string): Promise<PopulatedDatabaseNotification[]> => {
   const res = await api.get(`${NOTIFICATION_API_URL}/getUserNotifs/${username}`);
   if (res.status !== 200) {
     throw new Error('Error when fetching notifications');
@@ -27,7 +27,7 @@ const getUserNotifs = async (username: string): Promise<DatabaseNotification[]> 
  */
 const createNotif = async (
   notification: Omit<Notification, 'sent'>,
-): Promise<DatabaseNotification> => {
+): Promise<PopulatedDatabaseNotification> => {
   try {
     const res = await api.post(`${NOTIFICATION_API_URL}/createNotif/`, notification);
     return res.data;
@@ -46,7 +46,7 @@ const createNotif = async (
  * @returns A read notification
  * @throws Error if there is an issue reading a notification
  */
-const readNotif = async (notifID: ObjectId): Promise<DatabaseNotification> => {
+const readNotif = async (notifID: ObjectId): Promise<PopulatedDatabaseNotification> => {
   const res = await api.patch(`${NOTIFICATION_API_URL}/readNotif/${notifID}`);
   if (res.status !== 200) {
     throw new Error('Error when fetching notifications');

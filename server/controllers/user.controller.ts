@@ -456,7 +456,7 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       let updatedUser: UserResponse;
-      if (notifType.type === 'browser') {
+      if (notifType === 'browser') {
         updatedUser = await updateUser(username, { browserNotif: !foundUser.browserNotif });
       } else {
         updatedUser = await updateUser(username, { emailNotif: !foundUser.emailNotif });

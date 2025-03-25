@@ -29,6 +29,7 @@ const notificationSchema: Schema = new Schema(
     },
     read: {
       type: Boolean,
+      default: false,
     },
   },
   { collection: 'Notification' },

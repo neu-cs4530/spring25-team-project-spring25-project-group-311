@@ -13,7 +13,7 @@ import { SafeDatabaseUser } from './user';
 export interface Notification {
   title: string;
   text: string;
-  type: 'email' | 'browser';
+  type: 'browser' | 'email';
   user: SafeDatabaseUser;
   read: boolean;
 }
@@ -27,8 +27,13 @@ export interface Notification {
  * - `user`: The user that the notificiation will be sent to.
  * - `sent`: Boolean representing whether the notification has been sent.
  */
-export interface DatabaseNotification extends Notification {
+export interface DatabaseNotification extends Omit<Notification, 'user'> {
   _id: ObjectId;
+  user: ObjectId;
+}
+
+export interface PopulatedDatabaseNotification extends Omit<DatabaseNotification, 'user'> {
+  user: SafeDatabaseUser;
 }
 
 /**
@@ -48,8 +53,8 @@ export interface CreateNotificationRequest extends Request {
   body: {
     title: string;
     text: string;
-    type: 'email' | 'browser';
-    user: User;
+    type: 'browser' | 'email';
+    user: SafeDatabaseUser;
   };
 }
 

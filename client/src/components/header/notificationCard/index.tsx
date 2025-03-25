@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.css';
 import { ObjectId } from 'mongodb';
-import { DatabaseNotification } from '../../../types/types';
+import { PopulatedDatabaseNotification } from '../../../types/types';
 
 /**
  * NotificationCard component displays information about a notification and allows the user to click on it to read it.
@@ -13,7 +13,7 @@ const NotificationCard = ({
   notification,
   handleReadNotification,
 }: {
-  notification: DatabaseNotification;
+  notification: PopulatedDatabaseNotification;
   handleReadNotification: (notifId: ObjectId | undefined) => void;
 }) => (
   <div onClick={() => handleReadNotification(notification._id)} className='notification-card'>

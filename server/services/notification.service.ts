@@ -40,6 +40,10 @@ export const getUserNotifs = async (username: string): Promise<DatabaseNotificat
     }
 
     const userNotifs = await NotificationModel.find({ user });
+    if (!userNotifs) {
+      throw Error('No notifications found');
+    }
+
     return userNotifs;
   } catch (error) {
     return [];
