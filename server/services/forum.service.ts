@@ -1,6 +1,7 @@
 // import { ObjectId } from 'mongodb';
 import ForumModel from '../models/forum.model';
 import { Forum, DatabaseForum, ForumResponse, ForumsResponse } from '../types/types';
+import { updateUser } from './user.service';
 
 /**
  * Saves a new forum to the database.
@@ -45,7 +46,6 @@ export const getForumById = async (forumId: string): Promise<ForumResponse> => {
 /**
  * Retrieves all forums from the database.
  *
- * @param {DatabaseUser} user - The user making the request (for authorization purposes).
  * @returns {Promise<ForumsResponse>} Array of forums or an error message.
  */
 export const getForumsList = async (): Promise<ForumsResponse> => {
@@ -54,5 +54,74 @@ export const getForumsList = async (): Promise<ForumsResponse> => {
     return forums;
   } catch (error) {
     return { error: `Error occurred when retrieving forums: ${error}` };
+  }
+};
+
+export const addUserToForum = async (fid: string, username: string): Promise<ForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    if (forum.members.includes(username)) {
+      return forum;
+    }
+
+    let updatedForum: DatabaseForum | null;
+    if (forum.type === 'public') {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { members: username } },
+        { new: true },
+      );
+    } else if (forum.type === 'private') {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { awaitingMembers: username } },
+        { new: true },
+      );
+    } else {
+      throw Error('Invalid forum type');
+    }
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when adding user to forum: ${error}` };
+  }
+};
+
+export const removeUserFromForum = async (
+  fid: string,
+  username: string,
+): Promise<ForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    if (!forum.members.includes(username)) {
+      return forum;
+    }
+
+    const updatedForum = await ForumModel.findOneAndUpdate(
+      { _id: fid },
+      { $pull: { members: username } },
+      { new: true },
+    );
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when removing user from forum: ${error}` };
   }
 };
