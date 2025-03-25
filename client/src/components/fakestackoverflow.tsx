@@ -20,6 +20,7 @@ import AllGamesPage from './main/games/allGamesPage';
 import GamePage from './main/games/gamePage';
 import NewForumPage from './main/newForum';
 import FocusedForumPage from './main/focusedForumPage';
+import NewForumQuestion from './main/newForumQuestion';
 
 const ProtectedRoute = ({
   user,
@@ -64,6 +65,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='/messaging/direct-message' element={<DirectMessage />} />
             <Route path='/forums' element={<ForumPage />} />
             <Route path='/forum/:fid' element={<FocusedForumPage />} />
+            <Route path='/forum/:fid/new/forum' element={<NewForumQuestion />} />
             <Route path='/new/forum' element={<NewForumPage />} />
             <Route path='/question/:qid' element={<AnswerPage />} />
             <Route path='/new/question' element={<NewQuestionPage />} />
