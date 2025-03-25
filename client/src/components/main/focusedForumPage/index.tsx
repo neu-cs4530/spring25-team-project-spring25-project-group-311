@@ -1,7 +1,7 @@
 import React from 'react';
 import { getMetaData } from '../../../tool';
 import './index.css';
-import { DatabaseForum } from '../../../types/types';
+import AskQuestionButton from '../askQuestionButton';
 import useFocusedForumPage from '../../../hooks/useFocusedForumPage';
 
 /**
@@ -16,9 +16,9 @@ const FocusedForumPage = () => {
 
   return (
     <div className='focused-forum-container'>
-      <div className='forum-header'>
-        <h1 className='forum-title'>{forum.name}</h1>
-        <div className='forum-type-badge'>{forum.type}</div>
+      <div className='space_between right_padding'>
+        <div className='bold_title'>{forum.name}</div>
+        <AskQuestionButton />
       </div>
 
       <div className='forum-details'>
