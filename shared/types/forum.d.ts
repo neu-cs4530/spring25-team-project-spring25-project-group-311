@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { ObjectId } from 'mongodb';
-import { Question } from './question';
+import { PopulatedDatabaseQuestion, Question } from './question';
 
 /**
  * Represents a forum in the database.
@@ -28,6 +28,10 @@ export interface DatabaseForum extends Omit<Forum, 'questions'> {
   questions: ObjectId[];
 }
 
+export interface PopulatedDatabaseForum extends Omit<DatabaseForum, 'questions'> {
+  questions: PopulatedDatabaseQuestion[];
+}
+
 /**
  * Express request for forum creation or modification.
  * - `body`: The forum object to be created or modified.
@@ -37,12 +41,12 @@ export interface ForumRequest extends Request {
 }
 
 /**
- * Express request for querying a forum by its id.
+ * Express request for querying a forum by its name.
  * - `forumName`: The forum name provided as a route parameter.
  */
-export interface ForumByIdRequest extends Request {
+export interface ForumByNameRequest extends Request {
   params: {
-    forumId: string;
+    forumName: string;
   };
 }
 
@@ -51,8 +55,9 @@ export interface ForumByIdRequest extends Request {
  */
 export interface ForumMembershipRequest extends Request {
   body: {
-    forumId: string;
+    fid: string;
     username: string;
+    type: 'join' | 'leave';
   };
 }
 
@@ -62,6 +67,13 @@ export interface ForumMembershipRequest extends Request {
  * - If unsuccessful, returns an error message.
  */
 export type ForumResponse = DatabaseForum | { error: string };
+
+/**
+ * Represents the populated response for forum-related operations.
+ * - If successful, returns the forum data.
+ * - If unsuccessful, returns an error message.
+ */
+export type PopulatedForumResponse = PopulatedDatabaseForum | { error: string };
 
 /**
  * Represents the response for multiple forum-related operations.
