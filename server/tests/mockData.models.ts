@@ -214,7 +214,6 @@ export const safeUser: SafeDatabaseUser = {
 export const forum: Forum = {
   name: 'forum1',
   description: 'this is a forum',
-  flairs: ['flair1'],
   createDateTime: new Date('2024-12-03'),
   createdBy: 'user1',
   moderators: ['user1'],

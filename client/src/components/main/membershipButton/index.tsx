@@ -12,7 +12,7 @@ interface MembershipButtonProps {
  * The button text and action changes based on whether the user is already a member.
  */
 const MembershipButton = ({ forumId, isMember, onMembershipChange }: MembershipButtonProps) => {
-  const { user } = useUserContext();
+  // const { user } = useUserContext();
   const [isUserMember, setIsUserMember] = useState<boolean>(isMember);
 
   useEffect(() => {
@@ -36,14 +36,12 @@ const MembershipButton = ({ forumId, isMember, onMembershipChange }: MembershipB
         if (onMembershipChange) onMembershipChange(true);
       }
     } catch (error) {
-      console.error('Error when changing forum membership:', error);
+      // console.error('Error when changing forum membership:', error);
     }
   };
 
   return (
-    <button
-      className={`${isUserMember ? 'redbtn' : 'bluebtn'}`}
-      onClick={handleMembershipChange}>
+    <button className={`${isUserMember ? 'redbtn' : 'bluebtn'}`} onClick={handleMembershipChange}>
       {isUserMember ? 'Leave Forum' : 'Join Forum'}
     </button>
   );

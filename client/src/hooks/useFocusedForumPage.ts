@@ -14,7 +14,7 @@ const useFocusedForumPage = () => {
   const { fid } = useParams();
   const navigate = useNavigate();
 
-  const { user, socket } = useUserContext();
+  const { socket } = useUserContext();
   const [forumID, setForumID] = useState<string>(fid || '');
   const [forum, setForum] = useState<DatabaseForum | null>(null);
 
@@ -35,11 +35,11 @@ const useFocusedForumPage = () => {
         const res = await getForumById(forumID);
         setForum(res || null);
       } catch (error) {
-        console.error('Error fetching forum:', error);
+        // console.error('Error fetching forum:', error);
       }
     };
 
-    fetchData().catch(e => console.log(e));
+    // fetchData().catch(e => console.log(e));
   }, [forumID]);
 
   // Listen for real-time updates to the forum

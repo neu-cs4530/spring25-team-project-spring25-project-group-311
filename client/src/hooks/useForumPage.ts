@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
-import { DatabaseForum, Forum, ForumUpdatePayload } from '../types/types';
+import { DatabaseForum, ForumUpdatePayload } from '../types/types';
 import { getForums } from '../services/forumService';
 
 /**
@@ -10,7 +10,7 @@ import { getForums } from '../services/forumService';
  * @returns setForumFilter - Function to set the filtering value of the forum search.
  */
 const useForumPage = () => {
-  const { user, socket } = useUserContext();
+  const { socket } = useUserContext();
 
   const [forumFilter, setForumFilter] = useState<string>('');
   const [forumList, setForumList] = useState<DatabaseForum[]>([]);
@@ -20,10 +20,9 @@ const useForumPage = () => {
       try {
         const forums = await getForums();
         setForumList(forums || []);
-        console.log('Forums fetched:', forums);
+        // console.log('Forums fetched:', forums);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error);
+        // console.log(error);
       }
     };
 
