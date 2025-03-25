@@ -43,18 +43,6 @@ const FocusedForumPage = () => {
           <div className='stat-label'>Questions</div>
         </div>
       </div>
-
-      {/* <div className='forum-flairs-section'>
-        <h3>Forum Flairs</h3>
-        <div className='forum-flairs'>
-          {forum.flairs.map((flair, index) => (
-            <span key={index} className='forum-flair'>
-              {flair}
-            </span>
-          ))}
-        </div>
-      </div> */}
-
       <div className='members-section'>
         <h3>Members</h3>
         <div className='members-list'>

@@ -9,12 +9,10 @@ const useNewForum = () => {
   const { user } = useUserContext();
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [flairNames, setFlairNames] = useState<string>('');
   const [type, setType] = useState<'public' | 'private'>('public');
 
   const [nameErr, setNameErr] = useState<string>('');
   const [descriptionErr, setDescriptionErr] = useState<string>('');
-  const [flairErr, setFlairErr] = useState<string>('');
 
   const validateForm = (): boolean => {
     let isValid = true;
@@ -39,44 +37,14 @@ const useNewForum = () => {
       setDescriptionErr('');
     }
 
-    const flairs = flairNames
-      .split(',')
-      .map(flair => flair.trim())
-      .filter(flair => flair !== '');
-    if (flairs.length === 0) {
-      setFlairErr('Should have at least 1 flair');
-      isValid = false;
-    } else if (flairs.length > 10) {
-      setFlairErr('Cannot have more than 10 flairs');
-      isValid = false;
-    } else {
-      for (const flair of flairs) {
-        if (flair.length > 20) {
-          setFlairErr('Flair length cannot be more than 20 characters');
-          isValid = false;
-          break;
-        }
-      }
-      if (isValid) {
-        setFlairErr('');
-      }
-    }
-
     return isValid;
   };
 
   const addForum = async () => {
     if (!validateForm()) return;
-
-    const flairs = flairNames
-      .split(',')
-      .map(flair => flair.trim())
-      .filter(flair => flair !== '');
-
     const forum: Forum = {
       name,
       description,
-      flairs,
       createdBy: user.username,
       createDateTime: new Date(),
       type,
@@ -99,13 +67,10 @@ const useNewForum = () => {
     setName,
     description,
     setDescription,
-    flairNames,
-    setFlairNames,
     type,
     setType,
     nameErr,
     descriptionErr,
-    flairErr,
     addForum,
   };
 };
