@@ -44,7 +44,7 @@ const FocusedForumPage = () => {
         </div>
       </div>
 
-      <div className='forum-flairs-section'>
+      {/* <div className='forum-flairs-section'>
         <h3>Forum Flairs</h3>
         <div className='forum-flairs'>
           {forum.flairs.map((flair, index) => (
@@ -53,7 +53,7 @@ const FocusedForumPage = () => {
             </span>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div className='members-section'>
         <h3>Members</h3>
