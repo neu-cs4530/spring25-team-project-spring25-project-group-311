@@ -1,6 +1,20 @@
 import express, { Request, Response, Router } from 'express';
-import { ForumRequest, ForumByNameRequest, FakeSOSocket } from '../types/types';
-import { saveForum, getForumById, getForumsList } from '../services/forum.service';
+import {
+  ForumRequest,
+  ForumByNameRequest,
+  FakeSOSocket,
+  ForumMembershipRequest,
+  DatabaseForum,
+  PopulatedDatabaseForum,
+  PopulatedForumResponse,
+} from '../types/types';
+import {
+  saveForum,
+  getForumById,
+  getForumsList,
+  addUserToForum,
+  removeUserFromForum,
+} from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 
 const forumController = (socket: FakeSOSocket) => {
@@ -18,9 +32,6 @@ const forumController = (socket: FakeSOSocket) => {
     req.body.name.trim() !== '' &&
     req.body.description !== undefined &&
     req.body.description.trim() !== '' &&
-    req.body.flairs !== undefined &&
-    Array.isArray(req.body.flairs) &&
-    req.body.flairs.length > 0 &&
     req.body.createdBy !== undefined &&
     req.body.createdBy.trim() !== '' &&
     req.body.type !== undefined &&
@@ -116,14 +127,36 @@ const forumController = (socket: FakeSOSocket) => {
   const getForums = async (_: Request, res: Response): Promise<void> => {
     try {
       const forums = await getForumsList();
-
-      if ('error' in forums) {
-        throw Error(forums.error);
-      }
-
       res.status(200).json(forums);
     } catch (error) {
       res.status(500).send(`Error when getting forums list: ${error}`);
+    }
+  };
+
+  const addUser = async (req: ForumMembershipRequest, res: Response): Promise<void> => {
+    if (!req.body || !req.body.fid || !req.body.username || !req.body.type) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+    const { fid, username, type } = req.body;
+    try {
+      let updatedForum: PopulatedForumResponse;
+      if (type === 'join') {
+        updatedForum = await addUserToForum(fid, username);
+      } else if (type === 'leave') {
+        updatedForum = await removeUserFromForum(fid, username);
+      } else {
+        throw new Error('Invalid type');
+      }
+
+      if ('error' in updatedForum) {
+        throw new Error(updatedForum.error);
+      }
+
+      socket.emit('forumUpdate', updatedForum as PopulatedDatabaseForum);
+      res.json(updatedForum);
+    } catch (err) {
+      res.status(500).send(`Error when adding user: ${(err as Error).message}`);
     }
   };
 
@@ -131,6 +164,7 @@ const forumController = (socket: FakeSOSocket) => {
   router.post('/create', createForum);
   router.get('/getForum/:forumName', getForum);
   router.get('/getForums', getForums);
+  router.post('/addUser', addUser);
   return router;
 };
 
