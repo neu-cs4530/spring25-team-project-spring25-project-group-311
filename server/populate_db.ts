@@ -201,6 +201,11 @@ async function userCreate(
     biography: biography ?? '',
     emails: [],
     badges: [],
+    browserNotif: false,
+    emailNotif: false,
+    questionsAsked: [],
+    answersGiven: [],
+    numUpvotesDownvotes: 0,
   };
 
   return await UserModel.create(userDetail);

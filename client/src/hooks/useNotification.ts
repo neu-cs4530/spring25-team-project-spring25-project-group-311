@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { DatabaseNotification, NotificationUpdatePayload } from '@fake-stack-overflow/shared';
+import {
+  NotificationUpdatePayload,
+  PopulatedDatabaseNotification,
+} from '@fake-stack-overflow/shared';
 import { ObjectId } from 'mongodb';
 import useUserContext from './useUserContext';
 import { getUserNotifs, readNotif } from '../services/notificationService';
@@ -11,7 +14,9 @@ import { getUserNotifs, readNotif } from '../services/notificationService';
 const useNotification = () => {
   const { user, socket } = useUserContext();
   const [showBrowserNotifs, setShowBrowserNotifs] = useState<boolean>(false);
-  const [unreadBrowserNotifs, setUnreadBrowserNotifs] = useState<DatabaseNotification[]>([]);
+  const [unreadBrowserNotifs, setUnreadBrowserNotifs] = useState<PopulatedDatabaseNotification[]>(
+    [],
+  );
   const [error, setError] = useState<string | null>(null);
 
   /**

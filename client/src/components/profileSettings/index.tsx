@@ -204,14 +204,8 @@ const ProfileSettings: React.FC = () => {
             {canEditProfile && (
               <>
                 <h4>Notifications</h4>
-                <NotificationToggleItem
-                  notifType={{ type: 'browser' }}
-                  toggleNotif={handleSubscription}
-                />
-                <NotificationToggleItem
-                  notifType={{ type: 'email' }}
-                  toggleNotif={handleSubscription}
-                />
+                <NotificationToggleItem notifType={'browser'} toggleNotif={handleSubscription} />
+                <NotificationToggleItem notifType={'email'} toggleNotif={handleSubscription} />
               </>
             )}
 
