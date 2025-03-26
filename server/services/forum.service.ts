@@ -1,17 +1,22 @@
+
 // import { ObjectId } from 'mongodb';
 import AnswerModel from '../models/answers.model';
 import CommentModel from '../models/comments.model';
 import ForumModel from '../models/forum.model';
 import QuestionModel from '../models/questions.model';
 import TagModel from '../models/tags.model';
+import ForumModel from '../models/forum.model';
+import QuestionModel from '../models/questions.model';
 import {
   Forum,
   DatabaseForum,
   ForumResponse,
-  ForumsResponse,
+  // ForumsResponse,
+  PopulatedDatabaseForum,
   PopulatedDatabaseQuestion,
+  PopulatedForumResponse,
 } from '../types/types';
-import { updateUser } from './user.service';
+
 
 /**
  * Saves a new forum to the database.
@@ -37,11 +42,11 @@ export const saveForum = async (forum: Forum): Promise<ForumResponse> => {
  * Retrieves a forum from the database by its name.
  *
  * @param {string} forumId - The name of the forum to find.
- * @returns {Promise<ForumResponse>} - Resolves with the found forum or an error message.
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
  */
-export const getForumById = async (forumId: string): Promise<ForumResponse> => {
+export const getForumById = async (forumId: string): Promise<PopulatedForumResponse> => {
   try {
-    const forum: DatabaseForum | null = await ForumModel.findOne({ _id: forumId });
+    const forum: PopulatedDatabaseForum | null = await ForumModel.findOne({ _id: forumId });
 
     if (!forum) {
       throw Error('Forum not found');
@@ -58,30 +63,28 @@ export const getForumById = async (forumId: string): Promise<ForumResponse> => {
  *
  * @returns {Promise<ForumsResponse>} Array of forums or an error message.
  */
-export const getForumsList = async (): Promise<ForumsResponse> => {
+export const getForumsList = async (): Promise<PopulatedDatabaseForum[]> => {
   try {
-    const forums: DatabaseForum[] = await ForumModel.find();
-    return forums;
-  } catch (error) {
-    return { error: `Error occurred when retrieving forums: ${error}` };
-  }
-};
-
-/**
- * Retrieves all forums associated with a user.
- * @param username The unique username of the user.
- * @returns {Promise<ForumsResponse>} Array of forums.
- */
-export const getUserForums = async (username: string): Promise<DatabaseForum[]> => {
-  try {
-    const forums: DatabaseForum[] = await ForumModel.find({ members: { $in: [username] } });
+    const forums: PopulatedDatabaseForum[] = await ForumModel.find().populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
     return forums;
   } catch (error) {
     return [];
   }
 };
 
-export const addUserToForum = async (fid: string, username: string): Promise<ForumResponse> => {
+/**
+ * Adds a user to a forum.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to add to the forum.
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const addUserToForum = async (
+  fid: string,
+  username: string,
+): Promise<PopulatedForumResponse> => {
   try {
     const forum = await getForumById(fid);
 
@@ -93,19 +96,23 @@ export const addUserToForum = async (fid: string, username: string): Promise<For
       return forum;
     }
 
-    let updatedForum: DatabaseForum | null;
+    let updatedForum: PopulatedDatabaseForum | null;
     if (forum.type === 'public') {
       updatedForum = await ForumModel.findOneAndUpdate(
         { _id: fid },
         { $addToSet: { members: username } },
         { new: true },
-      );
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
     } else if (forum.type === 'private') {
       updatedForum = await ForumModel.findOneAndUpdate(
         { _id: fid },
         { $addToSet: { awaitingMembers: username } },
         { new: true },
-      );
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
     } else {
       throw Error('Invalid forum type');
     }
@@ -120,10 +127,17 @@ export const addUserToForum = async (fid: string, username: string): Promise<For
   }
 };
 
+/**
+ * Removes a user from a forum.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to remove from  the forum.
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
 export const removeUserFromForum = async (
   fid: string,
   username: string,
-): Promise<ForumResponse> => {
+): Promise<PopulatedForumResponse> => {
   try {
     const forum = await getForumById(fid);
     if ('error' in forum) {
@@ -138,7 +152,9 @@ export const removeUserFromForum = async (
       { _id: fid },
       { $pull: { members: username } },
       { new: true },
-    );
+    ).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
 
     if (!updatedForum) {
       throw Error('Error updating forum');

@@ -15,21 +15,7 @@ describe('Forum model', () => {
     beforeEach(() => {
       mockingoose.resetAll();
     });
-
-    const forum: Forum = {
-      name: 'Forum',
-      description: 'This is a forum',
-      flairs: [],
-      createdBy: 'user123',
-      createDateTime: new Date(),
-      moderators: ['user123'],
-      members: ['user123'],
-      questions: [],
-      type: 'public',
-      awaitingMembers: [],
-      bannedMembers: [],
-    };
-
+    
     it('should return the saved user', async () => {
       const userId = new mongoose.Types.ObjectId();
       const savedForum = {
@@ -38,6 +24,20 @@ describe('Forum model', () => {
         members: [userId],
         questions: [],
       };
+
+      const forum: Forum = {
+        name: 'Forum',
+        description: 'This is a forum',
+        createdBy: 'user123',
+        createDateTime: new Date(),
+        moderators: ['user123'],
+        members: ['user123'],
+        awaitingMembers: [],
+        bannedMembers: [],
+        questions: [],
+        type: 'public',
+      };
+
       mockingoose(ForumModel).toReturn(savedForum, 'create');
 
       const newForum = (await saveForum(forum)) as DatabaseForum;
