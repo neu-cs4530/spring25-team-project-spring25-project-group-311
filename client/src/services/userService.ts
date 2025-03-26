@@ -214,6 +214,9 @@ const awardBanners = async (username: string, banners: string[]): Promise<SafeDa
   });
   if (res.status !== 200) {
     throw new Error(`Error when awarding banner ${banners}`);
+  }
+  return res.data;
+};
 /**
  * Sends out an email to the user.
  * @param username The unique username of the user.
