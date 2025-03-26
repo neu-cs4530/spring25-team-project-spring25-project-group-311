@@ -164,6 +164,17 @@ const replaceEmail = async (
   return res.data;
 };
 
+const subscribeNotifs = async (username: string, notifType: string): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/changeSubscription`, {
+    username,
+    notifType,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when changing subscriptions to notifications');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -174,4 +185,5 @@ export {
   updateBiography,
   addEmail,
   replaceEmail,
+  subscribeNotifs,
 };

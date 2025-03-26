@@ -6,7 +6,9 @@ import {
   MessageInChat,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseChat,
+  PopulatedDatabaseNotification,
   PopulatedDatabaseQuestion,
+  SafeDatabaseUser,
 } from '../types/types';
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
@@ -15,6 +17,7 @@ import CommentModel from '../models/comments.model';
 import ChatModel from '../models/chat.model';
 import UserModel from '../models/users.model';
 import MessageModel from '../models/messages.model';
+import NotificationModel from '../models/notifications.model';
 
 /**
  * Fetches and populates a question document with its related tags, answers, and comments.
@@ -50,6 +53,25 @@ const populateAnswer = async (answerID: string): Promise<PopulatedDatabaseAnswer
   const result = await AnswerModel.findOne({ _id: answerID }).populate<{
     comments: DatabaseComment[];
   }>([{ path: 'comments', model: CommentModel }]);
+
+  return result;
+};
+
+/**
+ * Fetches and populates a notification document with its related user.
+ * @param notificationID The ID of the notification to fetch.
+ * @returns {Promise<PopulatedDatabaseNotification | null>} - The populated notifcation document or null if not found.
+ */
+const populateNotification = async (
+  notificationID: string,
+): Promise<PopulatedDatabaseNotification | null> => {
+  const result = await NotificationModel.findOne({ _id: notificationID }).populate<{
+    user: SafeDatabaseUser;
+  }>([{ path: 'user', model: UserModel }]);
+
+  if (!result) {
+    throw new Error('Chat not found');
+  }
 
   return result;
 };
@@ -117,9 +139,13 @@ const populateChat = async (chatID: string): Promise<PopulatedDatabaseChat | nul
 // eslint-disable-next-line import/prefer-default-export
 export const populateDocument = async (
   id: string,
-  type: 'question' | 'answer' | 'chat',
+  type: 'question' | 'answer' | 'chat' | 'notification',
 ): Promise<
-  PopulatedDatabaseAnswer | PopulatedDatabaseChat | PopulatedDatabaseQuestion | { error: string }
+  | PopulatedDatabaseAnswer
+  | PopulatedDatabaseChat
+  | PopulatedDatabaseQuestion
+  | PopulatedDatabaseNotification
+  | { error: string }
 > => {
   try {
     if (!id) {
@@ -137,6 +163,9 @@ export const populateDocument = async (
         break;
       case 'chat':
         result = await populateChat(id);
+        break;
+      case 'notification':
+        result = await populateNotification(id);
         break;
       default:
         throw new Error('Invalid type provided.');

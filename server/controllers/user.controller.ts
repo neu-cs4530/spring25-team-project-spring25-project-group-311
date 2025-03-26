@@ -10,6 +10,8 @@ import {
   UpdateEmailRequest,
   AddEmailRequest,
   AddBadgeRequest,
+  SubscribeToNotification,
+  UserResponse,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -19,6 +21,12 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
+import {
+  getQuestionsByOrder,
+  filterQuestionsByAskedBy,
+  getUpvotesAndDownVotesBy,
+} from '../services/question.service';
+import { getAllAnswers } from '../services/answer.service';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -59,6 +67,17 @@ const userController = (socket: FakeSOSocket) => {
     req.body.newEmail.trim() !== '';
 
   /**
+   * Validates that the request body contains all required fields to change a subscription.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isChangeSubscriptionBodyValid = (req: SubscribeToNotification): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.notifType !== undefined;
+
+  /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
    * @param res The response, either returning the created user or an error.
@@ -78,6 +97,11 @@ const userController = (socket: FakeSOSocket) => {
       biography: requestUser.biography ?? '',
       emails: requestUser.emails ?? [],
       badges: [],
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [],
+      numUpvotesDownvotes: 0,
     };
 
     try {
@@ -276,9 +300,7 @@ const userController = (socket: FakeSOSocket) => {
         res.status(400).send('Invalid email');
         return;
       }
-      /**
-       * I feel like this is extra work but how do I work around the fact that updateUser wants a partial user?
-       */
+
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
@@ -369,6 +391,12 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds a badge to the user's account
+   * @param req The request containing the username and the badge to add
+   * @param res The response, either confirming the new badge or an error.
+   * @returns A promise resolving to void.
+   */
   const addBadges = async (req: AddBadgeRequest, res: Response): Promise<void> => {
     try {
       const { username, badge } = req.body;
@@ -403,6 +431,123 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Subscribes/unsubscribe a user to notifications
+   * @param req The request containing the username and the notification type
+   * @param res The response, either confirming the subscription or an error.
+   * @returns A promise resolving to void.
+   */
+  const changeNotifSubscription = async (
+    req: SubscribeToNotification,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      if (!isChangeSubscriptionBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username } = req.body;
+      const { notifType } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let updatedUser: UserResponse;
+      if (notifType === 'browser') {
+        updatedUser = await updateUser(username, { browserNotif: !foundUser.browserNotif });
+      } else {
+        updatedUser = await updateUser(username, { emailNotif: !foundUser.emailNotif });
+      }
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when changing subscription to notification: ${error}`);
+    }
+  };
+
+  /**
+   * Gets a list of all questions asked by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a list of questions or an error.
+   * @returns A promise resolving to void.
+   */
+  const getQuestionsAsked = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const allQuestions = await getQuestionsByOrder('newest');
+      const userQuestions = await filterQuestionsByAskedBy(allQuestions, username);
+      res.status(200).send(userQuestions);
+    } catch (error) {
+      res.status(500).send(`Error when getting questions asked: ${error}`);
+    }
+  };
+
+  /**
+   * Gets a list of all the answers given by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a list of answers or an error
+   * @returns A promise resolving to void.
+   */
+  const getAnswersGiven = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const allAnswers = await getAllAnswers();
+      const userAnswers = allAnswers.filter(a => a.ansBy === username);
+      res.status(200).send(userAnswers);
+    } catch (error) {
+      res.status(500).send(`Error when getting answers given: ${error}`);
+    }
+  };
+
+  /**
+   * Gets the count of all votes (up and down votes) made by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a count of votes or an error
+   * @returns A promise resolving to void.
+   */
+  const getUpvotesAndDownVotes = async (
+    req: UserByUsernameRequest,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const upAndDownVoteCount = await getUpvotesAndDownVotesBy(username);
+      res.status(200).send(upAndDownVoteCount);
+    } catch (error) {
+      res.status(500).send(`Error when getting number of up and down votes: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -414,6 +559,10 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/:currEmail/replaceEmail', replaceEmail);
   router.post('/addEmail', addEmail);
   router.post('/addBadges', addBadges);
+  router.patch('/changeSubscription', changeNotifSubscription);
+  router.get('/getQuestionsAsked', getQuestionsAsked);
+  router.get('/getAnswersGiven', getAnswersGiven);
+  router.get('/getVoteCount', getUpvotesAndDownVotes);
   return router;
 };
 

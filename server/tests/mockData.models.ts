@@ -191,6 +191,11 @@ export const user: User = {
   dateJoined: new Date('2024-12-03'),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -199,6 +204,11 @@ export const safeUser: SafeDatabaseUser = {
   dateJoined: new Date('2024-12-03'),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 export const forum: Forum = {

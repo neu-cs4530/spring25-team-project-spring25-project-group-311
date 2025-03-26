@@ -2,6 +2,7 @@ import {
   Answer,
   AnswerResponse,
   DatabaseAnswer,
+  DatabaseComment,
   DatabaseQuestion,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseQuestion,
@@ -9,6 +10,7 @@ import {
 } from '../types/types';
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
+import CommentModel from '../models/comments.model';
 
 /**
  * Records the most recent answer time for a given question based on its answers.
@@ -71,5 +73,20 @@ export const addAnswerToQuestion = async (
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };
+  }
+};
+
+/**
+ * Gets all the answers from the model.
+ * @returns {Promise<PopulatedDatabaseAnswer[]>} - A promise resolving to a list of populated questions.
+ */
+export const getAllAnswers = async (): Promise<PopulatedDatabaseAnswer[]> => {
+  try {
+    const alist: PopulatedDatabaseAnswer[] = await AnswerModel.find().populate<{
+      comments: DatabaseComment[];
+    }>([{ path: 'comments', model: CommentModel }]);
+    return alist;
+  } catch (error) {
+    return [];
   }
 };

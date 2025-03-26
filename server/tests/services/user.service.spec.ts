@@ -197,6 +197,11 @@ describe('updateUser', () => {
     dateJoined: user.dateJoined,
     emails: [],
     badges: [],
+    browserNotif: false,
+    emailNotif: false,
+    questionsAsked: [],
+    answersGiven: [],
+    numUpvotesDownvotes: 0,
   };
 
   const safeUpdatedUserWithEmails: SafeDatabaseUser = {
@@ -205,6 +210,11 @@ describe('updateUser', () => {
     dateJoined: user.dateJoined,
     emails: ['johnDoe@gmail.com', 'janeDoe@gmail.com'],
     badges: [],
+    browserNotif: false,
+    emailNotif: false,
+    questionsAsked: [],
+    answersGiven: [],
+    numUpvotesDownvotes: 0,
   };
 
   const updates: Partial<User> = {

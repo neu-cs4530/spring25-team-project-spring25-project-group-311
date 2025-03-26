@@ -30,6 +30,11 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       biography: result.biography,
       emails: [],
       badges: result.badges,
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [],
+      numUpvotesDownvotes: 0,
     };
 
     return safeUser;

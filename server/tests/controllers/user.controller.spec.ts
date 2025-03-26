@@ -10,6 +10,11 @@ const mockUser: User = {
   dateJoined: new Date('2024-12-03'),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -18,6 +23,11 @@ const mockSafeUser: SafeDatabaseUser = {
   dateJoined: new Date('2024-12-03'),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 const mockUserJSONResponse = {
@@ -26,6 +36,11 @@ const mockUserJSONResponse = {
   dateJoined: new Date('2024-12-03').toISOString(),
   emails: [],
   badges: [],
+  browserNotif: false,
+  emailNotif: false,
+  questionsAsked: [],
+  answersGiven: [],
+  numUpvotesDownvotes: 0,
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -62,6 +77,11 @@ describe('Test userController', () => {
         dateJoined: expect.any(Date),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       });
     });
 
@@ -439,6 +459,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -452,6 +477,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockUserEmailJSONResponse = {
@@ -460,6 +490,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['raisa16h21@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -546,6 +581,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -585,6 +625,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const userEmails = {
@@ -593,6 +638,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: [],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -627,6 +677,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -640,6 +695,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockUserEmailJSONResponse = {
@@ -648,6 +708,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -756,6 +821,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -779,6 +849,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['bhuiyan.r@northeastern.edu', 'emcd.ny@gmail.com'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -824,6 +899,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['emcd.ny@gmail.com', 'he.maxw@northeastern.edu'],
         badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -858,6 +938,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['eroev@gmail.com'],
         badges: ['badge1', 'badge2'],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockReqBody = {
@@ -871,6 +956,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03'),
         emails: ['eroev@gmail.com'],
         badges: ['badge1', 'badge2', 'badge3'],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       const mockUserBadgeJSONResponse = {
@@ -879,6 +969,11 @@ describe('Test userController', () => {
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: ['eroev@gmail.com'],
         badges: ['badge1', 'badge2', 'badge3'],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserBadges);
@@ -892,6 +987,276 @@ describe('Test userController', () => {
       expect(updatedUserSpy).toHaveBeenCalledWith(safeUserBadges.username, {
         badges: ['badge1', 'badge2', 'badge3'],
       });
+    });
+  });
+
+  describe('PATCH /changeSubscription', () => {
+    it('should opt a user in for browser subscriptions', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        notifType: 'browser',
+      };
+
+      const browserNotifUser = {
+        _id: mockSafeUser._id,
+        username: 'user1',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: true,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockBrowserNotifResponse = {
+        _id: browserNotifUser._id.toString(),
+        username: 'user1',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: [],
+        badges: [],
+        browserNotif: true,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
+      updatedUserSpy.mockResolvedValueOnce(browserNotifUser);
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockBrowserNotifResponse);
+    });
+
+    it('should opt a user in for email subscriptions', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        notifType: 'email',
+      };
+
+      const emailNotifUser = {
+        _id: mockSafeUser._id,
+        username: 'user1',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: true,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockBrowserNotifResponse = {
+        _id: emailNotifUser._id.toString(),
+        username: 'user1',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: true,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
+      updatedUserSpy.mockResolvedValueOnce(emailNotifUser);
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockBrowserNotifResponse);
+    });
+
+    it('should opt a user out for browser subscriptions', async () => {
+      const mockSafeUserBrowser: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user1',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: true,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockReqBody = {
+        username: 'user1',
+        notifType: 'browser',
+      };
+
+      const browserNotifUser = {
+        _id: mockSafeUserBrowser._id,
+        username: 'user1',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockBrowserNotifResponse = {
+        _id: browserNotifUser._id.toString(),
+        username: 'user1',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUserBrowser);
+      updatedUserSpy.mockResolvedValueOnce(browserNotifUser);
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockBrowserNotifResponse);
+    });
+
+    it('should opt a user out for email subscriptions', async () => {
+      const mockSafeUserEmail: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user1',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: true,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockReqBody = {
+        username: 'user1',
+        notifType: 'email',
+      };
+
+      const emailNotifUser = {
+        _id: mockSafeUserEmail._id,
+        username: 'user1',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockBrowserNotifResponse = {
+        _id: emailNotifUser._id.toString(),
+        username: 'user1',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUserEmail);
+      updatedUserSpy.mockResolvedValueOnce(emailNotifUser);
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockBrowserNotifResponse);
+    });
+
+    it('should return a 400 error if there is no request body', async () => {
+      const mockReqBody = {};
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return a 400 error if there is no username', async () => {
+      const mockReqBody = {
+        notifType: 'browser',
+      };
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return a 400 error if there is a blank username', async () => {
+      const mockReqBody = {
+        username: '',
+        notifType: 'browser',
+      };
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return a 400 error if there is no notifType', async () => {
+      const mockReqBody = {
+        username: 'user1',
+      };
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return a 500 error if there is no user associated with the given username', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        notifType: 'email',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error getting user' });
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual(
+        'Error when changing subscription to notification: Error: Error getting user',
+      );
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should return a 500 error if there is an error with updating the user', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        notifType: 'browser',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
+      updatedUserSpy.mockResolvedValueOnce({ error: 'Error when updating user' });
+
+      const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual(
+        'Error when changing subscription to notification: Error: Error when updating user',
+      );
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
     });
   });
 });

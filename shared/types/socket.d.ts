@@ -5,6 +5,7 @@ import { DatabaseForum } from './forum';
 import { PopulatedDatabaseQuestion } from './question';
 import { SafeDatabaseUser } from './user';
 import { BaseMove, GameInstance, GameInstanceID, GameMove, GameState } from './game';
+import { DatabaseNotification, PopulatedDatabaseNotification } from './notification';
 
 /**
  * Payload for an answer update event.
@@ -96,6 +97,17 @@ export interface ForumUpdatePayload {
 
 /**
  * Interface representing the payload for a game move operation, which contains:
+ * Payload for a notification update event.
+ * - `notification`: The updated notification object.
+ * - `type`: The type of modification (`'created'`, `'read'`)
+ */
+export interface NotificationUpdatePayload {
+  notification: PopulatedDatabaseNotification;
+  type: 'created' | 'read';
+}
+
+/**
+ * Interface representing the p ayload for a game move operation, which contains:
  * - `gameID`: The ID of the game being played.
  * - `move`: The move being made in the game, defined by `GameMove`.
  */
@@ -146,4 +158,5 @@ export interface ServerToClientEvents {
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
+  notificationUpdate: (notification: NotificationUpdatePayload) => void;
 }
