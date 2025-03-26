@@ -222,6 +222,4 @@ export const forum: Forum = {
   bannedMembers: [],
   questions: [],
   type: 'private',
-  awaitingMembers: [],
-  bannedMembers: [],
 };
