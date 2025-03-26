@@ -39,7 +39,7 @@ const useFocusedForumPage = () => {
       }
     };
 
-    // fetchData().catch(e => console.log(e));
+    fetchData().catch(() => {});
   }, [forumID]);
 
   // Listen for real-time updates to the forum
