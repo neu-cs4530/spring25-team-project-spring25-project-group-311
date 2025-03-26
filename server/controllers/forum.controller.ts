@@ -36,6 +36,13 @@ const forumController = (socket: FakeSOSocket) => {
     req.body.type !== undefined &&
     (req.body.type === 'public' || req.body.type === 'private');
 
+  /**
+   * Creates a forum
+   *
+   * @param req - The request containing the forum object
+   * @param res - The response, either returning the forum list or an error
+   * @returns A promise resolving to void
+   */
   const createForum = async (req: ForumRequest, res: Response): Promise<void> => {
     try {
       if (!isForumBodyValid(req)) {
@@ -132,6 +139,13 @@ const forumController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds a user to the forum
+   *
+   * @param req - The request containing the username, forumId, and type of membership change
+   * @param res - The response, either returning the forum list or an error
+   * @returns A promise resolving to void
+   */
   const addUser = async (req: ForumMembershipRequest, res: Response): Promise<void> => {
     if (!req.body || !req.body.fid || !req.body.username || !req.body.type) {
       res.status(400).send('Invalid request');
