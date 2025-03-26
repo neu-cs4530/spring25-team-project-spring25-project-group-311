@@ -8,14 +8,21 @@ import NotificationButton from './notificationButton';
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page
- * when they press Enter.
+ * when they press Enter
+ * @param userBanner - The banner color of the current user.
  */
-const Header = () => {
+const Header = ({ userBanner }: { userBanner: string }) => {
   const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
   const { user: currentUser } = useUserContext();
+
+  const getBackgroundColor = () => userBanner;
+
   const navigate = useNavigate();
   return (
-    <div id='header' className='header'>
+    <div
+      id='header'
+      className='header'
+      style={{ '--header-background': getBackgroundColor() } as React.CSSProperties}>
       <div></div>
       <div className='title'>Fake Stack Overflow</div>
       <input

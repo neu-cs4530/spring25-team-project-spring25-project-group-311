@@ -102,6 +102,17 @@ const resetPassword = async (username: string, newPassword: string): Promise<Saf
   return res.data;
 };
 
+const newActiveBanner = async (username: string, banner: string): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/newActiveBanner`, {
+    username,
+    banner,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when setting new active banner');
+  }
+  return res.data;
+};
+
 /**
  * Updates the user's biography.
  * @param username The unique username of the user
@@ -185,6 +196,27 @@ const subscribeNotifs = async (username: string, notifType: string): Promise<Saf
   return res.data;
 };
 
+const awardBadges = async (username: string, badges: string[]): Promise<SafeDatabaseUser> => {
+  const res = await api.post(`${USER_API_URL}/addBadges`, {
+    username,
+    badges,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when awarding badge');
+  }
+  return res.data;
+};
+
+const awardBanners = async (username: string, banners: string[]): Promise<SafeDatabaseUser> => {
+  const res = await api.post(`${USER_API_URL}/addBanners`, {
+    username,
+    banners,
+  });
+  if (res.status !== 200) {
+    throw new Error(`Error when awarding banner ${banners}`);
+  }
+  return res.data;
+};
 /**
  * Sends out an email to the user.
  * @param username The unique username of the user.
@@ -228,6 +260,9 @@ export {
   addEmail,
   replaceEmail,
   subscribeNotifs,
+  awardBadges,
+  awardBanners,
+  newActiveBanner,
   sendEmails,
   changeFreq,
 };

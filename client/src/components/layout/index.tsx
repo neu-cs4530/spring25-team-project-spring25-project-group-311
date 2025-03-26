@@ -6,10 +6,11 @@ import Header from '../header';
 
 /**
  * Main component represents the layout of the main page, including a sidebar and the main content area.
+ * @param userBanner - The banner color of the current user.
  */
-const Layout = () => (
+const Layout = ({ userBanner }: { userBanner: string }) => (
   <>
-    <Header />
+    <Header userBanner={userBanner} />
     <div id='main' className='main'>
       <SideBarNav />
       <div id='right_main' className='right_main'>

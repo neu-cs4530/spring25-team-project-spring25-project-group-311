@@ -8,6 +8,9 @@ import {
   addEmail,
   replaceEmail,
   subscribeNotifs,
+  awardBadges,
+  awardBanners,
+  newActiveBanner,
   sendEmails,
   changeFreq,
 } from '../services/userService';
@@ -103,6 +106,22 @@ const useProfileSettings = () => {
       setConfirmNewPassword('');
     } catch (error) {
       setErrorMessage('Failed to reset password.');
+      setSuccessMessage(null);
+    }
+  };
+
+  const handleNewSelectedBanner = async (banner: string) => {
+    if (!username) return;
+    try {
+      const updatedUser = await newActiveBanner(username, banner);
+      await new Promise(resolve => {
+        setUserData(updatedUser);
+        resolve(null);
+      });
+      setSuccessMessage('Banner updated!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to update banner.');
       setSuccessMessage(null);
     }
   };
@@ -227,6 +246,94 @@ const useProfileSettings = () => {
     }
   };
 
+  const handleAwardBadges = async () => {
+    if (!username) return;
+    try {
+      const badges = [];
+      if (
+        userData?.answersGiven &&
+        userData?.answersGiven?.length >= 100 &&
+        !userData.badges.includes('/badge_images/One_Hundred_Comments_Badge.png')
+      ) {
+        badges.push('/badge_images/One_Hundred_Comments_Badge.png');
+      } else if (
+        userData?.questionsAsked &&
+        userData?.questionsAsked?.length > 0 &&
+        !userData.badges.includes('/badge_images/First_Post_Badge.png')
+      ) {
+        badges.push('/badge_images/First_Post_Badge.png');
+      }
+      if (userData && !userData.badges.includes('/badge_images/First_Post_Badge.png')) {
+        badges.push('/badge_images/First_Post_Badge.png');
+      }
+
+      if (badges.length > 0) {
+        const updatedUser = await awardBadges(username, badges);
+        await new Promise(resolve => {
+          setUserData(updatedUser);
+          resolve(null);
+        });
+        setSuccessMessage('Badges awarded!');
+        setErrorMessage(null);
+      } else {
+        setSuccessMessage('No badges to award.');
+        setErrorMessage(null);
+      }
+    } catch (error) {
+      setErrorMessage(`Failed to award badges: ${error}`);
+      setSuccessMessage(null);
+    }
+  };
+
+  const handleAwardBanners = async () => {
+    if (!username) return;
+    try {
+      const banners = [];
+      if (
+        userData &&
+        userData.badges.includes('/badge_images/First_Post_Badge.png') &&
+        !userData.banners?.includes('lightblue')
+      ) {
+        banners.push('lightblue');
+      }
+      if (
+        userData &&
+        userData.badges.includes('/badge_images/One_Hundred_Comments_Badge.png') &&
+        !userData.banners?.includes('lightgreen')
+      ) {
+        banners.push('lightgreen');
+      }
+      if (
+        userData &&
+        userData.badges.includes('/badge_images/Daily_Challenge_Badge.png') &&
+        !userData.banners?.includes('lightyellow')
+      ) {
+        banners.push('lightyellow');
+      }
+
+      if (banners.length > 0) {
+        const updatedUser = await awardBanners(username, banners);
+        await new Promise(resolve => {
+          setUserData(updatedUser);
+          resolve(null);
+        });
+        setSuccessMessage(`Banners awarded! ${banners} added`);
+        setErrorMessage(null);
+      } else {
+        setSuccessMessage('No banners to award.');
+        setErrorMessage(null);
+      }
+    } catch (error) {
+      setErrorMessage(`Failed to award banners: ${error}`);
+      setSuccessMessage(null);
+    }
+  };
+
+  const handleRefresh = async () => {
+    handleAwardBadges();
+    handleAwardBanners();
+  };
+
   /**
    * Handler for deleting the user (triggers confirmation modal)
    */
@@ -284,6 +391,10 @@ const useProfileSettings = () => {
     handleAddEmail,
     handleReplaceEmail,
     handleSubscription,
+    handleAwardBadges,
+    handleRefresh,
+    handleAwardBanners,
+    handleNewSelectedBanner,
     handleChangeFrequency,
   };
 };
