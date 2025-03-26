@@ -12,11 +12,15 @@ import NewAnswerPage from './main/newAnswer';
 import AnswerPage from './main/answerPage';
 import MessagingPage from './main/messagingPage';
 import DirectMessage from './main/directMessage';
+import ForumPage from './main/forumPage';
 import Signup from './auth/signup';
 import UsersListPage from './main/usersListPage';
 import ProfileSettings from './profileSettings';
 import AllGamesPage from './main/games/allGamesPage';
 import GamePage from './main/games/gamePage';
+import NewForumPage from './main/newForum';
+import FocusedForumPage from './main/focusedForumPage';
+import NewForumQuestion from './main/newForumQuestion';
 
 const ProtectedRoute = ({
   user,
@@ -59,6 +63,10 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='tags' element={<TagPage />} />
             <Route path='/messaging' element={<MessagingPage />} />
             <Route path='/messaging/direct-message' element={<DirectMessage />} />
+            <Route path='/forums' element={<ForumPage />} />
+            <Route path='/forum/:fid' element={<FocusedForumPage />} />
+            <Route path='/forum/:fid/new/forum' element={<NewForumQuestion />} />
+            <Route path='/new/forum' element={<NewForumPage />} />
             <Route path='/question/:qid' element={<AnswerPage />} />
             <Route path='/new/question' element={<NewQuestionPage />} />
             <Route path='/new/answer/:qid' element={<NewAnswerPage />} />
