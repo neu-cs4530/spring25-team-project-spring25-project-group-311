@@ -66,6 +66,13 @@ export const getForumsList = async (): Promise<PopulatedDatabaseForum[]> => {
   }
 };
 
+/**
+ * Adds a user to a forum.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to add to the forum.
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
 export const addUserToForum = async (
   fid: string,
   username: string,
@@ -112,6 +119,13 @@ export const addUserToForum = async (
   }
 };
 
+/**
+ * Removes a user from a forum.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to remove from  the forum.
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
 export const removeUserFromForum = async (
   fid: string,
   username: string,
