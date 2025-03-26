@@ -12,7 +12,7 @@ import {
   awardBanners,
   newActiveBanner,
 } from '../services/userService';
-import { SafeDatabaseUser, SubscriptionType } from '../types/types';
+import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
 
 /**
@@ -194,8 +194,9 @@ const useProfileSettings = () => {
   /**
    * Handler for setting the subscription
    */
-  const handleSubscription = async (type: SubscriptionType) => {
+  const handleSubscription = async (type: string) => {
     if (!username) return;
+    if (type !== 'browser' && type !== 'email') return;
     try {
       // Await the async call to subscribe to notification
       const subscribedUser = await subscribeNotifs(username, type);

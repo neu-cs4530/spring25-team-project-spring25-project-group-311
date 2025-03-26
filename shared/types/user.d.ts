@@ -167,16 +167,6 @@ export interface AddSelectedBannerRequest extends Request {
     banner: string;
   };
 }
-
-/**
- * Represents the two types of notifications a user can have
- * - `browser`: Browser-side notifications
- * - `email`: Notifications via email
- */
-export interface SubscriptionType {
-  type: 'browser' | 'email';
-}
-
 /**
  * Express request for subscribing to notifications
  * - `username`: The username of the user to subscribe
@@ -185,6 +175,6 @@ export interface SubscriptionType {
 export interface SubscribeToNotification extends Request {
   body: {
     username: string;
-    notifType: SubscriptionType;
+    notifType: 'browser' | 'email';
   };
 }
