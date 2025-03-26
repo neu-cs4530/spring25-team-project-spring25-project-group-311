@@ -9,6 +9,7 @@ import NotificationButton from './notificationButton';
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page
  * when they press Enter.
+ * @param userBanner - The banner color of the current user.
  */
 const Header = ({ userBanner }: { userBanner: string }) => {
   const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
