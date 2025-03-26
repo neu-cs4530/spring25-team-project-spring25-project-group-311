@@ -168,7 +168,6 @@ const replaceEmail = async (
  * Subscribes/unsubscribes a user from notifications.
  * @param username The unique username of the user.
  * @param notifType The type of notification a user wants (should be browser or email)
- * @param emailFreq: Optional parameter for setting the type of frequency.
  * @returns A promsie resolving to the updated user
  * @throws Error if the request fails or if an invalid notification type is given
  */
