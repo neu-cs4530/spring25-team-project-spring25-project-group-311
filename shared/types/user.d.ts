@@ -164,6 +164,18 @@ export interface SubscribeToNotification extends Request {
 }
 
 /**
+ * Express request for changing the frequency of a notification
+ * - `username`: The username of the user whose frequency we want to change.
+ * - `frequency`: The new frequency we want to put in.
+ */
+export interface ChangeFreqRequest extends Request {
+  body: {
+    username: string;
+    frequency: 'weekly' | 'daily' | 'monthly' | 'hourly';
+  };
+}
+
+/**
  * Express request for sending an email to the user regarding their forums
  * - `username`: The username of the user to email (param)
  */

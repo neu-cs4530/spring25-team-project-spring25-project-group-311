@@ -26,6 +26,8 @@ describe('Forum model', () => {
       members: ['user123'],
       questions: [],
       type: 'public',
+      awaitingMembers: [],
+      bannedMembers: [],
     };
 
     it('should return the saved user', async () => {

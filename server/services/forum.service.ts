@@ -67,6 +67,20 @@ export const getForumsList = async (): Promise<ForumsResponse> => {
   }
 };
 
+/**
+ * Retrieves all forums associated with a user.
+ * @param username The unique username of the user.
+ * @returns {Promise<ForumsResponse>} Array of forums.
+ */
+export const getUserForums = async (username: string): Promise<DatabaseForum[]> => {
+  try {
+    const forums: DatabaseForum[] = await ForumModel.find({ members: { $in: [username] } });
+    return forums;
+  } catch (error) {
+    return [];
+  }
+};
+
 export const addUserToForum = async (fid: string, username: string): Promise<ForumResponse> => {
   try {
     const forum = await getForumById(fid);

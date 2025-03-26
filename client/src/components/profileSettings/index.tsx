@@ -42,6 +42,7 @@ const ProfileSettings: React.FC = () => {
     handleUpdateBiography,
     handleDeleteUser,
     handleSubscription,
+    handleChangeFrequency,
   } = useProfileSettings();
 
   if (loading) {
@@ -209,18 +210,35 @@ const ProfileSettings: React.FC = () => {
                 {userData.emailNotif && (
                   <div>
                     <div>
-                      <input type='radio' value='weekly' checked />
+                      <input
+                        type='radio'
+                        value='weekly'
+                        defaultChecked
+                        onClick={() => handleChangeFrequency('weekly')}
+                      />
                       <label>Weekly</label>
                     </div>
                     <div>
-                      <input type='radio' value='hourly' />
+                      <input
+                        type='radio'
+                        value='hourly'
+                        onClick={() => handleChangeFrequency('hourly')}
+                      />
                       <label>Hourly</label>
                     </div>
                     <div>
-                      <input type='radio' value='monthly' />
+                      <input
+                        type='radio'
+                        value='monthly'
+                        onClick={() => handleChangeFrequency('monthly')}
+                      />
                       <label>Monthly</label>
                       <div>
-                        <input type='radio' value='daily' />
+                        <input
+                          type='radio'
+                          value='daily'
+                          onClick={() => handleChangeFrequency('daily')}
+                        />
                         <label>Daily</label>
                       </div>
                     </div>

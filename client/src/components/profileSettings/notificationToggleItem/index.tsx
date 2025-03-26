@@ -8,7 +8,7 @@ const NotificationToggleItem = ({
   toggleNotif: (notifType: string) => void;
 }) => (
   <div className='notification-display'>
-    <p>{notifType}</p>
+    <p>{notifType === 'browser' ? 'Browser-Side Notifications' : 'Email Notifications'}</p>
     <input type='checkbox' id='showPasswordToggle' onChange={() => toggleNotif(notifType)} />
   </div>
 );
