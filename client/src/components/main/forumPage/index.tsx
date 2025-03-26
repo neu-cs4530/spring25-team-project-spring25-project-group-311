@@ -15,9 +15,11 @@ const ForumPage = () => {
   const [isSortedAsc, setIsSortedAsc] = useState(true);
   const [userSorted, setUserSorted] = useState(false);
 
+  // updates sortedForums based on chages to forumList
   useEffect(() => {
     if (!userSorted) {
       setSortedForums(prev => {
+        // check if current forum list has the same length as previous
         const sameLength = prev.length === forumList.length;
         const sameIds = prev.every((f, i) => f._id === forumList[i]?._id);
         return sameLength && sameIds ? prev : forumList;
