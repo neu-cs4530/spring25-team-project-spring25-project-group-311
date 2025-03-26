@@ -7,7 +7,7 @@ import './index.css';
 
 /**
  * NewForumPage component allows users to create a new forum with a name,
- * description, flairs, and forum type (public/private).
+ * description, and forum type (public/private).
  */
 const NewForumPage = () => {
   const {
@@ -15,13 +15,10 @@ const NewForumPage = () => {
     setName,
     description,
     setDescription,
-    flairNames,
-    setFlairNames,
     type,
     setType,
     nameErr,
     descriptionErr,
-    flairErr,
     addForum,
   } = useNewForum();
 
@@ -42,14 +39,6 @@ const NewForumPage = () => {
         val={description}
         setState={setDescription}
         err={descriptionErr}
-      />
-      <Input
-        title={'Flairs'}
-        hint={'Add flairs separated by commas'}
-        id={'formFlairInput'}
-        val={flairNames}
-        setState={setFlairNames}
-        err={flairErr}
       />
       <div className='form_type_selector'>
         <label className='form_type_label'>Forum Type:</label>
