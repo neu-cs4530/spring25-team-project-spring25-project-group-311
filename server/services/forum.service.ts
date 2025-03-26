@@ -1,12 +1,9 @@
-
 // import { ObjectId } from 'mongodb';
 import AnswerModel from '../models/answers.model';
 import CommentModel from '../models/comments.model';
 import ForumModel from '../models/forum.model';
 import QuestionModel from '../models/questions.model';
 import TagModel from '../models/tags.model';
-import ForumModel from '../models/forum.model';
-import QuestionModel from '../models/questions.model';
 import {
   Forum,
   DatabaseForum,
@@ -16,7 +13,6 @@ import {
   PopulatedDatabaseQuestion,
   PopulatedForumResponse,
 } from '../types/types';
-
 
 /**
  * Saves a new forum to the database.
@@ -68,6 +64,20 @@ export const getForumsList = async (): Promise<PopulatedDatabaseForum[]> => {
     const forums: PopulatedDatabaseForum[] = await ForumModel.find().populate<{
       questions: PopulatedDatabaseQuestion[];
     }>([{ path: 'questions', model: QuestionModel }]);
+    return forums;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Retrieves all forums associated with a user.
+ * @param username The unique username of the user.
+ * @returns {Promise<ForumsResponse>} Array of forums.
+ */
+export const getUserForums = async (username: string): Promise<DatabaseForum[]> => {
+  try {
+    const forums: DatabaseForum[] = await ForumModel.find({ members: { $in: [username] } });
     return forums;
   } catch (error) {
     return [];

@@ -31,12 +31,10 @@ const forumController = (socket: FakeSOSocket) => {
     req.body.name.trim() !== '' &&
     req.body.description !== undefined &&
     req.body.description.trim() !== '' &&
-
     req.body.createdBy !== undefined &&
     req.body.createdBy.trim() !== '' &&
     req.body.type !== undefined &&
     (req.body.type === 'public' || req.body.type === 'private');
-
 
   /**
    * Creates a forum
@@ -135,16 +133,11 @@ const forumController = (socket: FakeSOSocket) => {
   const getForums = async (_: Request, res: Response): Promise<void> => {
     try {
       const forums = await getForumsList();
-
-      if ('error' in forums) {
-        throw Error(forums.error);
-      }
       res.status(200).json(forums);
     } catch (error) {
       res.status(500).send(`Error when getting forums list: ${error}`);
     }
   };
-
 
   /**
    * Adds a user to the forum

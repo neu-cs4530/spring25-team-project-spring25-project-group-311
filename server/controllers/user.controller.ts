@@ -652,8 +652,6 @@ const userController = (socket: FakeSOSocket) => {
         transporter.sendMail(mailOptions, (error: Error) => {
           if (error) {
             throw Error('Error sending out email');
-          } else {
-            console.log('sent mail');
           }
         });
       });

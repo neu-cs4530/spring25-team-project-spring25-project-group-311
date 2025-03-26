@@ -6,7 +6,6 @@ import {
   Notification,
   PopulatedDatabaseNotification,
   ReadNotificationRequest,
-  SendEmailNotif,
 } from '../types/types';
 import {
   getUserNotifs,
