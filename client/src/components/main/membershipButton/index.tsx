@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import useUserContext from '../../../hooks/useUserContext';
 
 interface MembershipButtonProps {
   forumId: string;
@@ -12,7 +11,6 @@ interface MembershipButtonProps {
  * The button text and action changes based on whether the user is already a member.
  */
 const MembershipButton = ({ forumId, isMember, onMembershipChange }: MembershipButtonProps) => {
-  // const { user } = useUserContext();
   const [isUserMember, setIsUserMember] = useState<boolean>(isMember);
 
   useEffect(() => {
