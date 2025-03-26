@@ -5,7 +5,7 @@ import { DatabaseForum } from './forum';
 import { PopulatedDatabaseQuestion } from './question';
 import { SafeDatabaseUser } from './user';
 import { BaseMove, GameInstance, GameInstanceID, GameMove, GameState } from './game';
-import { DatabaseNotification, PopulatedDatabaseNotification } from './notification';
+import { PopulatedDatabaseNotification } from './notification';
 
 /**
  * Payload for an answer update event.

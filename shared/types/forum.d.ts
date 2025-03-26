@@ -2,7 +2,6 @@ import { Request } from 'express';
 import { ObjectId } from 'mongodb';
 import { PopulatedDatabaseQuestion, Question } from './question';
 
-
 /**
  * Represents a forum in the database.
  *
