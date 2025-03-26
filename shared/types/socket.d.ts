@@ -158,4 +158,5 @@ export interface ServerToClientEvents {
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
   notificationUpdate: (notification: NotificationUpdatePayload) => void;
+  forumUpdate: (forum: ForumUpdatePayload) => void;
 }
