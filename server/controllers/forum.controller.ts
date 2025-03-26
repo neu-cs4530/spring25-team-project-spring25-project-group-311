@@ -4,8 +4,8 @@ import {
   ForumByNameRequest,
   FakeSOSocket,
   ForumMembershipRequest,
-  PopulatedDatabaseForum,
   PopulatedForumResponse,
+  DatabaseForum,
 } from '../types/types';
 import {
   saveForum,
@@ -166,7 +166,13 @@ const forumController = (socket: FakeSOSocket) => {
         throw new Error(updatedForum.error);
       }
 
-      socket.emit('forumUpdate', updatedForum as PopulatedDatabaseForum);
+      socket.emit('forumUpdate', {
+        forum: {
+          ...updatedForum,
+          questions: updatedForum.questions.map(question => question._id),
+        } as DatabaseForum,
+        type: 'updated',
+      });
       res.json(updatedForum);
     } catch (err) {
       res.status(500).send(`Error when adding user: ${(err as Error).message}`);

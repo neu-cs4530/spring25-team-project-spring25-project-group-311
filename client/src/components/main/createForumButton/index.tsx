@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -17,11 +16,7 @@ const CreateForumButton = () => {
   };
 
   return (
-    <button
-      className='bluebtn'
-      onClick={() => {
-        handleNewQuestion();
-      }}>
+    <button className='bluebtn' onClick={handleNewQuestion}>
       Create a forum
     </button>
   );
