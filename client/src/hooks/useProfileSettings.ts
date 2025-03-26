@@ -11,6 +11,8 @@ import {
   awardBadges,
   awardBanners,
   newActiveBanner,
+  sendEmails,
+  changeFreq,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -205,6 +207,37 @@ const useProfileSettings = () => {
         resolve(null); // Resolve the promise
       });
 
+      if (type === 'email') {
+        await sendEmails(username);
+      }
+      setSuccessMessage('Subscription changed!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to change subscription.');
+      setSuccessMessage(null);
+    }
+  };
+
+  /**
+   * Handler for changing the frequency of email notification.
+   */
+  const handleChangeFrequency = async (frequency: string) => {
+    if (!username) return;
+    if (
+      frequency !== 'weekly' &&
+      frequency !== 'hourly' &&
+      frequency !== 'monthly' &&
+      frequency !== 'daily'
+    )
+      return;
+
+    try {
+      const updatedUser = await changeFreq(username, frequency);
+      await new Promise(resolve => {
+        setUserData(updatedUser); // Update the user data
+        resolve(null); // Resolve the promise
+      });
+
       setSuccessMessage('Subscription changed!');
       setErrorMessage(null);
     } catch (error) {
@@ -362,6 +395,7 @@ const useProfileSettings = () => {
     handleRefresh,
     handleAwardBanners,
     handleNewSelectedBanner,
+    handleChangeFrequency,
   };
 };
 

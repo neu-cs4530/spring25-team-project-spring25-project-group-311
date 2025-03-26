@@ -11,6 +11,8 @@ import { Schema } from 'mongoose';
  * - `createdBy`: The user who created the forum.
  * - `createDateTime`: The date and time when the forum was created.
  * - `moderators`: An array of references to Users who moderate the forum.
+ * - `awaitingMembers` : An array of references to Users who are awaiting a moderator join approval.
+ * - `bannedMembers` : An array of references to Users who are banned by forum moderators.
  * - `members`: An array of references to Users who are members of the forum.
  * - `questions`: An array of references to Questions posted in the forum.
  * - `type`: The type of forum, either 'public' or 'private'.
@@ -33,8 +35,10 @@ const forumSchema: Schema = new Schema(
     createDateTime: {
       type: Date,
     },
-    moderators: [{ String }],
-    members: [{ String }],
+    moderators: [{ type: String }],
+    members: [{ type: String }],
+    awaitingMembers: [{ type: String }],
+    bannedMembers: [{ type: String }],
     questions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
     type: {
       type: String,

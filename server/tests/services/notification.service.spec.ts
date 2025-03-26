@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { DatabaseNotification } from '@fake-stack-overflow/shared';
 import { ObjectId } from 'mongodb';
 import NotificationModel from '../../models/notifications.model';

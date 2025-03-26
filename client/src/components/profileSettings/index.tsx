@@ -44,6 +44,7 @@ const ProfileSettings: React.FC = () => {
     handleSubscription,
     handleRefresh,
     handleNewSelectedBanner,
+    handleChangeFrequency,
   } = useProfileSettings();
 
   if (loading) {
@@ -271,6 +272,35 @@ const ProfileSettings: React.FC = () => {
                 <h4>Notifications</h4>
                 <NotificationToggleItem notifType={'browser'} toggleNotif={handleSubscription} />
                 <NotificationToggleItem notifType={'email'} toggleNotif={handleSubscription} />
+                {userData.emailNotif && (
+                  <div>
+                    <div>
+                      <input
+                        type='radio'
+                        value='weekly'
+                        defaultChecked
+                        onClick={() => handleChangeFrequency('weekly')}
+                      />
+                      <label>Weekly</label>
+                    </div>
+                    <div>
+                      <input
+                        type='radio'
+                        value='hourly'
+                        onClick={() => handleChangeFrequency('hourly')}
+                      />
+                      <label>Hourly</label>
+                    </div>
+                    <div>
+                      <input
+                        type='radio'
+                        value='daily'
+                        onClick={() => handleChangeFrequency('daily')}
+                      />
+                      <label>Daily</label>
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
