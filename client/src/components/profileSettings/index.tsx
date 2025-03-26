@@ -229,18 +229,10 @@ const ProfileSettings: React.FC = () => {
                     <div>
                       <input
                         type='radio'
-                        value='monthly'
-                        onClick={() => handleChangeFrequency('monthly')}
+                        value='daily'
+                        onClick={() => handleChangeFrequency('daily')}
                       />
-                      <label>Monthly</label>
-                      <div>
-                        <input
-                          type='radio'
-                          value='daily'
-                          onClick={() => handleChangeFrequency('daily')}
-                        />
-                        <label>Daily</label>
-                      </div>
+                      <label>Daily</label>
                     </div>
                   </div>
                 )}

@@ -205,12 +205,7 @@ const sendEmails = async (username: string): Promise<void> => {
  * @param emailFreq The frequency of the email.
  */
 const changeFreq = async (username: string, emailFreq: string): Promise<SafeDatabaseUser> => {
-  if (
-    emailFreq !== 'weekly' &&
-    emailFreq !== 'monthly' &&
-    emailFreq !== 'daily' &&
-    emailFreq !== 'hourly'
-  ) {
+  if (emailFreq !== 'weekly' && emailFreq !== 'daily' && emailFreq !== 'hourly') {
     throw new Error('Not a valid notification type');
   }
   const res = await api.patch(`${USER_API_URL}/changeFrequency`, {

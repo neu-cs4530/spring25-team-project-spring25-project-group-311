@@ -636,13 +636,10 @@ const userController = (socket: FakeSOSocket) => {
       let howOftenToSend;
       switch (foundUser.emailFrequency) {
         case 'weekly':
-          howOftenToSend = '53 0 * * 3';
+          howOftenToSend = '25 9 * * 3';
           break;
         case 'daily':
           howOftenToSend = '30 18 * * *';
-          break;
-        case 'monthly':
-          howOftenToSend = '30 18 1 * *';
           break;
         case 'hourly':
           howOftenToSend = '30 * * * *';
