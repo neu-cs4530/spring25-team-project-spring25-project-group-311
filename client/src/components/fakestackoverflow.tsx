@@ -52,7 +52,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
           <Route
             element={
               <ProtectedRoute user={user} socket={socket}>
-                <Layout userBadges={user ? user.badges : ['badge1']} />
+                <Layout userBanner={user?.selectedBanner ?? '#dddddd'} />
               </ProtectedRoute>
             }>
             <Route path='/home' element={<QuestionPage />} />

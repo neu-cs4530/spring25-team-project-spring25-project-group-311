@@ -10,6 +10,8 @@ import {
   UpdateEmailRequest,
   AddEmailRequest,
   AddBadgeRequest,
+  AddBannerRequest,
+  AddSelectedBannerRequest,
   SubscribeToNotification,
   UserResponse,
 } from '../types/types';
@@ -97,6 +99,7 @@ const userController = (socket: FakeSOSocket) => {
       biography: requestUser.biography ?? '',
       emails: requestUser.emails ?? [],
       badges: [],
+      banners: [],
       browserNotif: false,
       emailNotif: false,
       questionsAsked: [],
@@ -399,7 +402,7 @@ const userController = (socket: FakeSOSocket) => {
    */
   const addBadges = async (req: AddBadgeRequest, res: Response): Promise<void> => {
     try {
-      const { username, badge } = req.body;
+      const { username, badges } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
@@ -407,12 +410,12 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       const userBadges = foundUser.badges;
-      if (userBadges.includes(badge)) {
-        res.status(400).send('Badge already associated with this user');
+      if (badges.some(badge => userBadges.includes(badge))) {
+        res.status(400).send('Badge(s) already associated with this user');
         return;
       }
 
-      userBadges.push(badge);
+      userBadges.push(...badges);
 
       const updatedUser = await updateUser(username, { badges: userBadges });
       if ('error' in updatedUser) {
@@ -428,6 +431,71 @@ const userController = (socket: FakeSOSocket) => {
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when adding user badge: ${error}`);
+    }
+  };
+
+  const addBanners = async (req: AddBannerRequest, res: Response): Promise<void> => {
+    try {
+      const { username, banners } = req.body;
+
+      if (!Array.isArray(banners) || banners.length === 0) {
+        res.status(400).send(`Invalid banner data: ${banners}`);
+        return;
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userBanners = foundUser.banners ?? [];
+      if (userBanners.length !== 0 && banners.some(banner1 => userBanners.includes(banner1))) {
+        res.status(400).send('Banner(s) already associated with this user');
+        return;
+      }
+
+      userBanners.push(...banners);
+
+      const updatedUser = await updateUser(username, { banners: userBanners });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding user banner: ${error}`);
+    }
+  };
+
+  const addSelectedBanner = async (req: AddSelectedBannerRequest, res: Response): Promise<void> => {
+    try {
+      const { username, banner } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const updatedUser = await updateUser(username, { selectedBanner: banner });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding selected banner: ${error}`);
     }
   };
 
@@ -559,6 +627,8 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/:currEmail/replaceEmail', replaceEmail);
   router.post('/addEmail', addEmail);
   router.post('/addBadges', addBadges);
+  router.post('/addBanners', addBanners);
+  router.post('/addSelectedBanner', addSelectedBanner);
   router.patch('/changeSubscription', changeNotifSubscription);
   router.get('/getQuestionsAsked', getQuestionsAsked);
   router.get('/getAnswersGiven', getAnswersGiven);

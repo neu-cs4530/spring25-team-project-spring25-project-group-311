@@ -7,9 +7,9 @@ import Header from '../header';
 /**
  * Main component represents the layout of the main page, including a sidebar and the main content area.
  */
-const Layout = ({ userBadges }: { userBadges: string[] }) => (
+const Layout = ({ userBanner }: { userBanner: string }) => (
   <>
-    <Header userBadges={userBadges} />
+    <Header userBanner={userBanner} />
     <div id='main' className='main'>
       <SideBarNav />
       <div id='right_main' className='right_main'>

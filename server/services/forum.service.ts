@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import ForumModel from '../models/forum.model';
 import { Forum, DatabaseForum, ForumResponse } from '../types/types';
 

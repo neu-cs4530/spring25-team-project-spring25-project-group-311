@@ -21,6 +21,8 @@ export interface UserCredentials {
  * - `biography`: A short description or bio of the user (optional).
  * - `emails`: A list of emails provided by the user.
  * - `badges`: A list of badges earned by the user.
+ * - `banners`: A list of banner images for the user (optional).
+ * - `selectedBanner`: The selected banner image for the user (optional).
  * - `browserNotif`: A boolean representing whether the user has opted for browser notifications
  * - `emailNotif`: A boolean representing whether the user has opted for email notifications
  * - `questionsAsked`: A list of questions asked by the user
@@ -32,6 +34,8 @@ export interface User extends UserCredentials {
   biography?: string;
   emails: string[];
   badges: string[];
+  banners?: string[];
+  selectedBanner?: string;
   browserNotif: boolean;
   emailNotif: boolean;
   questionsAsked: Question[];
@@ -146,7 +150,21 @@ export interface UpdateEmailRequest extends AddEmailRequest {
 export interface AddBadgeRequest extends Request {
   body: {
     username: string;
-    badge: string;
+    badges: string[];
+  };
+}
+
+export interface AddBannerRequest extends Request {
+  body: {
+    username: string;
+    banners: string[];
+  };
+}
+
+export interface AddSelectedBannerRequest extends Request {
+  body: {
+    username: string;
+    banner: string;
   };
 }
 
