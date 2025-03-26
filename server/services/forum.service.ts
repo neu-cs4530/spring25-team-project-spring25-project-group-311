@@ -1,5 +1,9 @@
+// import { ObjectId } from 'mongodb';
+import AnswerModel from '../models/answers.model';
+import CommentModel from '../models/comments.model';
 import ForumModel from '../models/forum.model';
 import QuestionModel from '../models/questions.model';
+import TagModel from '../models/tags.model';
 import {
   Forum,
   DatabaseForum,
@@ -60,6 +64,20 @@ export const getForumsList = async (): Promise<PopulatedDatabaseForum[]> => {
     const forums: PopulatedDatabaseForum[] = await ForumModel.find().populate<{
       questions: PopulatedDatabaseQuestion[];
     }>([{ path: 'questions', model: QuestionModel }]);
+    return forums;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Retrieves all forums associated with a user.
+ * @param username The unique username of the user.
+ * @returns {Promise<ForumsResponse>} Array of forums.
+ */
+export const getUserForums = async (username: string): Promise<DatabaseForum[]> => {
+  try {
+    const forums: DatabaseForum[] = await ForumModel.find({ members: { $in: [username] } });
     return forums;
   } catch (error) {
     return [];
@@ -155,5 +173,51 @@ export const removeUserFromForum = async (
     return updatedForum;
   } catch (error) {
     return { error: `Error occurred when removing user from forum: ${error}` };
+  }
+};
+
+/**
+ * Generates the top 5 posts for a given forum
+ * @param forumName the name of the forum we want to get the top 5 posts from.
+ * @returns {Promise<PopulatedDatabaseQuestion[]>} - Resolves with a list of populated database questions
+ */
+export const getTopFivePosts = async (forumName: string): Promise<PopulatedDatabaseQuestion[]> => {
+  try {
+    const forum = await ForumModel.findOne({ name: forumName }).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([
+      {
+        path: 'questions',
+        model: QuestionModel,
+        populate: { path: 'answers', model: AnswerModel },
+      },
+      {
+        path: 'questions',
+        model: QuestionModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      {
+        path: 'questions',
+        model: QuestionModel,
+        populate: { path: 'tags', model: TagModel },
+      },
+    ]);
+
+    if (!forum) {
+      throw Error('Forum not found');
+    }
+
+    const forumPosts = forum.questions.sort((a, b) => {
+      if (a.upVotes > b.upVotes) {
+        return 1;
+      }
+      if (a.upVotes < b.upVotes) {
+        return -1;
+      }
+      return 0;
+    });
+    return forumPosts.slice(0, 5);
+  } catch (error) {
+    return [];
   }
 };

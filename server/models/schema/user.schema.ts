@@ -40,6 +40,7 @@ const userSchema: Schema = new Schema(
     emailNotif: {
       type: Boolean,
     },
+    emailFrequency: { type: String, default: 'weekly' },
     questionsAsked: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
     answersGiven: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
     numUpvotesDownvotes: {
