@@ -6,7 +6,11 @@ import {
   ForumMembershipRequest,
   PopulatedForumResponse,
   DatabaseForum,
+  AddQuestionRequest,
+  AddForumQuestionRequest,
+  Question,
 } from '../types/types';
+import { isQuestionBodyValid } from '../controllers/question.controller';
 import {
   saveForum,
   getForumById,
@@ -179,11 +183,43 @@ const forumController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds a new question to a forum in the database. The question request and question are
+   * validated and then saved. If successful, the question is associated with the corresponding
+   * forum. If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The QuestionRequest object containing the forum ID and question data.
+   * @param res The HTTP response object used to send back the result of the operation.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const addQuestion = async (req: AddForumQuestionRequest, res: Response): Promise<void> => {
+    if (!req.body || !req.body.fid || !req.body.question) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    if (!isQuestionBodyValid(req.body.question)) {
+      res.status(400).send('Invalid question');
+      return;
+    }
+
+    const { fid } = req.body;
+    const qInfo: Question = req.body.question;
+
+    try {
+      
+    }
+
+
+  }
+
   // Define routes for the forum-related operations
   router.post('/create', createForum);
   router.get('/getForum/:forumName', getForum);
   router.get('/getForums', getForums);
   router.post('/addUser', addUser);
+  router.post('/addQuestion', addQuestion);
   return router;
 };
 

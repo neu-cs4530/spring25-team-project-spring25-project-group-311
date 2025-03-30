@@ -1,4 +1,3 @@
-// import { ObjectId } from 'mongodb';
 import AnswerModel from '../models/answers.model';
 import CommentModel from '../models/comments.model';
 import ForumModel from '../models/forum.model';
@@ -106,7 +105,11 @@ export const addUserToForum = async (
       throw new Error(forum.error);
     }
 
-    if (forum.members.includes(username)) {
+    if (
+      forum.members.includes(username) ||
+      forum.awaitingMembers.includes(username) ||
+      forum.bannedMembers.includes(username)
+    ) {
       return forum;
     }
 
@@ -141,6 +144,13 @@ export const addUserToForum = async (
   }
 };
 
+/**
+ * Adds a question to a specified forum.
+ *
+ * @param {string} fid - The ID of the forum to which the question will be added
+ * @param {DatabaseQuestion} question - The question object to be added to the forum
+ * @returns A promise that resolves to a populated forum response or an error object
+ */
 export const addQuestionToForum = async (
   fid: string,
   question: DatabaseQuestion,
