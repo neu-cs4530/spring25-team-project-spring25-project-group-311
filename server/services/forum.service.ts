@@ -11,7 +11,14 @@ import {
   PopulatedDatabaseQuestion,
   PopulatedForumResponse,
   DatabaseQuestion,
+  OrderType,
 } from '../types/types';
+import {
+  sortQuestionsByActive,
+  sortQuestionsByMostViews,
+  sortQuestionsByNewest,
+  sortQuestionsByUnanswered,
+} from '../utils/sort.util';
 
 /**
  * Saves a new forum to the database.
@@ -22,11 +29,6 @@ import {
 export const saveForum = async (forum: Forum): Promise<ForumResponse> => {
   try {
     const result: DatabaseForum = await ForumModel.create(forum);
-
-    if (!result) {
-      throw Error('Failed to create forum');
-    }
-
     return result;
   } catch (error) {
     return { error: `Error occurred when saving forum: ${error}` };
@@ -145,7 +147,7 @@ export const addUserToForum = async (
 };
 
 /**
- * Adds a question to a specified forum.
+ * Creates and adds a question to a specified forum.
  *
  * @param {string} fid - The ID of the forum to which the question will be added
  * @param {DatabaseQuestion} question - The question object to be added to the forum
@@ -170,9 +172,12 @@ export const addQuestionToForum = async (
     ) {
       throw new Error('Invalid question');
     }
+
+    const questionResult: DatabaseQuestion = await QuestionModel.create(question);
+
     const result: PopulatedDatabaseForum | null = await ForumModel.findOneAndUpdate(
       { _id: fid },
-      { $push: { questions: { $each: [question._id], $position: 0 } } },
+      { $push: { questions: { $each: [questionResult._id], $position: 0 } } },
       { new: true },
     ).populate<{
       questions: PopulatedDatabaseQuestion[];
@@ -223,6 +228,43 @@ export const removeUserFromForum = async (
     return updatedForum;
   } catch (error) {
     return { error: `Error occurred when removing user from forum: ${error}` };
+  }
+};
+
+/**
+ * Retrieves questions of a forumordered by specified criteria.
+ * @param {OrderType} order - The order type to filter the questions
+ * @param {string} fid - The forum from which to return the questions
+ * @returns {Promise<Question[]>} - The ordered list of questions
+ */
+export const getForumQuestionsByOrder = async (
+  order: OrderType,
+  fid: string,
+): Promise<PopulatedDatabaseQuestion[]> => {
+  try {
+    const forum = await ForumModel.findOne({ _id: fid }).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
+
+    if (!forum) {
+      return [];
+    }
+
+    const qlist = forum.questions;
+
+    switch (order) {
+      case 'active':
+        return sortQuestionsByActive(qlist);
+      case 'unanswered':
+        return sortQuestionsByUnanswered(qlist);
+      case 'newest':
+        return sortQuestionsByNewest(qlist);
+      case 'mostViewed':
+      default:
+        return sortQuestionsByMostViews(qlist);
+    }
+  } catch (error) {
+    return [];
   }
 };
 
