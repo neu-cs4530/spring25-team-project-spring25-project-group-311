@@ -16,7 +16,7 @@ describe('Forum model', () => {
       mockingoose.resetAll();
     });
 
-    it('should return the saved user', async () => {
+    it('should return the saved forum', async () => {
       const userId = new mongoose.Types.ObjectId();
       const savedForum = {
         _id: new mongoose.Types.ObjectId(),

@@ -8,10 +8,10 @@ import {
   Forum,
   DatabaseForum,
   ForumResponse,
-  // ForumsResponse,
   PopulatedDatabaseForum,
   PopulatedDatabaseQuestion,
   PopulatedForumResponse,
+  DatabaseQuestion,
 } from '../types/types';
 
 /**
@@ -42,7 +42,11 @@ export const saveForum = async (forum: Forum): Promise<ForumResponse> => {
  */
 export const getForumById = async (forumId: string): Promise<PopulatedForumResponse> => {
   try {
-    const forum: PopulatedDatabaseForum | null = await ForumModel.findOne({ _id: forumId });
+    const forum: PopulatedDatabaseForum | null = await ForumModel.findOne({
+      _id: forumId,
+    }).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
 
     if (!forum) {
       throw Error('Forum not found');
@@ -134,6 +138,42 @@ export const addUserToForum = async (
     return updatedForum;
   } catch (error) {
     return { error: `Error occurred when adding user to forum: ${error}` };
+  }
+};
+
+export const addQuestionToForum = async (
+  fid: string,
+  question: DatabaseQuestion,
+): Promise<PopulatedForumResponse> => {
+  try {
+    if (
+      question.title !== undefined &&
+      question.title !== '' &&
+      question.text !== undefined &&
+      question.text !== '' &&
+      question.tags !== undefined &&
+      question.tags.length > 0 &&
+      question.askedBy !== undefined &&
+      question.askedBy !== '' &&
+      question.askDateTime !== undefined &&
+      question.askDateTime !== null
+    ) {
+      throw new Error('Invalid question');
+    }
+    const result: PopulatedDatabaseForum | null = await ForumModel.findOneAndUpdate(
+      { _id: fid },
+      { $push: { questions: { $each: [question._id], $position: 0 } } },
+      { new: true },
+    ).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
+
+    if (result === null) {
+      throw new Error('Error when adding question to forum');
+    }
+    return result;
+  } catch (error) {
+    return { error: 'Error when adding question to forum' };
   }
 };
 
