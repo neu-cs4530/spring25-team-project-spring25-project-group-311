@@ -6,19 +6,21 @@ import {
   ForumMembershipRequest,
   PopulatedForumResponse,
   DatabaseForum,
-  AddQuestionRequest,
   AddForumQuestionRequest,
   Question,
+  PopulatedDatabaseForum,
 } from '../types/types';
-import { isQuestionBodyValid } from '../controllers/question.controller';
 import {
   saveForum,
   getForumById,
   getForumsList,
   addUserToForum,
   removeUserFromForum,
+  addQuestionToForum,
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
+import { saveQuestion } from '../services/question.service';
+import { populateDocument } from '../utils/database.util';
 
 const forumController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -93,7 +95,7 @@ const forumController = (socket: FakeSOSocket) => {
         type: 'created',
       });
 
-      res.status(201).json(result);
+      res.status(200).json(result);
     } catch (error) {
       res.status(500).send(`Error when creating forum: ${error}`);
     }
@@ -199,20 +201,50 @@ const forumController = (socket: FakeSOSocket) => {
       return;
     }
 
-    if (!isQuestionBodyValid(req.body.question)) {
+    // checking if the question is valid
+    if (
+      !(
+        req.body.question.title !== undefined &&
+        req.body.question.title !== '' &&
+        req.body.question.text !== undefined &&
+        req.body.question.text !== '' &&
+        req.body.question.tags !== undefined &&
+        req.body.question.tags.length > 0 &&
+        req.body.question.askedBy !== undefined &&
+        req.body.question.askedBy !== '' &&
+        req.body.question.askDateTime !== undefined &&
+        req.body.question.askDateTime !== null
+      )
+    ) {
       res.status(400).send('Invalid question');
       return;
     }
 
     const { fid } = req.body;
-    const qInfo: Question = req.body.question;
+    const questionInfo: Question = req.body.question;
 
     try {
-      
+      const questionFromDb = await saveQuestion(questionInfo);
+
+      if ('error' in questionFromDb) {
+        throw new Error(questionFromDb.error as string);
+      }
+
+      const result = await addQuestionToForum(fid, questionFromDb);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error as string);
+      }
+
+      socket.emit('forumUpdate', {
+        forum: result,
+        type: 'updated',
+      });
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(500).send(`Error when adding question: ${(err as Error).message}`);
     }
-
-
-  }
+  };
 
   // Define routes for the forum-related operations
   router.post('/create', createForum);
