@@ -4,6 +4,7 @@ import useHeader from '../../hooks/useHeader';
 import './index.css';
 import useUserContext from '../../hooks/useUserContext';
 import NotificationButton from './notificationButton';
+import { useHeaderContext } from '../../contexts/HeaderContext';
 
 /**
  * Header component that renders the main title and a search bar.
@@ -14,6 +15,7 @@ import NotificationButton from './notificationButton';
 const Header = ({ userBanner }: { userBanner: string }) => {
   const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
   const { user: currentUser } = useUserContext();
+  const { headerBackground } = useHeaderContext();
 
   const getBackgroundColor = () => userBanner;
 
@@ -22,7 +24,7 @@ const Header = ({ userBanner }: { userBanner: string }) => {
     <div
       id='header'
       className='header'
-      style={{ '--header-background': getBackgroundColor() } as React.CSSProperties}>
+      style={{ '--header-background': headerBackground } as React.CSSProperties}>
       <div></div>
       <div className='title'>Fake Stack Overflow</div>
       <input

@@ -3,6 +3,7 @@ import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import NotificationToggleItem from './notificationToggleItem';
+import { useHeaderContext } from '../../contexts/HeaderContext';
 
 const ProfileSettings: React.FC = () => {
   const {
@@ -43,9 +44,12 @@ const ProfileSettings: React.FC = () => {
     handleDeleteUser,
     handleSubscription,
     handleRefresh,
+    handleAddNewBanner,
     handleNewSelectedBanner,
     handleChangeFrequency,
   } = useProfileSettings();
+
+  const { setHeaderBackground } = useHeaderContext();
 
   if (loading) {
     return (
@@ -131,7 +135,7 @@ const ProfileSettings: React.FC = () => {
                     <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
                       <img src={img} style={{ width: '100px', height: '100px' }} />
                       <button
-                        className='pin-button'
+                        className='login-button'
                         style={{ display: 'block', marginTop: '0.5rem' }}
                         // Pinning a badge to the user's profile
                         onClick={() => {
@@ -166,20 +170,63 @@ const ProfileSettings: React.FC = () => {
             {/* ---- Banners Section ---- */}
             {
               <div style={{ margin: '1rem 0' }}>
-                {' '}
-                Banners
+                <h4>Your Banners</h4>
                 <p>
                   {userData.banners?.map(img => (
                     <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
                       <button
-                        className='pin-button'
-                        style={{ display: 'block', marginTop: '0.5rem' }}
-                        color={img}
+                        className='login-button'
+                        style={{
+                          display: 'block',
+                          marginTop: '0.5rem',
+                          backgroundColor: img,
+                          width: '60px',
+                          height: '30px',
+                        }}
                         onClick={() => {
                           handleNewSelectedBanner(img);
-                        }}>
-                        {img}
-                      </button>
+                          setHeaderBackground(img);
+                        }}></button>
+                    </div>
+                  ))}
+                </p>
+              </div>
+            }
+            {
+              <div style={{ margin: '1rem 0' }}>
+                <h4>Store</h4>
+                <p>
+                  {['red', 'black', 'yellow', 'purple'].map(color => (
+                    <div
+                      key={color}
+                      style={{ display: 'inline-block', marginRight: '1rem', textAlign: 'center' }}>
+                      <div>
+                        <div
+                          className='badge'
+                          style={{
+                            backgroundColor: color,
+                            width: '60px',
+                            height: '30px',
+                            margin: '0 auto',
+                          }}></div>
+                        {userData.badges.length > 0 && (
+                          <button
+                            className='login-button'
+                            style={{
+                              width: '60px',
+                              height: '30px',
+                              marginTop: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            onClick={() => {
+                              handleAddNewBanner(color);
+                            }}>
+                            Buy
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </p>

@@ -334,6 +334,20 @@ const useProfileSettings = () => {
     handleAwardBanners();
   };
 
+  const handleAddNewBanner = async (banner: string) => {
+    if (!username) return;
+    try {
+      const updatedUser = await awardBanners(username, [banner]);
+      await new Promise(resolve => {
+        setUserData(updatedUser);
+        resolve(null);
+      });
+    } catch (error) {
+      setErrorMessage(`Failed to award banner: ${error}`);
+      setSuccessMessage(null);
+    }
+  };
+
   /**
    * Handler for deleting the user (triggers confirmation modal)
    */
@@ -396,6 +410,7 @@ const useProfileSettings = () => {
     handleAwardBanners,
     handleNewSelectedBanner,
     handleChangeFrequency,
+    handleAddNewBanner,
   };
 };
 

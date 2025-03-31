@@ -103,7 +103,7 @@ const resetPassword = async (username: string, newPassword: string): Promise<Saf
 };
 
 const newActiveBanner = async (username: string, banner: string): Promise<SafeDatabaseUser> => {
-  const res = await api.patch(`${USER_API_URL}/newActiveBanner`, {
+  const res = await api.post(`${USER_API_URL}/addSelectedBanner`, {
     username,
     banner,
   });
