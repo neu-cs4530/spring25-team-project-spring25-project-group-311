@@ -209,31 +209,27 @@ const ProfileSettings: React.FC = () => {
                 <NotificationToggleItem notifType={'email'} toggleNotif={handleSubscription} />
                 {userData.emailNotif && (
                   <div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='weekly'
-                        defaultChecked
-                        onClick={() => handleChangeFrequency('weekly')}
-                      />
-                      <label>Weekly</label>
-                    </div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='hourly'
-                        onClick={() => handleChangeFrequency('hourly')}
-                      />
-                      <label>Hourly</label>
-                    </div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='daily'
-                        onClick={() => handleChangeFrequency('daily')}
-                      />
-                      <label>Daily</label>
-                    </div>
+                    <input
+                      type='radio'
+                      value='weekly'
+                      checked={userData.emailFrequency === 'weekly'}
+                      onClick={() => handleChangeFrequency('weekly')}
+                    />
+                    <label>Weekly</label>
+                    <input
+                      type='radio'
+                      value='hourly'
+                      checked={userData.emailFrequency === 'hourly'}
+                      onClick={() => handleChangeFrequency('hourly')}
+                    />
+                    <label>Hourly</label>
+                    <input
+                      type='radio'
+                      value='daily'
+                      checked={userData.emailFrequency === 'daily'}
+                      onClick={() => handleChangeFrequency('daily')}
+                    />
+                    <label>Daily</label>
                   </div>
                 )}
               </>

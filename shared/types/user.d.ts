@@ -171,7 +171,7 @@ export interface SubscribeToNotification extends Request {
 export interface ChangeFreqRequest extends Request {
   body: {
     username: string;
-    frequency: 'weekly' | 'daily' | 'hourly';
+    emailFreq: 'weekly' | 'daily' | 'hourly';
   };
 }
 

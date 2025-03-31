@@ -12,7 +12,6 @@ import {
   AddBadgeRequest,
   SubscribeToNotification,
   UserResponse,
-  SendEmailNotif,
   ChangeFreqRequest,
 } from '../types/types';
 import {
@@ -29,12 +28,6 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
-import { getTopFivePosts, getUserForums } from '../services/forum.service';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const schedule = require('node-schedule');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const nodemailer = require('nodemailer');
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -94,15 +87,8 @@ const userController = (socket: FakeSOSocket) => {
     req.body !== undefined &&
     req.body.username !== undefined &&
     req.body.username.trim() !== '' &&
-    req.body.frequency !== undefined;
+    req.body.emailFreq !== undefined;
 
-  /**
-   * Validates that the request body contains all required fields to send the email to the user.
-   * @param req The incoming request containing user data.
-   * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
-   */
-  const isSendEmailNotifBodyValid = (req: SendEmailNotif): boolean =>
-    req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
   /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
@@ -469,7 +455,7 @@ const userController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     try {
       if (!isChangeSubscriptionBodyValid(req)) {
-        res.status(400).send('Invalid user body');
+        res.status(400).send(`Invalid user body`);
         return;
       }
 
@@ -579,89 +565,6 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Sends out an email to the user regarding the top 5 posts in each of their forum.
-   * @param req The request containing the username
-   * @param res The response, either providing the email sent or an error
-   * @returns A promise resolving to void.
-   */
-  const sendEmail = async (req: SendEmailNotif, res: Response): Promise<void> => {
-    try {
-      if (!isSendEmailNotifBodyValid(req)) {
-        res.status(400).send('Invalid user body');
-      }
-
-      const { username } = req.body;
-
-      const foundUser = await getUserByUsername(username);
-      if ('error' in foundUser) {
-        throw Error(foundUser.error);
-      }
-
-      if (!foundUser.emailNotif) {
-        throw Error('User not subscribed to email notifs');
-      }
-
-      const allUserForums = await getUserForums(foundUser.username);
-      const topFivePostsPerForum = await Promise.all(
-        allUserForums.map(f => getTopFivePosts(f.name)),
-      );
-
-      const transporter = nodemailer.createTransport({
-        service: 'Gmail',
-        auth: {
-          user: 'raisa16h21@gmail.com',
-          pass: 'uqby iszq gtfa chld',
-        },
-      });
-
-      let forumItems = '';
-      topFivePostsPerForum.forEach(forum => {
-        forum.forEach(post => {
-          forumItems += `<li>${post.title}</li><ul>`;
-          post.answers.forEach(answer => {
-            forumItems += `<li>${answer.text}</li>`;
-          });
-          forumItems += `</ul>`;
-        });
-      });
-
-      // Email content
-      const mailOptions = {
-        from: 'raisa16h21@gmail.com',
-        to: foundUser.emails[0],
-        subject: 'FakeStackOverflow Email Digest',
-        text: forumItems,
-      };
-
-      let howOftenToSend;
-      switch (foundUser.emailFrequency) {
-        case 'weekly':
-          howOftenToSend = '25 9 * * 3';
-          break;
-        case 'daily':
-          howOftenToSend = '30 18 * * *';
-          break;
-        case 'hourly':
-          howOftenToSend = '30 * * * *';
-          break;
-        default:
-          throw Error('not a valid frequency');
-      }
-
-      const email = schedule.scheduleJob(howOftenToSend, () => {
-        transporter.sendMail(mailOptions, (error: Error) => {
-          if (error) {
-            throw Error('Error sending out email');
-          }
-        });
-      });
-      res.status(200).send(email);
-    } catch (error) {
-      res.status(500).send(`Error when sending email : ${error}`);
-    }
-  };
-
-  /**
    * Changes the frequency of a user's email notifications.
    * @param req The request containing the username and the frequency
    * @param res The response, either providing the updated user or an error
@@ -670,16 +573,17 @@ const userController = (socket: FakeSOSocket) => {
     try {
       if (!isChangeFreqBodyValid(req)) {
         res.status(400).send('Invalid user body');
+        return;
       }
 
-      const { username, frequency } = req.body;
+      const { username, emailFreq } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
 
-      const updatedUser = await updateUser(username, { emailFrequency: frequency });
+      const updatedUser = await updateUser(username, { emailFrequency: emailFreq });
 
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
@@ -711,7 +615,6 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getQuestionsAsked', getQuestionsAsked);
   router.get('/getAnswersGiven', getAnswersGiven);
   router.get('/getVoteCount', getUpvotesAndDownVotes);
-  router.post('/sendEmail', sendEmail);
   router.patch('/changeFrequency', changeFrequency);
   return router;
 };

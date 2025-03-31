@@ -21,6 +21,8 @@ import chatController from './controllers/chat.controller';
 import gameController from './controllers/game.controller';
 import readStatusController from './controllers/readStatus.controller';
 import notificationController from './controllers/notification.controller';
+import { getUsersList } from './services/user.service';
+import sendEmail from './services/email.service';
 
 dotenv.config();
 
@@ -34,6 +36,9 @@ const socket: FakeSOSocket = new Server(server, {
   cors: { origin: '*' },
 });
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const schedule = require('node-schedule');
+
 function connectDatabase() {
   return mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
 }
@@ -43,6 +48,71 @@ function startServer() {
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
+}
+
+/**
+ * Schedules all the hourly email jobs
+ */
+async function scheduleHourlyEmails() {
+  try {
+    const allUsers = await getUsersList();
+    if ('error' in allUsers) {
+      throw Error('error getting users');
+    }
+    allUsers.forEach(user => {
+      if (user.emailNotif && user.emailFrequency == 'hourly') {
+        schedule.scheduleJob('13 * * * *', async () => {
+          console.log('Hourly email sending scheduled.');
+          await sendEmail(user.username);
+        });
+      }
+    });
+  } catch (error) {
+    console.log('Error sending emails');
+  }
+}
+
+/**
+ * Schedules all the hourly email jobs
+ */
+async function scheduleDailyEmails() {
+  try {
+    const allUsers = await getUsersList();
+    if ('error' in allUsers) {
+      throw Error('error getting users');
+    }
+    allUsers.forEach(user => {
+      if (user.emailNotif && user.emailFrequency == 'daily') {
+        schedule.scheduleJob('30 18 * * *', async () => {
+          await sendEmail(user.username);
+        });
+      }
+    });
+  } catch (error) {
+    console.log('Error sending emails');
+  }
+}
+
+/**
+ * Schedules all the hourly email jobs
+ */
+async function scheduleWeeklyEmails() {
+  try {
+    const allUsers = await getUsersList();
+    if ('error' in allUsers) {
+      throw Error('error getting users');
+    }
+    allUsers.forEach(user => {
+      if (user.emailNotif && user.emailFrequency == 'weekly') {
+        schedule.scheduleJob('16 15 * * 5', async () => {
+          await sendEmail(user.username);
+        });
+        console.log('woo');
+      }
+    });
+  } catch (error) {
+    console.log('Error sending emails');
+  }
 }
 
 socket.on('connection', socket => {
@@ -79,7 +149,7 @@ app.get('/', (_: Request, res: Response) => {
 
 app.use('/question', questionController(socket));
 app.use('/tag', tagController());
-app.use('/forum', forumController(socket))
+app.use('/forum', forumController(socket));
 app.use('/answer', answerController(socket));
 app.use('/comment', commentController(socket));
 app.use('/messaging', messageController(socket));
@@ -90,4 +160,11 @@ app.use('/read-status', readStatusController());
 app.use('/notification', notificationController(socket));
 
 // Export the app instance
-export { app, server, startServer };
+export {
+  app,
+  server,
+  startServer,
+  scheduleHourlyEmails,
+  scheduleDailyEmails,
+  scheduleWeeklyEmails,
+};

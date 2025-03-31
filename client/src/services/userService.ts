@@ -186,19 +186,6 @@ const subscribeNotifs = async (username: string, notifType: string): Promise<Saf
 };
 
 /**
- * Sends out an email to the user.
- * @param username The unique username of the user.
- */
-const sendEmails = async (username: string): Promise<void> => {
-  const res = await api.post(`${USER_API_URL}/sendEmail`, {
-    username,
-  });
-  if (res.status !== 200) {
-    throw new Error('Error when changing subscriptions to notifications');
-  }
-};
-
-/**
  * Changes the frequency of the email notification
  * @param username The unique username of the user.
  * @param emailFreq The frequency of the email.
@@ -228,6 +215,5 @@ export {
   addEmail,
   replaceEmail,
   subscribeNotifs,
-  sendEmails,
   changeFreq,
 };
