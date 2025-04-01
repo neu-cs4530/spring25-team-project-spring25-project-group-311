@@ -8,7 +8,6 @@ import {
   DatabaseForum,
   AddForumQuestionRequest,
   Question,
-  PopulatedDatabaseForum,
 } from '../types/types';
 import {
   saveForum,
@@ -20,7 +19,7 @@ import {
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveQuestion } from '../services/question.service';
-import { populateDocument } from '../utils/database.util';
+import { processTags } from '../services/tag.service';
 
 const forumController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -146,13 +145,16 @@ const forumController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Adds a user to the forum
+   * Adds or removes a user to the forum
    *
    * @param req - The request containing the username, forumId, and type of membership change
    * @param res - The response, either returning the forum list or an error
    * @returns A promise resolving to void
    */
-  const addUser = async (req: ForumMembershipRequest, res: Response): Promise<void> => {
+  const toggleUserMembership = async (
+    req: ForumMembershipRequest,
+    res: Response,
+  ): Promise<void> => {
     if (!req.body || !req.body.fid || !req.body.username || !req.body.type) {
       res.status(400).send('Invalid request');
       return;
@@ -181,7 +183,7 @@ const forumController = (socket: FakeSOSocket) => {
       });
       res.json(updatedForum);
     } catch (err) {
-      res.status(500).send(`Error when adding user: ${(err as Error).message}`);
+      res.status(500).send(`Error when updating user membership: ${(err as Error).message}`);
     }
   };
 
@@ -224,7 +226,16 @@ const forumController = (socket: FakeSOSocket) => {
     const questionInfo: Question = req.body.question;
 
     try {
-      const questionFromDb = await saveQuestion(questionInfo);
+      const questionWithTags = {
+        ...questionInfo,
+        tags: await processTags(questionInfo.tags),
+      };
+
+      if (questionWithTags.tags.length === 0) {
+        throw new Error('Invalid tags');
+      }
+
+      const questionFromDb = await saveQuestion(questionWithTags);
 
       if ('error' in questionFromDb) {
         throw new Error(questionFromDb.error as string);
@@ -250,7 +261,7 @@ const forumController = (socket: FakeSOSocket) => {
   router.post('/create', createForum);
   router.get('/getForum/:forumName', getForum);
   router.get('/getForums', getForums);
-  router.post('/addUser', addUser);
+  router.post('/toggleUserMembership', toggleUserMembership);
   router.post('/addQuestion', addQuestion);
   return router;
 };

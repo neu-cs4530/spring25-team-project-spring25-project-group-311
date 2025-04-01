@@ -12,6 +12,7 @@ import {
   PopulatedForumResponse,
   DatabaseQuestion,
   OrderType,
+  Question,
 } from '../types/types';
 import {
   sortQuestionsByActive,
@@ -159,25 +160,25 @@ export const addQuestionToForum = async (
 ): Promise<PopulatedForumResponse> => {
   try {
     if (
-      question.title !== undefined &&
-      question.title !== '' &&
-      question.text !== undefined &&
-      question.text !== '' &&
-      question.tags !== undefined &&
-      question.tags.length > 0 &&
-      question.askedBy !== undefined &&
-      question.askedBy !== '' &&
-      question.askDateTime !== undefined &&
-      question.askDateTime !== null
+      !(
+        question.title !== undefined &&
+        question.title !== '' &&
+        question.text !== undefined &&
+        question.text !== '' &&
+        question.tags !== undefined &&
+        question.tags.length > 0 &&
+        question.askedBy !== undefined &&
+        question.askedBy !== '' &&
+        question.askDateTime !== undefined &&
+        question.askDateTime !== null
+      )
     ) {
       throw new Error('Invalid question');
     }
 
-    const questionResult: DatabaseQuestion = await QuestionModel.create(question);
-
     const result: PopulatedDatabaseForum | null = await ForumModel.findOneAndUpdate(
       { _id: fid },
-      { $push: { questions: { $each: [questionResult._id], $position: 0 } } },
+      { $push: { questions: { $each: [question._id], $position: 0 } } },
       { new: true },
     ).populate<{
       questions: PopulatedDatabaseQuestion[];
