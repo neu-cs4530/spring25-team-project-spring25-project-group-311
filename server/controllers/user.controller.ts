@@ -14,7 +14,6 @@ import {
   AddSelectedBannerRequest,
   SubscribeToNotification,
   UserResponse,
-  SendEmailNotif,
   ChangeFreqRequest,
 } from '../types/types';
 import {
@@ -31,7 +30,6 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
-import { getTopFivePosts, getUserForums } from '../services/forum.service';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -102,15 +100,8 @@ const userController = (socket: FakeSOSocket) => {
     req.body !== undefined &&
     req.body.username !== undefined &&
     req.body.username.trim() !== '' &&
-    req.body.frequency !== undefined;
+    req.body.emailFreq !== undefined;
 
-  /**
-   * Validates that the request body contains all required fields to send the email to the user.
-   * @param req The incoming request containing user data.
-   * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
-   */
-  const isSendEmailNotifBodyValid = (req: SendEmailNotif): boolean =>
-    req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
   /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
@@ -543,7 +534,7 @@ const userController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     try {
       if (!isChangeSubscriptionBodyValid(req)) {
-        res.status(400).send('Invalid user body');
+        res.status(400).send(`Invalid user body`);
         return;
       }
 
@@ -661,16 +652,17 @@ const userController = (socket: FakeSOSocket) => {
     try {
       if (!isChangeFreqBodyValid(req)) {
         res.status(400).send('Invalid user body');
+        return;
       }
 
-      const { username, frequency } = req.body;
+      const { username, emailFreq } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
 
-      const updatedUser = await updateUser(username, { emailFrequency: frequency });
+      const updatedUser = await updateUser(username, { emailFrequency: emailFreq });
 
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);

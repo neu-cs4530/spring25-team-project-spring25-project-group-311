@@ -6,6 +6,7 @@ import {
   MessageInChat,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseChat,
+  PopulatedDatabaseForum,
   PopulatedDatabaseNotification,
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
@@ -18,6 +19,7 @@ import ChatModel from '../models/chat.model';
 import UserModel from '../models/users.model';
 import MessageModel from '../models/messages.model';
 import NotificationModel from '../models/notifications.model';
+import ForumModel from '../models/forum.model';
 
 /**
  * Fetches and populates a question document with its related tags, answers, and comments.
@@ -53,6 +55,19 @@ const populateAnswer = async (answerID: string): Promise<PopulatedDatabaseAnswer
   const result = await AnswerModel.findOne({ _id: answerID }).populate<{
     comments: DatabaseComment[];
   }>([{ path: 'comments', model: CommentModel }]);
+
+  return result;
+};
+
+/**
+ * Fetches and populates a forum document with its related questions.
+ * @param {string} forumId - The ID of the forum to fetch
+ * @returns {Promise<PopulatedDatabaseForum | null>} - The populated forum document, or null if not found.
+ */
+const populateForum = async (forumId: string): Promise<PopulatedDatabaseForum | null> => {
+  const result = await ForumModel.findOne({ _id: forumId }).populate<{
+    questions: PopulatedDatabaseQuestion[];
+  }>([{ path: 'questions', model: QuestionModel }]);
 
   return result;
 };
@@ -139,12 +154,13 @@ const populateChat = async (chatID: string): Promise<PopulatedDatabaseChat | nul
 // eslint-disable-next-line import/prefer-default-export
 export const populateDocument = async (
   id: string,
-  type: 'question' | 'answer' | 'chat' | 'notification',
+  type: 'question' | 'answer' | 'chat' | 'notification' | 'forum',
 ): Promise<
   | PopulatedDatabaseAnswer
   | PopulatedDatabaseChat
   | PopulatedDatabaseQuestion
   | PopulatedDatabaseNotification
+  | PopulatedDatabaseForum
   | { error: string }
 > => {
   try {
@@ -166,6 +182,9 @@ export const populateDocument = async (
         break;
       case 'notification':
         result = await populateNotification(id);
+        break;
+      case 'forum':
+        result = await populateForum(id);
         break;
       default:
         throw new Error('Invalid type provided.');

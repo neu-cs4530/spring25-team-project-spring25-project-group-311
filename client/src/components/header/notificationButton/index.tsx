@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaBell } from 'react-icons/fa';
 import useNotification from '../../../hooks/useNotification';
 import './index.css';
 import NotificationCard from '../notificationCard';
@@ -19,13 +18,16 @@ const NotificationButton = () => {
 
   return (
     <>
-      {error && <div className='direct-message-error'>{error}</div>}
-      <div>
-        <FaBell
-          style={unreadBrowserNotifs.length > 0 ? { color: 'red' } : { color: 'blue' }}
-          onClick={() => setShowBrowserNotifs(show => !show)}></FaBell>
+      {error && <div className='notif-error'>{error}</div>}
+      <div className='notif-section'>
+        <button
+          className='dropdown-button'
+          data-toggle='dropdown'
+          onClick={() => setShowBrowserNotifs(prev => !prev)}>
+          Notifications
+        </button>
         {showBrowserNotifs && (
-          <div className='browser-notif-list'>
+          <div>
             {unreadBrowserNotifs.map(bNotif => (
               <NotificationCard
                 key={String(bNotif._id)}

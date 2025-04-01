@@ -121,6 +121,18 @@ export interface AddQuestionRequest extends Request {
 }
 
 /**
+ * Interface for the request body when adding a new question to a forum.
+ * - `fid`: The unqiue identified of the forum where the question is being added.
+ * - `question`: The question being added.
+ */
+export interface AddForumQuestionRequest extends Request {
+  body: {
+    fid: string;
+    question: Question;
+  };
+}
+
+/**
  * Interface for the request body when upvoting or downvoting a question.
  * - `qid`: The unique identifier of the question being voted on (body).
  * - `username`: The username of the user casting the vote (body).
