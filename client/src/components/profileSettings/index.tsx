@@ -3,6 +3,7 @@ import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import NotificationToggleItem from './notificationToggleItem';
+import { useHeaderContext } from '../../contexts/HeaderContext';
 
 const ProfileSettings: React.FC = () => {
   const {
@@ -42,8 +43,13 @@ const ProfileSettings: React.FC = () => {
     handleUpdateBiography,
     handleDeleteUser,
     handleSubscription,
+    handleRefresh,
+    handleAddNewBanner,
+    handleNewSelectedBanner,
     handleChangeFrequency,
   } = useProfileSettings();
+
+  const { setHeaderBackground } = useHeaderContext();
 
   if (loading) {
     return (
@@ -63,6 +69,13 @@ const ProfileSettings: React.FC = () => {
         {errorMessage && <p className='error-message'>{errorMessage}</p>}
         {userData ? (
           <>
+            <button
+              className='login-button'
+              onClick={() => {
+                handleRefresh();
+              }}>
+              Refresh
+            </button>
             <h4>General Information</h4>
             <p>
               <strong>Username:</strong> {userData.username}
@@ -116,10 +129,109 @@ const ProfileSettings: React.FC = () => {
 
             {/* ---- Badges Section ---- */}
             {userData.badges.length > 0 && (
-              <p>
-                <strong>Badges:</strong> {userData.badges.join(', ')}
-              </p>
+              <div style={{ margin: '1rem 0' }}>
+                <p>
+                  {userData.badges.map(img => (
+                    <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
+                      <img src={img} style={{ width: '100px', height: '100px' }} />
+                      <button
+                        className='login-button'
+                        style={{ display: 'block', marginTop: '0.5rem' }}
+                        // Pinning a badge to the user's profile
+                        onClick={() => {
+                          // finds the first strong element in the document (which is the username)
+                          const usernameElement = document.querySelector('p strong');
+                          if (usernameElement) {
+                            // Remove any previously pinned badge
+                            const existingPinnedBadge =
+                              usernameElement.parentNode?.querySelector('img[alt="Pinned badge"]');
+                            if (existingPinnedBadge) {
+                              existingPinnedBadge.remove();
+                            }
+
+                            // Add the new pinned badge
+                            const pinnedBadge = document.createElement('img');
+                            pinnedBadge.src = img;
+                            pinnedBadge.alt = 'Pinned badge';
+                            pinnedBadge.style.marginLeft = '1rem';
+                            pinnedBadge.style.height = '75px';
+                            pinnedBadge.style.width = '75px';
+                            usernameElement.parentNode?.appendChild(pinnedBadge);
+                          }
+                        }}>
+                        Pin
+                      </button>
+                    </div>
+                  ))}
+                </p>
+              </div>
             )}
+
+            {/* ---- Banners Section ---- */}
+            {
+              <div style={{ margin: '1rem 0' }}>
+                <h4>Your Banners</h4>
+                <p>
+                  {userData.banners?.map(img => (
+                    <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
+                      <button
+                        className='login-button'
+                        style={{
+                          display: 'block',
+                          marginTop: '0.5rem',
+                          backgroundColor: img,
+                          width: '60px',
+                          height: '30px',
+                        }}
+                        onClick={() => {
+                          handleNewSelectedBanner(img);
+                          setHeaderBackground(img);
+                        }}></button>
+                    </div>
+                  ))}
+                </p>
+              </div>
+            }
+            {
+              <div style={{ margin: '1rem 0' }}>
+                <h4>Store</h4>
+                <p>
+                  {['red', 'orange', 'yellow', 'purple'].map(color => (
+                    <div
+                      key={color}
+                      style={{ display: 'inline-block', marginRight: '1rem', textAlign: 'center' }}>
+                      <div>
+                        <div
+                          className='badge'
+                          style={{
+                            backgroundColor: color,
+                            width: '60px',
+                            height: '30px',
+                            margin: '0 auto',
+                          }}></div>
+                        {userData.badges.length > 0 && (
+                          <button
+                            className='login-button'
+                            style={{
+                              width: '60px',
+                              height: '30px',
+                              marginTop: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            onClick={() => {
+                              handleAddNewBanner(color);
+                            }}>
+                            Buy
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </p>
+              </div>
+            }
 
             {/* ---- Email Section ---- */}
             {!addEmailMode && !replaceEmailMode && (

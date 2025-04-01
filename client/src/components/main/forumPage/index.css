@@ -1,0 +1,35 @@
+.button-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: right;
+    padding-right: 20px;
+}
+
+.bluebtn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.greybtn {
+    background-color: gray;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}

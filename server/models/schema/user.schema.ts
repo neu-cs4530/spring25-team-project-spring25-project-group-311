@@ -34,6 +34,14 @@ const userSchema: Schema = new Schema(
       type: [String],
       default: [],
     },
+    banners: {
+      type: [String],
+      default: [],
+    },
+    selectedBanner: {
+      type: String,
+      default: '#dddddd',
+    },
     browserNotif: {
       type: Boolean,
     },
