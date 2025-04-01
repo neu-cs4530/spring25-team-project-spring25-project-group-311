@@ -11,7 +11,6 @@ import {
   awardBadges,
   awardBanners,
   newActiveBanner,
-  sendEmails,
   changeFreq,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';

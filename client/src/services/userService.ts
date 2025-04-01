@@ -250,6 +250,5 @@ export {
   awardBadges,
   awardBanners,
   newActiveBanner,
-  sendEmails,
   changeFreq,
 };
