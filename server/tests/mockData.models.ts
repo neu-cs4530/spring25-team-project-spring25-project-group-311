@@ -7,7 +7,8 @@ import {
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
   User,
-  Forum,
+  PopulatedDatabaseForum,
+  DatabaseForum,
 } from '../types/types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 
@@ -211,7 +212,8 @@ export const safeUser: SafeDatabaseUser = {
   numUpvotesDownvotes: 0,
 };
 
-export const forum: Forum = {
+export const databaseForum: DatabaseForum = {
+  _id: new ObjectId('67e9aed01b2ac4c63eb92ab0'),
   name: 'forum1',
   description: 'this is a forum',
   createDateTime: new Date('2024-12-03'),
@@ -220,6 +222,20 @@ export const forum: Forum = {
   members: ['user1'],
   awaitingMembers: [],
   bannedMembers: [],
-  questions: [],
+  questions: [POPULATED_QUESTIONS[0]._id],
+  type: 'private',
+};
+
+export const populatedDatabaseForum: PopulatedDatabaseForum = {
+  _id: new ObjectId('67e9aed01b2ac4c63eb92ab0'),
+  name: 'forum1',
+  description: 'this is a forum',
+  createDateTime: new Date('2024-12-03'),
+  createdBy: 'user1',
+  moderators: ['user1'],
+  members: ['user1'],
+  awaitingMembers: [],
+  bannedMembers: [],
+  questions: [POPULATED_QUESTIONS[0]],
   type: 'private',
 };

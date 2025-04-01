@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { validateHyperlink } from '../tool';
 import { addQuestion } from '../services/questionService';
 import useUserContext from './useUserContext';
@@ -19,6 +19,7 @@ import { Question } from '../types/types';
 const useNewQuestion = () => {
   const navigate = useNavigate();
   const { user } = useUserContext();
+  const { fid } = useParams();
   const [title, setTitle] = useState<string>('');
   const [text, setText] = useState<string>('');
   const [tagNames, setTagNames] = useState<string>('');
@@ -104,10 +105,17 @@ const useNewQuestion = () => {
       comments: [],
     };
 
-    const res = await addQuestion(question);
+    let res;
+    if (!fid) {
+      res = await addQuestion(question);
+    } else {
+      res = await addQuestion(question, fid);
+    }
 
-    if (res && res._id) {
+    if (res && res._id && !fid) {
       navigate('/home');
+    } else if (res && res._id && fid) {
+      navigate(`/forum/${fid}`);
     }
   };
 

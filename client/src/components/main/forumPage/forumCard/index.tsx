@@ -46,7 +46,7 @@ const ForumView = ({ forum }: ForumProps) => {
         <div className='forum_creator'>{forum.createdBy}</div>
         <div>&nbsp;</div>
         <div className='forum_meta'>created {getMetaData(new Date(forum.createDateTime))}</div>
-        <div className='forum_type'>{forum.type}</div>
+        <div className='forum_type'>({forum.type})</div>
       </div>
     </div>
   );
