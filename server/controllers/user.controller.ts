@@ -70,9 +70,20 @@ const userController = (socket: FakeSOSocket) => {
     req.body.newEmail.trim() !== '';
 
   /**
+   * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
+   * and does it have an @ symbol and ends with a . something)?
+   * @param em The email to validate
+   * @returns `true` if the email is valid; otherwise, `false`.
+   */
+  const isEmailValid = (em: string): boolean => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(em);
+  };
+
+  /**
    * Validates that the request body contains all required fields to change a subscription.
-   * @param req The incoming request containing user data.
-   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   * @param req The incoming request containing user data. d
+   * @returns `true` if the body contains valid user fields; otherwise, `false`cd.
    */
   const isChangeSubscriptionBodyValid = (req: SubscribeToNotification): boolean =>
     req.body !== undefined &&
@@ -309,10 +320,10 @@ const userController = (socket: FakeSOSocket) => {
 
       const { username, newEmail } = req.body;
 
-      const validateEmail = await validate(newEmail);
+      const validateEmail = await isEmailValid(newEmail);
 
-      if (!validateEmail.valid) {
-        res.status(400).send('Invalid email');
+      if (!validateEmail) {
+        res.status(400).send(`Invalid email`);
         return;
       }
 
