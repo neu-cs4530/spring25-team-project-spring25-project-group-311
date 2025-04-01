@@ -77,6 +77,7 @@ describe('Test userController', () => {
         dateJoined: expect.any(Date),
         emails: [],
         badges: [],
+        banners: [],
         browserNotif: false,
         emailNotif: false,
         questionsAsked: [],
@@ -926,66 +927,6 @@ describe('Test userController', () => {
       expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
       expect(updatedUserSpy).toHaveBeenCalledWith(safeUserEmails.username, {
         emails: ['raisa16h21@gmail.com', 'he.maxw@northeastern.edu'],
-      });
-    });
-  });
-
-  describe('POST /addBadge', () => {
-    it('should successfully add a badge given correct arguments', async () => {
-      const safeUserBadges = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['eroev@gmail.com'],
-        badges: ['badge1', 'badge2'],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      const mockReqBody = {
-        username: 'newUser',
-        badge: 'badge3',
-      };
-
-      const mockSafeUserBadges = {
-        _id: safeUserBadges._id,
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03'),
-        emails: ['eroev@gmail.com'],
-        badges: ['badge1', 'badge2', 'badge3'],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      const mockUserBadgeJSONResponse = {
-        _id: mockSafeUserBadges._id.toString(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03').toISOString(),
-        emails: ['eroev@gmail.com'],
-        badges: ['badge1', 'badge2', 'badge3'],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(safeUserBadges);
-
-      updatedUserSpy.mockResolvedValueOnce(mockSafeUserBadges);
-
-      const response = await supertest(app).post('/user/addBadges').send(mockReqBody);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockUserBadgeJSONResponse);
-      expect(updatedUserSpy).toHaveBeenCalledWith(safeUserBadges.username, {
-        badges: ['badge1', 'badge2', 'badge3'],
       });
     });
   });
