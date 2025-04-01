@@ -4,6 +4,7 @@ import useHeader from '../../hooks/useHeader';
 import './index.css';
 import useUserContext from '../../hooks/useUserContext';
 import NotificationButton from './notificationButton';
+import { useHeaderContext } from '../../contexts/HeaderContext';
 
 /**
  * Header component that renders the main title and a search bar.
@@ -11,18 +12,17 @@ import NotificationButton from './notificationButton';
  * when they press Enter
  * @param userBanner - The banner color of the current user.
  */
-const Header = ({ userBanner }: { userBanner: string }) => {
+const Header = () => {
   const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
   const { user: currentUser } = useUserContext();
-
-  const getBackgroundColor = () => userBanner;
+  const { headerBackground } = useHeaderContext();
 
   const navigate = useNavigate();
   return (
     <div
       id='header'
       className='header'
-      style={{ '--header-background': getBackgroundColor() } as React.CSSProperties}>
+      style={{ '--header-background': headerBackground } as React.CSSProperties}>
       <div></div>
       <div className='title'>Fake Stack Overflow</div>
       <input
