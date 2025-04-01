@@ -12,7 +12,6 @@ import {
   PopulatedForumResponse,
   DatabaseQuestion,
   OrderType,
-  Question,
 } from '../types/types';
 import {
   sortQuestionsByActive,

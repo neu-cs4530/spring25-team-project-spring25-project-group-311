@@ -1,5 +1,4 @@
 import React from 'react';
-import { getMetaData } from '../../../tool';
 import './index.css';
 import AskQuestionButton from '../askQuestionButton';
 import useFocusedForumPage from '../../../hooks/useFocusedForumPage';
