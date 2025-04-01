@@ -2,7 +2,6 @@ import React from 'react';
 import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
-import NotificationToggleItem from './notificationToggleItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
 
 const ProfileSettings: React.FC = () => {
@@ -317,8 +316,22 @@ const ProfileSettings: React.FC = () => {
             {canEditProfile && (
               <>
                 <h4>Notifications</h4>
-                <NotificationToggleItem notifType={'browser'} toggleNotif={handleSubscription} />
-                <NotificationToggleItem notifType={'email'} toggleNotif={handleSubscription} />
+                <div className='notification-display'>
+                  <p>Browser-Side Notifications</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.browserNotif}
+                    onChange={() => handleSubscription}
+                  />
+                </div>
+                <div className='notification-display'>
+                  <p>Email Notification</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.emailNotif}
+                    onChange={() => handleSubscription}
+                  />
+                </div>
                 {userData.emailNotif && (
                   <div>
                     <input
