@@ -196,7 +196,7 @@ const ProfileSettings: React.FC = () => {
               <div style={{ margin: '1rem 0' }}>
                 <h4>Store</h4>
                 <p>
-                  {['red', 'black', 'yellow', 'purple'].map(color => (
+                  {['red', 'orange', 'yellow', 'purple'].map(color => (
                     <div
                       key={color}
                       style={{ display: 'inline-block', marginRight: '1rem', textAlign: 'center' }}>

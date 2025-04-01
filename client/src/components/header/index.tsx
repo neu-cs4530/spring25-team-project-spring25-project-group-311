@@ -12,12 +12,10 @@ import { useHeaderContext } from '../../contexts/HeaderContext';
  * when they press Enter
  * @param userBanner - The banner color of the current user.
  */
-const Header = ({ userBanner }: { userBanner: string }) => {
+const Header = () => {
   const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
   const { user: currentUser } = useUserContext();
   const { headerBackground } = useHeaderContext();
-
-  const getBackgroundColor = () => userBanner;
 
   const navigate = useNavigate();
   return (

@@ -18,7 +18,7 @@ const LayoutContent = ({ userBanner }: { userBanner: string }) => {
 
   return (
     <>
-      <Header userBanner={userBanner} />
+      <Header />
       <div id='main' className='main'>
         <SideBarNav />
         <div id='right_main' className='right_main'>
