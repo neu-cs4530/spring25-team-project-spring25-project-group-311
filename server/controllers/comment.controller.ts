@@ -131,7 +131,7 @@ const commentController = (socket: FakeSOSocket) => {
       // The new notification
       const newNotif: Notification = {
         title: 'New Comment to Your Post',
-        text: `A new answer has been given to your question ${foundParentPost.text}`,
+        text: `A new comment has been given to your question ${foundParentPost.text}`,
         type: 'browser',
         user: asker,
         read: false,
