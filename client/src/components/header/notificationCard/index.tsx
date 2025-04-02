@@ -17,7 +17,6 @@ const NotificationCard = ({
   handleReadNotification: (notifId: ObjectId | undefined) => void;
 }) => (
   <div onClick={() => handleReadNotification(notification._id)} className='notification-card'>
-    <h6>{notification.title}</h6>
     <p>{notification.text}</p>
   </div>
 );

@@ -1,47 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { DatabaseForum } from '@fake-stack-overflow/shared';
+import useMembershipButton from '../../../hooks/useMembershipButton';
 
 interface MembershipButtonProps {
-  forumId: string;
-  isMember: boolean;
-  onMembershipChange?: (joined: boolean) => void;
+  forum: DatabaseForum;
+  updateForum: (forum: DatabaseForum) => void;
 }
 
 /**
  * MembershipButton component that renders a button for joining or leaving a forum.
  * The button text and action changes based on whether the user is already a member.
  */
-const MembershipButton = ({ forumId, isMember, onMembershipChange }: MembershipButtonProps) => {
-  const [isUserMember, setIsUserMember] = useState<boolean>(isMember);
-
-  useEffect(() => {
-    setIsUserMember(isMember);
-  }, [isMember]);
-
-  /**
-   * Function to handle joining or leaving the forum
-   */
-  const handleMembershipChange = async () => {
-    try {
-      if (isUserMember) {
-        // Call your API to leave the forum
-        // const response = await leaveForum(forumId, user.username);
-        setIsUserMember(false);
-        if (onMembershipChange) onMembershipChange(false);
-      } else {
-        // Call your API to join the forum
-        // const response = await joinForum(forumId, user.username);
-        setIsUserMember(true);
-        if (onMembershipChange) onMembershipChange(true);
-      }
-    } catch (error) {
-      // console.error('Error when changing forum membership:', error);
-    }
-  };
+const MembershipButton = ({ forum, updateForum }: MembershipButtonProps) => {
+  // Use the membership button hook
+  const { buttonText, isMember, isAwaitingApproval, error, toggleMembership } = useMembershipButton(
+    forum,
+    updateForum,
+  );
 
   return (
-    <button className={`${isUserMember ? 'redbtn' : 'bluebtn'}`} onClick={handleMembershipChange}>
-      {isUserMember ? 'Leave Forum' : 'Join Forum'}
-    </button>
+    <div>
+      <button
+        className={`bluebtn ${isMember ? 'leave-button' : 'join-button'}`}
+        onClick={toggleMembership}>
+        {buttonText}
+      </button>
+      {isAwaitingApproval && <div className='awaiting-text'>Your request is pending approval</div>}
+      {error && <div className='error-text'>{error}</div>}
+    </div>
   );
 };
 

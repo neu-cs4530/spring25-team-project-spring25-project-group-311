@@ -2,7 +2,6 @@ import React from 'react';
 import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
-import NotificationToggleItem from './notificationToggleItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
 
 const ProfileSettings: React.FC = () => {
@@ -314,35 +313,45 @@ const ProfileSettings: React.FC = () => {
             {canEditProfile && (
               <>
                 <h4>Notifications</h4>
-                <NotificationToggleItem notifType={'browser'} toggleNotif={handleSubscription} />
-                <NotificationToggleItem notifType={'email'} toggleNotif={handleSubscription} />
+                <div className='notification-display'>
+                  <p>Browser-Side Notifications</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.browserNotif}
+                    onChange={() => handleSubscription}
+                  />
+                </div>
+                <div className='notification-display'>
+                  <p>Email Notification</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.emailNotif}
+                    onChange={() => handleSubscription}
+                  />
+                </div>
                 {userData.emailNotif && (
                   <div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='weekly'
-                        defaultChecked
-                        onClick={() => handleChangeFrequency('weekly')}
-                      />
-                      <label>Weekly</label>
-                    </div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='hourly'
-                        onClick={() => handleChangeFrequency('hourly')}
-                      />
-                      <label>Hourly</label>
-                    </div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='daily'
-                        onClick={() => handleChangeFrequency('daily')}
-                      />
-                      <label>Daily</label>
-                    </div>
+                    <input
+                      type='radio'
+                      value='weekly'
+                      checked={userData.emailFrequency === 'weekly'}
+                      onClick={() => handleChangeFrequency('weekly')}
+                    />
+                    <label>Weekly</label>
+                    <input
+                      type='radio'
+                      value='hourly'
+                      checked={userData.emailFrequency === 'hourly'}
+                      onClick={() => handleChangeFrequency('hourly')}
+                    />
+                    <label>Hourly</label>
+                    <input
+                      type='radio'
+                      value='daily'
+                      checked={userData.emailFrequency === 'daily'}
+                      onClick={() => handleChangeFrequency('daily')}
+                    />
+                    <label>Daily</label>
                   </div>
                 )}
               </>

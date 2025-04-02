@@ -6,6 +6,8 @@ import {
   ForumMembershipRequest,
   PopulatedForumResponse,
   DatabaseForum,
+  AddForumQuestionRequest,
+  Question,
 } from '../types/types';
 import {
   saveForum,
@@ -13,8 +15,11 @@ import {
   getForumsList,
   addUserToForum,
   removeUserFromForum,
+  addQuestionToForum,
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
+import { saveQuestion } from '../services/question.service';
+import { processTags } from '../services/tag.service';
 
 const forumController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -89,7 +94,7 @@ const forumController = (socket: FakeSOSocket) => {
         type: 'created',
       });
 
-      res.status(201).json(result);
+      res.status(200).json(result);
     } catch (error) {
       res.status(500).send(`Error when creating forum: ${error}`);
     }
@@ -140,13 +145,16 @@ const forumController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Adds a user to the forum
+   * Adds or removes a user to the forum
    *
    * @param req - The request containing the username, forumId, and type of membership change
    * @param res - The response, either returning the forum list or an error
    * @returns A promise resolving to void
    */
-  const addUser = async (req: ForumMembershipRequest, res: Response): Promise<void> => {
+  const toggleUserMembership = async (
+    req: ForumMembershipRequest,
+    res: Response,
+  ): Promise<void> => {
     if (!req.body || !req.body.fid || !req.body.username || !req.body.type) {
       res.status(400).send('Invalid request');
       return;
@@ -175,7 +183,77 @@ const forumController = (socket: FakeSOSocket) => {
       });
       res.json(updatedForum);
     } catch (err) {
-      res.status(500).send(`Error when adding user: ${(err as Error).message}`);
+      res.status(500).send(`Error when updating user membership: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * Adds a new question to a forum in the database. The question request and question are
+   * validated and then saved. If successful, the question is associated with the corresponding
+   * forum. If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The QuestionRequest object containing the forum ID and question data.
+   * @param res The HTTP response object used to send back the result of the operation.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const addQuestion = async (req: AddForumQuestionRequest, res: Response): Promise<void> => {
+    if (!req.body || !req.body.fid || !req.body.question) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    // checking if the question is valid
+    if (
+      !(
+        req.body.question.title !== undefined &&
+        req.body.question.title !== '' &&
+        req.body.question.text !== undefined &&
+        req.body.question.text !== '' &&
+        req.body.question.tags !== undefined &&
+        req.body.question.tags.length > 0 &&
+        req.body.question.askedBy !== undefined &&
+        req.body.question.askedBy !== '' &&
+        req.body.question.askDateTime !== undefined &&
+        req.body.question.askDateTime !== null
+      )
+    ) {
+      res.status(400).send('Invalid question');
+      return;
+    }
+
+    const { fid } = req.body;
+    const questionInfo: Question = req.body.question;
+
+    try {
+      const questionWithTags = {
+        ...questionInfo,
+        tags: await processTags(questionInfo.tags),
+      };
+
+      if (questionWithTags.tags.length === 0) {
+        throw new Error('Invalid tags');
+      }
+
+      const questionFromDb = await saveQuestion(questionWithTags);
+
+      if ('error' in questionFromDb) {
+        throw new Error(questionFromDb.error as string);
+      }
+
+      const result = await addQuestionToForum(fid, questionFromDb);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error as string);
+      }
+
+      socket.emit('forumUpdate', {
+        forum: result,
+        type: 'updated',
+      });
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(500).send(`Error when adding question: ${(err as Error).message}`);
     }
   };
 
@@ -183,7 +261,8 @@ const forumController = (socket: FakeSOSocket) => {
   router.post('/create', createForum);
   router.get('/getForum/:forumName', getForum);
   router.get('/getForums', getForums);
-  router.post('/addUser', addUser);
+  router.post('/toggleUserMembership', toggleUserMembership);
+  router.post('/addQuestion', addQuestion);
   return router;
 };
 

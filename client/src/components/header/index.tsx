@@ -24,7 +24,7 @@ const Header = () => {
       className='header'
       style={{ '--header-background': headerBackground } as React.CSSProperties}>
       <div></div>
-      <div className='title'>Fake Stack Overflow</div>
+      <div className='title'>CodeTGT</div>
       <input
         id='searchBar'
         placeholder='Search ...'
