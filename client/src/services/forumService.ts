@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DatabaseForum, Forum } from '../types/types';
+import { DatabaseForum, Forum, OrderType, PopulatedDatabaseQuestion } from '../types/types';
 import api from './config';
 
 const FORUM_API_URL = `${process.env.REACT_APP_SERVER_URL}/forum`;
@@ -8,6 +8,17 @@ const getForums = async (): Promise<DatabaseForum[]> => {
   const res = await api.get(`${FORUM_API_URL}/getForums`);
   if (res.status !== 200) {
     throw new Error('Error when fetching forums');
+  }
+  return res.data;
+};
+
+const getQuestionsByOrder = async (
+  fid: string,
+  order: OrderType,
+): Promise<PopulatedDatabaseQuestion[]> => {
+  const res = await api.get(`${FORUM_API_URL}/getQuestion?order=${order}&fid=${fid}`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching questions by order');
   }
   return res.data;
 };
@@ -83,4 +94,4 @@ const deleteForum = async (forum: string): Promise<Forum> => {
   return res.data;
 };
 
-export { getForums, getForumById, createForum, updateForum, deleteForum };
+export { getForums, getForumById, createForum, updateForum, deleteForum, getQuestionsByOrder };

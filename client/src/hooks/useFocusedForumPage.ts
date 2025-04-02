@@ -1,8 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { DatabaseForum } from '../types/types';
+import {
+  DatabaseForum,
+  ForumUpdatePayload,
+  OrderType,
+  PopulatedDatabaseQuestion,
+} from '../types/types';
 import useUserContext from './useUserContext';
-import { getForumById } from '../services/forumService';
+import { getForumById, getQuestionsByOrder } from '../services/forumService';
 
 /**
  * Custom hook for managing the focused forum page's state, navigation, and real-time updates.
@@ -15,6 +20,8 @@ const useFocusedForumPage = () => {
   const navigate = useNavigate();
 
   const { socket } = useUserContext();
+  const [questionOrder, setQuestionOrder] = useState<OrderType>('newest');
+  const [sortedQuestions, setSortedQuestions] = useState<PopulatedDatabaseQuestion[]>([]);
   const [forumID, setForumID] = useState<string>(fid || '');
   const [forum, setForum] = useState<DatabaseForum | null>(null);
 
@@ -45,13 +52,42 @@ const useFocusedForumPage = () => {
   }, [forumID]);
 
   useEffect(() => {
-    const handleForumUpdate = (forumUpdate: { forum: DatabaseForum; type: string }) => {
+    /**
+     * Function to fetch questions based on the order
+     */
+    const fetchSortedQuestions = async () => {
+      if (forumID) {
+        try {
+          const questions = await getQuestionsByOrder(forumID, questionOrder);
+          setSortedQuestions(questions || []);
+        } catch (error) {
+          // console.log(error);
+        }
+      }
+    };
+
+    fetchSortedQuestions().catch(() => {});
+  }, [forumID, questionOrder]);
+
+  useEffect(() => {
+    const handleForumUpdate = (forumUpdate: ForumUpdatePayload) => {
       if (forumUpdate && forumUpdate.forum && forumUpdate.forum._id && forumID) {
         const updateId = String(forumUpdate.forum._id);
 
         if (updateId === forumID) {
           setForum(forumUpdate.forum);
         }
+
+        const fetchUpdatedQuestions = async () => {
+          try {
+            const questions = await getQuestionsByOrder(forumID, questionOrder);
+            setSortedQuestions(questions);
+          } catch (error) {
+            // console.error('Error fetching updated questions:', error);
+          }
+        };
+
+        fetchUpdatedQuestions().catch(() => {});
       }
     };
 
@@ -60,12 +96,13 @@ const useFocusedForumPage = () => {
     return () => {
       socket.off('forumUpdate', handleForumUpdate);
     };
-  }, [forumID, socket]);
+  }, [forumID, questionOrder, socket]);
 
   return {
-    forumID,
     forum,
     updateForum,
+    setQuestionOrder,
+    sortedQuestions,
   };
 };
 

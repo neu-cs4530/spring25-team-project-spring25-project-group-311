@@ -1,5 +1,8 @@
 .focused_forum_container {
   padding: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .forum_title {
@@ -11,4 +14,13 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+
+.sideBarNav {
+  display: flex;
+  flex-direction: column;
+  width: 15%;
+  border-left: dashed;
+  padding: 4% 0 4% 0;
+  align-items: center;
 }

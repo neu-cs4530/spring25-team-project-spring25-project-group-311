@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { ObjectId } from 'mongodb';
-import { PopulatedDatabaseQuestion, Question } from './question';
+import { OrderType, PopulatedDatabaseQuestion, Question } from './question';
 
 /**
  * Represents a forum in the database.
@@ -58,6 +58,13 @@ export interface ForumMembershipRequest extends Request {
     fid: string;
     username: string;
     type: 'join' | 'leave';
+  };
+}
+
+export interface FindForumQuestionRequest extends Request {
+  query: {
+    fid: string;
+    order: OrderType;
   };
 }
 

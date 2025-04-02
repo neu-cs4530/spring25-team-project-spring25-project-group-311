@@ -1,15 +1,18 @@
 import React from 'react';
 import './index.css';
+import { OrderType } from '@fake-stack-overflow/shared';
 import AskQuestionButton from '../askQuestionButton';
 import useFocusedForumPage from '../../../hooks/useFocusedForumPage';
 import MembershipButton from '../membershipButton';
-import ForumQuestionList from '../forumQuestionList';
+import { orderTypeDisplayName } from '../../../types/constants';
+import OrderButton from '../questionPage/header/orderButton';
+import QuestionView from '../questionPage/question';
 
 /**
  * FocusedForumPage component that displays the full content of a forum.
  */
 const FocusedForumPage = () => {
-  const { forum, updateForum } = useFocusedForumPage();
+  const { forum, updateForum, setQuestionOrder, sortedQuestions } = useFocusedForumPage();
 
   if (!forum) {
     return null;
@@ -20,6 +23,15 @@ const FocusedForumPage = () => {
       <div className='space_between right_padding'>
         <div className='bold_title'>{forum.name}</div>
         <div className='buttons-container'>
+          <div className='btns'>
+            {Object.keys(orderTypeDisplayName).map(order => (
+              <OrderButton
+                key={order}
+                orderType={order as OrderType}
+                setQuestionOrder={setQuestionOrder}
+              />
+            ))}
+          </div>
           <MembershipButton forum={forum} updateForum={updateForum} />
           <AskQuestionButton forumId={forum._id.toString()} />
         </div>
@@ -44,6 +56,12 @@ const FocusedForumPage = () => {
         </div>
       </div>
 
+      <div id='question_list' className='question_list'>
+        {sortedQuestions.map(q => (
+          <QuestionView question={q} key={String(q._id)} />
+        ))}
+      </div>
+
       <div className='members-section'>
         <h3>Members</h3>
         <div className='members-list'>
@@ -54,17 +72,6 @@ const FocusedForumPage = () => {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className='questions-section'>
-        {forum.questions.length > 0 ? (
-          <ForumQuestionList
-            forumId={forum._id.toString()}
-            questionIds={forum.questions.map(qId => qId.toString())}
-          />
-        ) : (
-          <div className='no-questions'>No questions have been posted in this forum yet.</div>
-        )}
       </div>
     </div>
   );

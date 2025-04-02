@@ -232,7 +232,7 @@ export const removeUserFromForum = async (
 };
 
 /**
- * Retrieves questions of a forumordered by specified criteria.
+ * Retrieves questions of a forum ordered by specified criteria.
  * @param {OrderType} order - The order type to filter the questions
  * @param {string} fid - The forum from which to return the questions
  * @returns {Promise<Question[]>} - The ordered list of questions

@@ -8,6 +8,8 @@ import {
   DatabaseForum,
   AddForumQuestionRequest,
   Question,
+  PopulatedDatabaseQuestion,
+  FindForumQuestionRequest,
 } from '../types/types';
 import {
   saveForum,
@@ -16,6 +18,7 @@ import {
   addUserToForum,
   removeUserFromForum,
   addQuestionToForum,
+  getForumQuestionsByOrder,
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveQuestion } from '../services/question.service';
@@ -144,6 +147,24 @@ const forumController = (socket: FakeSOSocket) => {
     }
   };
 
+  const getQuestionsByOrder = async (
+    req: FindForumQuestionRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { fid, order } = req.query;
+
+    try {
+      const qlist: PopulatedDatabaseQuestion[] = await getForumQuestionsByOrder(order, fid);
+      res.json(qlist);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching questions by filter: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching questions by filter`);
+      }
+    }
+  };
+
   /**
    * Adds or removes a user to the forum
    *
@@ -263,6 +284,7 @@ const forumController = (socket: FakeSOSocket) => {
   router.get('/getForums', getForums);
   router.post('/toggleUserMembership', toggleUserMembership);
   router.post('/addQuestion', addQuestion);
+  router.get('/getQuestion', getQuestionsByOrder);
   return router;
 };
 
