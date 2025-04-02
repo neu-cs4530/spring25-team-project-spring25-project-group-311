@@ -208,9 +208,6 @@ const useProfileSettings = () => {
         resolve(null); // Resolve the promise
       });
 
-      if (type === 'email') {
-        await sendEmails(username);
-      }
       setSuccessMessage('Subscription changed!');
       setErrorMessage(null);
     } catch (error) {
@@ -224,13 +221,7 @@ const useProfileSettings = () => {
    */
   const handleChangeFrequency = async (frequency: string) => {
     if (!username) return;
-    if (
-      frequency !== 'weekly' &&
-      frequency !== 'hourly' &&
-      frequency !== 'monthly' &&
-      frequency !== 'daily'
-    )
-      return;
+    if (frequency !== 'weekly' && frequency !== 'hourly' && frequency !== 'daily') return;
 
     try {
       const updatedUser = await changeFreq(username, frequency);

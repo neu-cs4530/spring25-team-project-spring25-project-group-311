@@ -42,3 +42,8 @@
 .forum_meta {
   color: #bbbbbb;
 }
+
+.forum_type {
+  margin-left: 6px;
+  display: inline-block;
+}

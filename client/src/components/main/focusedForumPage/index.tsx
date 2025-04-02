@@ -1,14 +1,15 @@
 import React from 'react';
-import { getMetaData } from '../../../tool';
 import './index.css';
 import AskQuestionButton from '../askQuestionButton';
 import useFocusedForumPage from '../../../hooks/useFocusedForumPage';
+import MembershipButton from '../membershipButton';
+import ForumQuestionList from '../forumQuestionList';
 
 /**
  * FocusedForumPage component that displays the full content of a forum.
  */
 const FocusedForumPage = () => {
-  const { forum } = useFocusedForumPage();
+  const { forum, updateForum } = useFocusedForumPage();
 
   if (!forum) {
     return null;
@@ -18,15 +19,14 @@ const FocusedForumPage = () => {
     <div className='focused-forum-container'>
       <div className='space_between right_padding'>
         <div className='bold_title'>{forum.name}</div>
-        <AskQuestionButton />
+        <div className='buttons-container'>
+          <MembershipButton forum={forum} updateForum={updateForum} />
+          <AskQuestionButton forumId={forum._id.toString()} />
+        </div>
       </div>
 
       <div className='forum-details'>
         <div className='forum-description'>{forum.description}</div>
-        <div className='forum-meta'>
-          <span className='forum-creator'>Created by: {forum.createdBy}</span>
-          <span className='forum-date'>Created {getMetaData(new Date(forum.createDateTime))}</span>
-        </div>
       </div>
 
       <div className='forum-stats'>
@@ -43,6 +43,7 @@ const FocusedForumPage = () => {
           <div className='stat-label'>Questions</div>
         </div>
       </div>
+
       <div className='members-section'>
         <h3>Members</h3>
         <div className='members-list'>
@@ -56,20 +57,14 @@ const FocusedForumPage = () => {
       </div>
 
       <div className='questions-section'>
-        <h3>Questions</h3>
         {forum.questions.length > 0 ? (
-          <div className='questions-list'>
-            <p>Questions will be displayed here</p>
-            {/* This would be replaced with actual question components */}
-          </div>
+          <ForumQuestionList
+            forumId={forum._id.toString()}
+            questionIds={forum.questions.map(qId => qId.toString())}
+          />
         ) : (
           <div className='no-questions'>No questions have been posted in this forum yet.</div>
         )}
-      </div>
-
-      <div className='forum-actions'>
-        <button className='bluebtn join-button'>Join Forum</button>
-        <button className='bluebtn post-question-button'>Post a Question</button>
       </div>
     </div>
   );

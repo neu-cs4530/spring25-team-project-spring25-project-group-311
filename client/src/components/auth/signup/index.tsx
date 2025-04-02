@@ -21,7 +21,7 @@ const Signup = () => {
 
   return (
     <div className='container'>
-      <h2>Sign up for FakeStackOverflow!</h2>
+      <h2>Sign up for CodeTGT!</h2>
       <form onSubmit={handleSubmit}>
         <h4>Please enter your username.</h4>
         <input

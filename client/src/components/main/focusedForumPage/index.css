@@ -6,3 +6,9 @@
   font-size: 24px;
   font-weight: bold;
 }
+
+.buttons-container {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}

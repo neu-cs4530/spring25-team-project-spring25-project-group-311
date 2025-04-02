@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DatabaseForum } from '../types/types';
 import useUserContext from './useUserContext';
 import { getForumById } from '../services/forumService';
@@ -18,7 +18,10 @@ const useFocusedForumPage = () => {
   const [forumID, setForumID] = useState<string>(fid || '');
   const [forum, setForum] = useState<DatabaseForum | null>(null);
 
-  // Handle navigation if no forum ID is provided
+  const updateForum = (updatedForum: DatabaseForum) => {
+    setForum(updatedForum);
+  };
+
   useEffect(() => {
     if (!fid) {
       navigate('/forums');
@@ -28,7 +31,6 @@ const useFocusedForumPage = () => {
     setForumID(fid);
   }, [fid, navigate]);
 
-  // Fetch forum data when ID changes
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,11 +44,14 @@ const useFocusedForumPage = () => {
     fetchData().catch(() => {});
   }, [forumID]);
 
-  // Listen for real-time updates to the forum
   useEffect(() => {
-    const handleForumUpdate = (forumUpdate: { forum: SetStateAction<DatabaseForum | null> }) => {
-      if (forumUpdate.forum && forumUpdate.forum.name === forum?.name) {
-        setForum(forumUpdate.forum);
+    const handleForumUpdate = (forumUpdate: { forum: DatabaseForum; type: string }) => {
+      if (forumUpdate && forumUpdate.forum && forumUpdate.forum._id && forumID) {
+        const updateId = String(forumUpdate.forum._id);
+
+        if (updateId === forumID) {
+          setForum(forumUpdate.forum);
+        }
       }
     };
 
@@ -55,11 +60,12 @@ const useFocusedForumPage = () => {
     return () => {
       socket.off('forumUpdate', handleForumUpdate);
     };
-  }, [forum?.name, socket]);
+  }, [forumID, socket]);
 
   return {
     forumID,
     forum,
+    updateForum,
   };
 };
 
