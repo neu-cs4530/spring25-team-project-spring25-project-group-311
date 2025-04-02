@@ -162,7 +162,7 @@ export interface AddBadgesRequest extends Request {
 }
 
 export interface AddBadgeRequest extends Request {
-  body : {
+  body: {
     username: string;
     pinnedBadge: string;
   };
