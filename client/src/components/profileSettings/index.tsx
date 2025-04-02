@@ -47,6 +47,7 @@ const ProfileSettings: React.FC = () => {
     handleAddNewBanner,
     handleNewSelectedBanner,
     handleChangeFrequency,
+    handleAddPinnedBadge,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -79,7 +80,21 @@ const ProfileSettings: React.FC = () => {
             <h4>General Information</h4>
             <p>
               <strong>Username:</strong> {userData.username}
+              {userData.pinnedBadge && userData.pinnedBadge !== '' && (
+                <img
+                  src={userData.pinnedBadge}
+                  alt='No image found'
+                  style={{ marginLeft: '1rem', height: '75px', width: '75px' }}
+                />
+              )}
             </p>
+
+            {/* ---- Daily Streak Tracker Section ---- */}
+            {
+              <p>
+                <strong>Current Streak</strong> {userData.streak}
+              </p>
+            }
 
             {/* ---- Biography Section ---- */}
             {!editBioMode && (
@@ -139,25 +154,7 @@ const ProfileSettings: React.FC = () => {
                         style={{ display: 'block', marginTop: '0.5rem' }}
                         // Pinning a badge to the user's profile
                         onClick={() => {
-                          // finds the first strong element in the document (which is the username)
-                          const usernameElement = document.querySelector('p strong');
-                          if (usernameElement) {
-                            // Remove any previously pinned badge
-                            const existingPinnedBadge =
-                              usernameElement.parentNode?.querySelector('img[alt="Pinned badge"]');
-                            if (existingPinnedBadge) {
-                              existingPinnedBadge.remove();
-                            }
-
-                            // Add the new pinned badge
-                            const pinnedBadge = document.createElement('img');
-                            pinnedBadge.src = img;
-                            pinnedBadge.alt = 'Pinned badge';
-                            pinnedBadge.style.marginLeft = '1rem';
-                            pinnedBadge.style.height = '75px';
-                            pinnedBadge.style.width = '75px';
-                            usernameElement.parentNode?.appendChild(pinnedBadge);
-                          }
+                          handleAddPinnedBadge(img);
                         }}>
                         Pin
                       </button>

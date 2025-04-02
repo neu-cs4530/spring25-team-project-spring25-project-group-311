@@ -249,6 +249,20 @@ const changeFreq = async (username: string, emailFreq: string): Promise<SafeData
   return res.data;
 };
 
+/**
+ * Adds a pinned badge to the user through the addPinnedBadge endpoint
+ * @param username string representing the user
+ * @param badge string representing the image location
+ * @returns updated user
+ */
+const addPinnedBadge = async (username: string, pinnedBadge: string): Promise<SafeDatabaseUser> => {
+  const res = await api.post(`${USER_API_URL}/addPinnedBadge`, { username, pinnedBadge });
+  if (res.status !== 200) {
+    throw new Error('Error when adding pinned badge');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -265,4 +279,5 @@ export {
   newActiveBanner,
   sendEmails,
   changeFreq,
+  addPinnedBadge,
 };

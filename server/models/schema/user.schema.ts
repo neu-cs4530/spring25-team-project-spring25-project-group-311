@@ -34,6 +34,10 @@ const userSchema: Schema = new Schema(
       type: [String],
       default: [],
     },
+    pinnedBadge: {
+      type: String,
+      default: '',
+    },
     banners: {
       type: [String],
       default: [],
