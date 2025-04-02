@@ -92,7 +92,7 @@ const ProfileSettings: React.FC = () => {
             {/* ---- Daily Streak Tracker Section ---- */}
             {
               <p>
-                <strong>Current Streak</strong> {userData.streak}
+                <strong>Current Streak: </strong> {userData.streak}
               </p>
             }
 
