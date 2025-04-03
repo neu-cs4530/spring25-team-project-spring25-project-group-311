@@ -11,6 +11,7 @@ import {
   awardBadges,
   awardBanners,
   newActiveBanner,
+  addPinnedBadge,
   changeFreq,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
@@ -359,6 +360,24 @@ const useProfileSettings = () => {
     });
   };
 
+  /**
+   * handles the on click for pinning a badge to a user
+   * @param badge string representing the location of the image
+   * @returns an updated user with the pinned badge
+   */
+  const handleAddPinnedBadge = async (badge: string) => {
+    if (!username) return;
+    try {
+      const updatedUser = await addPinnedBadge(username, badge);
+      await new Promise(resolve => {
+        setUserData(updatedUser);
+        resolve(null);
+      });
+    } catch (error) {
+      setErrorMessage('Failed to pin badge');
+    }
+  };
+
   return {
     userData,
     newPassword,
@@ -401,6 +420,7 @@ const useProfileSettings = () => {
     handleNewSelectedBanner,
     handleChangeFrequency,
     handleAddNewBanner,
+    handleAddPinnedBadge,
   };
 };
 

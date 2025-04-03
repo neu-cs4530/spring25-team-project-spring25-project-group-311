@@ -30,6 +30,7 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       biography: result.biography,
       emails: [],
       badges: result.badges,
+      pinnedBadge: result.pinnedBadge,
       browserNotif: false,
       emailNotif: false,
       emailFrequency: result.emailFrequency,
