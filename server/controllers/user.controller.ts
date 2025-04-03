@@ -375,9 +375,9 @@ const userController = (socket: FakeSOSocket) => {
       const { username, newEmail } = req.body;
       const { currEmail } = req.params;
 
-      const validateEmail = await validate(newEmail);
+      const validateEmail = await isEmailValid(newEmail);
 
-      if (!validateEmail.valid) {
+      if (!validateEmail) {
         res.status(400).send('Invalid email');
         return;
       }

@@ -28,12 +28,11 @@ export const readStatusController = (router: Router = express.Router()) => {
     try {
       const result = await markAsRead(userId, postId);
       if ('error' in result) {
-        res.status(500).json({ message: 'Failed to mark as read', error: result.error });
-        return;
+        throw Error('Error marking as read');
       }
       res.status(200).json({ message: 'Post marked as read', postId });
     } catch (error) {
-      res.status(500).json({ message: 'Error processing your request', error });
+      res.status(500).send(`Error processing your request: ${error}`);
     }
   });
 
@@ -44,12 +43,11 @@ export const readStatusController = (router: Router = express.Router()) => {
     try {
       const result = await checkReadStatus(userId, postId);
       if ('error' in result) {
-        res.status(500).json({ message: 'Failed to check read status', error: result.error });
-        return;
+        throw Error('Error checking status');
       }
       res.status(200).json({ readStatus: result.read });
     } catch (error) {
-      res.status(500).json({ message: 'Error processing your request', error });
+      res.status(500).send(`Error processing your request: ${error}`);
     }
   });
 

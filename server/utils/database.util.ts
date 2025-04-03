@@ -4,6 +4,7 @@ import {
   DatabaseTag,
   DatabaseUser,
   MessageInChat,
+  NotificationResponse,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseChat,
   PopulatedDatabaseForum,
@@ -148,7 +149,7 @@ const populateChat = async (chatID: string): Promise<PopulatedDatabaseChat | nul
  *
  * @param {string | undefined} id - The ID of the document to fetch.
  * @param {'question' | 'answer' | 'chat'} type - Specifies the type of document to fetch.
- * @returns {Promise<QuestionResponse | AnswerResponse | ChatResponse>} - A promise resolving to the populated document or an error message if the operation fails.
+ * @returns {Promise<QuestionResponse | AnswerResponse | ChatResponse | NotificationResponse>} - A promise resolving to the populated document or an error message if the operation fails.
  */
 // eslint-disable is for testing purposes only, so that Jest spy functions can be used.
 // eslint-disable-next-line import/prefer-default-export

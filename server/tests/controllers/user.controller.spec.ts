@@ -1203,4 +1203,12 @@ describe('Test userController', () => {
       expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
     });
   });
+
+  describe('POST /addBadges', () => {
+    it('should add badges to a user', async () => {
+      const mockReqBody = {
+        username: 'll',
+      };
+    });
+  });
 });

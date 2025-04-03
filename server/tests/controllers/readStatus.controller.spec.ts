@@ -45,7 +45,31 @@ describe('readStatusController', () => {
         .send({ user: { _id: 'user123' } });
 
       expect(response.status).toBe(500);
-      expect(response.text).toContain('Error processing your request');
+      expect(response.text).toEqual('Error processing your request: Error: Error marking read');
+    });
+
+    it('should return 404 if there is no post parameter', async () => {
+      const response = await supertest(app)
+        .post(`/read-status/read`)
+        .send({ user: { _id: 'user123' } });
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 401 if there is no user body given', async () => {
+      const postId = new mongoose.Types.ObjectId().toString();
+      const response = await supertest(app).post(`/read-status/${postId}/read`).send({});
+
+      expect(response.status).toBe(401);
+      expect(response.text).toEqual('User not authenticated');
+    });
+
+    it('should return 401 if there is no user id given', async () => {
+      const postId = new mongoose.Types.ObjectId().toString();
+      const response = await supertest(app).post(`/read-status/${postId}/read`).send({ user: {} });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toEqual('User not authenticated');
     });
   });
 
@@ -66,14 +90,14 @@ describe('readStatusController', () => {
 
     it('should return 500 if there is an error fetching the read status', async () => {
       const postId = new mongoose.Types.ObjectId().toString();
-      checkReadStatusSpy.mockRejectedValueOnce(new Error('Error fetching read status'));
+      checkReadStatusSpy.mockRejectedValueOnce(new Error('Error checking status'));
 
       const response = await supertest(app)
         .get(`/read-status/${postId}`)
         .send({ user: { _id: 'user123' } });
 
       expect(response.status).toBe(500);
-      expect(response.text).toContain('Error processing your request');
+      expect(response.text).toEqual('Error processing your request: Error: Error checking status');
     });
   });
 });

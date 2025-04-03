@@ -9,6 +9,7 @@ import {
   User,
   PopulatedDatabaseForum,
   DatabaseForum,
+  PopulatedDatabaseAnswer,
 } from '../types/types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 
@@ -35,6 +36,13 @@ export const com1: DatabaseComment = {
   text: 'com1',
   commentBy: 'com_by1',
   commentDateTime: new Date('2023-11-18T09:25:00'),
+};
+
+export const com2: DatabaseComment = {
+  _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+  text: 'wowza',
+  commentBy: 'user2',
+  commentDateTime: new Date('2023-09-18T09:25:00'),
 };
 
 export const ans1: DatabaseAnswer = {
@@ -67,6 +75,38 @@ export const ans4: DatabaseAnswer = {
   ansBy: 'ansBy4',
   ansDateTime: new Date('2023-11-19T09:24:00'),
   comments: [],
+};
+
+export const unpopAns1: DatabaseAnswer = {
+  _id: new ObjectId('65e9b58910afe6e94fc6e6af'),
+  text: '2 + 2 = 4',
+  ansBy: 'user1',
+  ansDateTime: new Date('2023-11-19T09:24:00'),
+  comments: [com1._id, com2._id],
+};
+
+export const unpopAns2: DatabaseAnswer = {
+  _id: new ObjectId('65e9b58910afe6e94fc6e6bf'),
+  text: '1 + 1 = 2',
+  ansBy: 'user3',
+  ansDateTime: new Date('2023-10-19T09:24:00'),
+  comments: [com2._id],
+};
+
+export const popAns1: PopulatedDatabaseAnswer = {
+  _id: unpopAns1._id,
+  text: '2 + 2 = 4',
+  ansBy: 'user1',
+  ansDateTime: new Date('2023-11-19T09:24:00'),
+  comments: [com1, com2],
+};
+
+export const popAns2: PopulatedDatabaseAnswer = {
+  _id: unpopAns2._id,
+  text: '1 + 1 = 2',
+  ansBy: 'user3',
+  ansDateTime: new Date('2023-10-19T09:24:00'),
+  comments: [com2],
 };
 
 export const QUESTIONS: DatabaseQuestion[] = [

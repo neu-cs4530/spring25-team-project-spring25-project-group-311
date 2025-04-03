@@ -49,10 +49,25 @@ describe('Notification model', () => {
       expect(saveNotif.user).toEqual(safeUser._id);
       expect(saveNotif.read).toEqual(false);
     });
+
+    it('should throw an error if you get null when creating new notif', async () => {
+      jest.spyOn(NotificationModel, 'create').mockRejectedValueOnce(null);
+
+      const saveError = await saveNotification({
+        title: 'New notification',
+        text: 'This is to notify you',
+        type: 'browser',
+        user: safeUser,
+        read: false,
+      });
+
+      expect('error' in saveError).toBe(true);
+    });
+
     it('should throw an error if error when saving to database', async () => {
       jest
         .spyOn(NotificationModel, 'create')
-        .mockRejectedValueOnce(() => new Error('Error saving document'));
+        .mockRejectedValueOnce(new Error('Error saving document'));
 
       const saveError = await saveNotification({
         title: 'New notification',
@@ -139,6 +154,14 @@ describe('Notification model', () => {
     it('should return an empty list of notifications if there is an error getting the notifications', async () => {
       mockingoose(UserModel).toReturn(safeUser, 'findOne');
       mockingoose(NotificationModel).toReturn(new Error('database error'), 'find');
+
+      const retrievedNotifs = await getUserNotifs(safeUser.username);
+      expect(retrievedNotifs.length).toEqual(0);
+    });
+
+    it('should return an empty list if find returns null', async () => {
+      mockingoose(UserModel).toReturn(safeUser, 'findOne');
+      mockingoose(NotificationModel).toReturn(null, 'find');
 
       const retrievedNotifs = await getUserNotifs(safeUser.username);
       expect(retrievedNotifs.length).toEqual(0);

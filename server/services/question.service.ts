@@ -268,10 +268,11 @@ export const addVoteToQuestion = async (
  */
 export const getUpvotesAndDownVotesBy = async (username: string): Promise<number> => {
   try {
-    const upvotes = await QuestionModel.find({ upVotes: username });
-    const downvotes = await QuestionModel.find({ downVotes: username });
+    const upAnddown = await QuestionModel.find({
+      $or: [{ upVotes: { $in: [username] } }, { downVotes: { $in: [username] } }],
+    });
 
-    return upvotes.length + downvotes.length;
+    return upAnddown.length;
   } catch (error) {
     return 0;
   }
