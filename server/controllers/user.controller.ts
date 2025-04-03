@@ -9,12 +9,14 @@ import {
   UpdateBiographyRequest,
   UpdateEmailRequest,
   AddEmailRequest,
+  AddBadgesRequest,
   AddBadgeRequest,
   AddBannerRequest,
   AddSelectedBannerRequest,
   SubscribeToNotification,
   UserResponse,
   ChangeFreqRequest,
+  UpdateStreakRequest,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -101,6 +103,28 @@ const userController = (socket: FakeSOSocket) => {
     req.body.username !== undefined &&
     req.body.username.trim() !== '' &&
     req.body.emailFreq !== undefined;
+
+  const isAddPinnedBadgeRequestValid = (req: AddBadgeRequest): boolean =>
+    req.body !== undefined && req.body.username !== undefined && req.body.pinnedBadge !== undefined;
+
+  const areDatesSequential = (dates: Date[]): boolean => {
+    if (dates.length <= 1) {
+      return true;
+    }
+
+    for (let i = 1; i < dates.length; i++) {
+      const prevDate = dates[i - 1];
+      const curDate = dates[i];
+      const expectedDate = new Date(prevDate);
+      expectedDate.setDate(prevDate.getDate() + 1);
+
+      if (curDate.getTime() !== expectedDate.getTime()) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   /**
    * Handles the creation of a new user account.
@@ -423,7 +447,7 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response, either confirming the new badge or an error.
    * @returns A promise resolving to void.
    */
-  const addBadges = async (req: AddBadgeRequest, res: Response): Promise<void> => {
+  const addBadges = async (req: AddBadgesRequest, res: Response): Promise<void> => {
     try {
       const { username, badges } = req.body;
 
@@ -454,6 +478,45 @@ const userController = (socket: FakeSOSocket) => {
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when adding user badge: ${error}`);
+    }
+  };
+
+  /**
+   * Adds a pinned badge to a user
+   * @param req The request containing the username and the badge the user would like pinned
+   * @param res The response containing either the user or an error
+   * @returns A promise resolving to void.
+   */
+  const addPinnedBadge = async (req: AddBadgeRequest, res: Response): Promise<void> => {
+    try {
+      const { username, pinnedBadge } = req.body;
+
+      if (!isAddPinnedBadgeRequestValid(req)) {
+        res.status(400).send(`invalid body`);
+      }
+
+      if (!pinnedBadge) {
+        res.status(400).send(`Error when adding a pinned badge: ${pinnedBadge}`);
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const updatedUser = await updateUser(username, { pinnedBadge });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding a pinned badge: ${error}`);
     }
   };
 
@@ -679,6 +742,64 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
+    try {
+      const { username, date } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      // if the user doesnt have an activty log give it an empty one
+      if (!foundUser.activityLog) {
+        foundUser.activityLog = [];
+      }
+
+      // if the user doesnt have a streak update the streak with the date
+      if (!foundUser.streak || foundUser.streak.length === 0) {
+        // if the user doesnt already have this date in its activity log add it to its activity log
+        if (!foundUser.activityLog.includes(date)) {
+          foundUser.activityLog.push(date);
+        }
+        foundUser.streak = [date];
+      }
+      // if the user does have a streak
+      else {
+        // if this date is not already in its activity log add it
+        if (!foundUser.activityLog.includes(date)) {
+          foundUser.activityLog.push(date);
+        }
+        // if the user streak does not include this date push the date onto its streak
+        if (!foundUser.streak.includes(date)) {
+          foundUser.streak.push(date);
+          // if the dates are not sequential reset the streak to just this date
+          if (!areDatesSequential(foundUser.streak)) {
+            foundUser.streak = [date];
+          }
+        }
+      }
+
+      const updatedUser = await updateUser(username, {
+        streak: foundUser.streak,
+        activityLog: foundUser.activityLog,
+      });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error updating user streak: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -690,6 +811,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/:currEmail/replaceEmail', replaceEmail);
   router.post('/addEmail', addEmail);
   router.post('/addBadges', addBadges);
+  router.post('/addPinnedBadge', addPinnedBadge);
   router.post('/addBanners', addBanners);
   router.post('/addSelectedBanner', addSelectedBanner);
   router.patch('/changeSubscription', changeNotifSubscription);
@@ -697,6 +819,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getAnswersGiven', getAnswersGiven);
   router.get('/getVoteCount', getUpvotesAndDownVotes);
   router.patch('/changeFrequency', changeFrequency);
+  router.patch('/updateStreak', updateUserStreak);
   return router;
 };
 

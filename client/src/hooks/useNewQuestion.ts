@@ -4,6 +4,7 @@ import { validateHyperlink } from '../tool';
 import { addQuestion } from '../services/questionService';
 import useUserContext from './useUserContext';
 import { Question } from '../types/types';
+import { updateStreak } from '../services/userService';
 
 /**
  * Custom hook to handle question submission and form validation
@@ -111,6 +112,10 @@ const useNewQuestion = () => {
     } else {
       res = await addQuestion(question, fid);
     }
+
+    const userRes = await updateStreak(user.username, question.askDateTime);
+    user.streak = userRes.streak;
+    user.activityLog = userRes.activityLog;
 
     if (res && res._id && !fid) {
       navigate('/home');
