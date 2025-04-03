@@ -38,7 +38,8 @@ export interface User extends UserCredentials {
   badges: string[];
   banners?: string[];
   selectedBanner?: string;
-  streak?: number;
+  streak?: Date[];
+  activityLog?: Date[];
   pinnedBadge?: string;
   browserNotif: boolean;
   emailNotif: boolean;
@@ -214,4 +215,11 @@ export interface SendEmailNotif extends Request {
   body: {
     username: string;
   };
+}
+
+export interface UpdateStreakRequest extends Request {
+  body: {
+    username: string;
+    date: Date
+  }
 }

@@ -42,6 +42,14 @@ const userSchema: Schema = new Schema(
       type: [String],
       default: [],
     },
+    streak: {
+      type: [Date],
+      default: 0,
+    },
+    activityLog: {
+      type: [Date],
+      default: [],
+    },
     selectedBanner: {
       type: String,
       default: '#dddddd',
