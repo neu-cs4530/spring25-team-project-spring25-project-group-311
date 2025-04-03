@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
+  AnswerUpdatePayload,
   DatabaseForum,
   ForumUpdatePayload,
   OrderType,
@@ -91,9 +92,54 @@ const useFocusedForumPage = () => {
       }
     };
 
+    /**
+     * Function to handle question updates from the socket.
+     *
+     * @param question - the updated question object.
+     */
+    const handleQuestionUpdate = (question: PopulatedDatabaseQuestion) => {
+      setSortedQuestions(prevQlist => {
+        const questionExists = prevQlist.some(q => q._id === question._id);
+
+        if (questionExists) {
+          // Update the existing question
+          return prevQlist.map(q => (q._id === question._id ? question : q));
+        }
+
+        return [question, ...prevQlist];
+      });
+    };
+
+    /**
+     * Function to handle answer updates from the socket.
+     *
+     * @param qid - The question ID.
+     * @param answer - The answer object.
+     */
+    const handleAnswerUpdate = ({ qid, answer }: AnswerUpdatePayload) => {
+      setSortedQuestions(prevQlist =>
+        prevQlist.map(q => (q._id === qid ? { ...q, answers: [...q.answers, answer] } : q)),
+      );
+    };
+
+    /**
+     * Function to handle views updates from the socket.
+     *
+     * @param question - The updated question object.
+     */
+    const handleViewsUpdate = (question: PopulatedDatabaseQuestion) => {
+      setSortedQuestions(prevQlist => prevQlist.map(q => (q._id === question._id ? question : q)));
+    };
+
     socket.on('forumUpdate', handleForumUpdate);
+    socket.on('questionUpdate', handleQuestionUpdate);
+    socket.on('answerUpdate', handleAnswerUpdate);
+    socket.on('viewsUpdate', handleViewsUpdate);
 
     return () => {
+      socket.off('questionUpdate', handleQuestionUpdate);
+      socket.off('answerUpdate', handleAnswerUpdate);
+      socket.off('viewsUpdate', handleViewsUpdate);
       socket.off('forumUpdate', handleForumUpdate);
     };
   }, [forumID, questionOrder, socket]);
