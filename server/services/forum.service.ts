@@ -244,7 +244,7 @@ export const getForumQuestionsByOrder = async (
   try {
     const forum = await ForumModel.findOne({ _id: fid }).populate<{
       questions: PopulatedDatabaseQuestion[];
-    }>([{ path: 'questions', model: QuestionModel }]);
+    }>([{ path: 'questions', model: QuestionModel, populate: { path: 'tags', model: TagModel } }]);
 
     if (!forum) {
       return [];

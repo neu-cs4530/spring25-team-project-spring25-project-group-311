@@ -23,46 +23,29 @@ const FocusedForumPage = () => {
       <div className='space_between right_padding'>
         <div className='bold_title'>{forum.name}</div>
         <div className='buttons-container'>
-          <div className='btns'>
-            {Object.keys(orderTypeDisplayName).map(order => (
-              <OrderButton
-                key={order}
-                orderType={order as OrderType}
-                setQuestionOrder={setQuestionOrder}
-              />
-            ))}
-          </div>
           <MembershipButton forum={forum} updateForum={updateForum} />
           <AskQuestionButton forumId={forum._id.toString()} />
         </div>
       </div>
-
-      <div className='forum-details'>
-        <div className='forum-description'>{forum.description}</div>
-      </div>
-
-      <div className='forum-stats'>
-        <div className='stat-box'>
-          <div className='stat-number'>{forum.members.length}</div>
-          <div className='stat-label'>Members</div>
-        </div>
-        <div className='stat-box'>
-          <div className='stat-number'>{forum.moderators.length}</div>
-          <div className='stat-label'>Moderators</div>
-        </div>
-        <div className='stat-box'>
-          <div className='stat-number'>{forum.questions.length}</div>
-          <div className='stat-label'>Questions</div>
+      <div className='space_between right_padding'>
+        <div id='question_count'>{sortedQuestions.length} questions</div>
+        <div className='btns'>
+          {Object.keys(orderTypeDisplayName).map(order => (
+            <OrderButton
+              key={order}
+              orderType={order as OrderType}
+              setQuestionOrder={setQuestionOrder}
+            />
+          ))}
         </div>
       </div>
-
       <div id='question_list' className='question_list'>
         {sortedQuestions.map(q => (
           <QuestionView question={q} key={String(q._id)} />
         ))}
       </div>
 
-      <div className='members-section'>
+      {/* <div className='members-section'>
         <h3>Members</h3>
         <div className='members-list'>
           {forum.members.map((member, index) => (
@@ -72,7 +55,7 @@ const FocusedForumPage = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
