@@ -38,14 +38,14 @@ describe('readStatusController', () => {
 
     it('should return 500 if there is an error marking the post as read', async () => {
       const postId = new mongoose.Types.ObjectId().toString();
-      markAsReadSpy.mockRejectedValueOnce(new Error('Error marking read'));
+      markAsReadSpy.mockResolvedValueOnce({ error: 'Error reading notification' });
 
       const response = await supertest(app)
         .post(`/read-status/${postId}/read`)
         .send({ user: { _id: 'user123' } });
 
       expect(response.status).toBe(500);
-      expect(response.text).toEqual('Error processing your request: Error: Error marking read');
+      expect(response.text).toEqual('Error processing your request: Error: Error marking as read');
     });
 
     it('should return 404 if there is no post parameter', async () => {
@@ -90,7 +90,7 @@ describe('readStatusController', () => {
 
     it('should return 500 if there is an error fetching the read status', async () => {
       const postId = new mongoose.Types.ObjectId().toString();
-      checkReadStatusSpy.mockRejectedValueOnce(new Error('Error checking status'));
+      checkReadStatusSpy.mockResolvedValueOnce({ error: 'Error reading notification' });
 
       const response = await supertest(app)
         .get(`/read-status/${postId}`)
