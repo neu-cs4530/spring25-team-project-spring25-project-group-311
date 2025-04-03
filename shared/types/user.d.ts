@@ -220,6 +220,6 @@ export interface SendEmailNotif extends Request {
 export interface UpdateStreakRequest extends Request {
   body: {
     username: string;
-    date: Date
-  }
+    date: Date;
+  };
 }
