@@ -32,6 +32,7 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
+import { ActivityType } from  '../../shared/types/activity';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -744,7 +745,7 @@ const userController = (socket: FakeSOSocket) => {
 
   const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
     try {
-      const { username, date } = req.body;
+      const { username, date, activity } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
@@ -753,23 +754,53 @@ const userController = (socket: FakeSOSocket) => {
 
       // if the user doesnt have an activty log give it an empty one
       if (!foundUser.activityLog) {
-        foundUser.activityLog = [];
+        foundUser.activityLog = new Map<Date,[Map<string,number>]>();
+        foundUser.activityLog.set(new Date(), []);
+      }
+
+      // if the date is not found in the activity log
+      if (!foundUser.activityLog.has(date)) {
+        // add date with new activity
+        const activityMap = new Map<string,number>();
+        activityMap.set(activity, 1);
+        foundUser.activityLog.set(date,[activityMap]);
+      }
+      // if the date is found in the activity log
+      else {
+        const activityMaps = foundUser.activityLog.get(date);
+        if (activityMaps) {
+          let activityFound = false;
+          const newMapList = [];
+          for (const activityMap of activityMaps) {
+            const newMap = new Map<string,number>();
+            activityMap.forEach((value, key) => {
+              if (key === activity) {
+                newMap.set(activity, value + 1);
+                activityFound = true;
+              }
+              else {
+                newMap.set(activity, value);
+              }
+            })
+
+            newMapList.push(newMap);
+          }
+          if (!activityFound) {
+            const newMap = new Map<string,number>();
+            newMap.set(activity, 1);
+            newMapList.push(newMap);
+          }
+          foundUser.activityLog.set(date, newMapList);
+        }
       }
 
       // if the user doesnt have a streak update the streak with the date
       if (!foundUser.streak || foundUser.streak.length === 0) {
         // if the user doesnt already have this date in its activity log add it to its activity log
-        if (!foundUser.activityLog.includes(date)) {
-          foundUser.activityLog.push(date);
-        }
         foundUser.streak = [date];
       }
       // if the user does have a streak
       else {
-        // if this date is not already in its activity log add it
-        if (!foundUser.activityLog.includes(date)) {
-          foundUser.activityLog.push(date);
-        }
         // if the user streak does not include this date push the date onto its streak
         if (!foundUser.streak.includes(date)) {
           foundUser.streak.push(date);
