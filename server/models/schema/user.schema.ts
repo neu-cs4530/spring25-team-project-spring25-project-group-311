@@ -61,6 +61,8 @@ const userSchema: Schema = new Schema(
       type: Boolean,
     },
     emailFrequency: { type: String, default: 'weekly' },
+    mutedNotif: { type: Boolean, default: false },
+    mutedTime: { type: Date, default: new Date('December 17, 1995 03:24:00') },
     questionsAsked: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
     answersGiven: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
     numUpvotesDownvotes: {

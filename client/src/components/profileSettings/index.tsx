@@ -46,6 +46,7 @@ const ProfileSettings: React.FC = () => {
     handleAddNewBanner,
     handleNewSelectedBanner,
     handleChangeFrequency,
+    handleMuteNotifications,
     handleAddPinnedBadge,
   } = useProfileSettings();
 
