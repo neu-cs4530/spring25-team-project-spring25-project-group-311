@@ -1,5 +1,4 @@
 import express, { Request, Response, Router } from 'express';
-import validate from 'deep-email-validator';
 import {
   UserRequest,
   User,
