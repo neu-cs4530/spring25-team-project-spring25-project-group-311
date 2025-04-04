@@ -11,6 +11,7 @@ const useLeaderboardPage = () => {
   const { socket } = useUserContext();
 
   const [leaderboardList, setLeaderboardList] = useState<SafeDatabaseUser[]>([]);
+  const [err, setErr] = useState('');
 
   useEffect(() => {
     /**
@@ -30,8 +31,7 @@ const useLeaderboardPage = () => {
         });
         setLeaderboardList(sortedRes || []);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error);
+        setErr((error as Error).message);
       }
     };
 
@@ -91,7 +91,7 @@ const useLeaderboardPage = () => {
     };
   }, [socket]);
 
-  return { leaderboardList };
+  return { err, leaderboardList };
 };
 
 export default useLeaderboardPage;

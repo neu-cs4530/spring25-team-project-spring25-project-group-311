@@ -8,10 +8,11 @@ import useLeaderboardPage from '../../../hooks/useLeaderboard';
  * ranked by the number of badges the user has.
  */
 const LeaderboardListPage = () => {
-  const { leaderboardList } = useLeaderboardPage();
+  const { err, leaderboardList } = useLeaderboardPage();
 
   return (
     <div className='user-card-container'>
+      {err && <p className='error-message'>{err}</p>}
       <h2>Current Leaderboard</h2>
       <div id='users_list' className='users_list'>
         {leaderboardList.map((user, index) => (
