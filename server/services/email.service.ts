@@ -1,9 +1,9 @@
 import { Error } from 'mongoose';
+import nodemailer from 'nodemailer';
 import { getTopFivePosts, getUserForums } from './forum.service';
 import { getUserByUsername } from './user.service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nodemailer = require('nodemailer');
 
 /**
  * Sends an emailt to the user about a summary of their forums.

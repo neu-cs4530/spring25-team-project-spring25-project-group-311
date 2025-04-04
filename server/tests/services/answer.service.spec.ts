@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 import AnswerModel from '../../models/answers.model';
 import QuestionModel from '../../models/questions.model';
 import { saveAnswer, addAnswerToQuestion, getAllAnswers } from '../../services/answer.service';
-import { DatabaseAnswer, DatabaseQuestion, PopulatedDatabaseAnswer } from '../../types/types';
-import { QUESTIONS, ans1, ans4, popAns1, popAns2, unpopAns1, unpopAns2 } from '../mockData.models';
+import { DatabaseAnswer, DatabaseQuestion } from '../../types/types';
+import { QUESTIONS, ans1, ans4, unpopAns1, unpopAns2 } from '../mockData.models';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
