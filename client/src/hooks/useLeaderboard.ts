@@ -3,6 +3,10 @@ import useUserContext from './useUserContext';
 import { SafeDatabaseUser, UserUpdatePayload } from '../types/types';
 import { getUsers } from '../services/userService';
 
+/**
+ * Hook to create the leaerboard page ranking users based on the number of badges they have.
+ * @returns leaderboardlist ranking users.
+ */
 const useLeaderboardPage = () => {
   const { socket } = useUserContext();
 

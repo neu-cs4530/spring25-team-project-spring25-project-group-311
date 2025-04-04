@@ -4,9 +4,8 @@ import LeaderCard from './leaderCard';
 import useLeaderboardPage from '../../../hooks/useLeaderboard';
 
 /**
- * UsersListPage component renders a page displaying a list of users
- * based on search content filtering.
- * It includes a header with a search bar.
+ * LeaderboardList component renders a page displaying a list of users
+ * ranked by the number of badges the user has.
  */
 const LeaderboardListPage = () => {
   const { leaderboardList } = useLeaderboardPage();
