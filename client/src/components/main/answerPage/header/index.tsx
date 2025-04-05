@@ -1,6 +1,5 @@
 import React from 'react';
 import './index.css';
-import AskQuestionButton from '../../askQuestionButton';
 
 /**
  * Interface representing the props for the AnswerHeader component.
