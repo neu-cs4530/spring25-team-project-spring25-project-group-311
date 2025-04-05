@@ -58,32 +58,35 @@ const ProfileSettings: React.FC = () => {
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
+
   const [dailyChallenge, setDailyChallenge] = useState(null);
   const [challengeCompleted, setChallengeCompleted] = useState(false);
 
   useEffect(() => {
-    const fetchDailyChallenge = async () => {
+    const loadChallenge = async () => {
       try {
-        const fetchedChallenge = await completeChallengeAPI(); // Adjust this to match your actual API call
-        setDailyChallenge(fetchedChallenge);
-        setChallengeCompleted(fetchedChallenge.completed); // Assuming 'completed' is a property of the challenge object
+        const challengeData = await fetchDailyChallenge(); // not void
+        setDailyChallenge(challengeData);
+        setChallengeCompleted(challengeData.completed);
       } catch (error) {
-        console.error('Failed to fetch daily challenge:', error);
+        console.error('Error fetching daily challenge:', error);
       }
     };
 
-    fetchDailyChallenge();
+    loadChallenge();
   }, []);
 
   const handleCompleteChallenge = async () => {
-    if (dailyChallenge) {
-      try {
-        await completeChallengeAPI(dailyChallenge.id);
+    if (!dailyChallenge) return;
+
+    try {
+      const result = await completeChallenge(dailyChallenge._id);
+      if (result.success) {
         setChallengeCompleted(true);
-        handleRefresh(); //  refresh user data if challenges affect profiles
-      } catch (error) {
-        console.error('Failed to complete challenge:', error);
+        handleRefresh(); // Refresh user data if necessary
       }
+    } catch (error) {
+      console.error('Failed to complete challenge:', error);
     }
   };
 
@@ -609,5 +612,3 @@ const ProfileSettings: React.FC = () => {
     </>
   );
 };
-
-export default ProfileSettings;
