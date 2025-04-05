@@ -235,13 +235,12 @@ const ProfileSettings: React.FC = () => {
                 <h4>Emails</h4>
                 {userData.emails.map(email => (
                   <div key={email}>
-                    <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />
-                    <button
-                      className='replace-email-button'
-                      style={{ marginLeft: '1rem' }}
-                      onClick={() => setReplaceEmailMode(true)}>
-                      Replace Email
-                    </button>
+                    <EmailDisplayItem
+                      email={email}
+                      selectEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={setReplaceEmailMode}
+                    />
                   </div>
                 ))}
                 <button
@@ -303,7 +302,13 @@ const ProfileSettings: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <EmailDisplayItem key={email} email={email} selectEmail={setEmailToReplace} />
+                    <EmailDisplayItem
+                      key={email}
+                      email={email}
+                      selectEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={setReplaceEmailMode}
+                    />
                   ),
                 )}
               </div>
@@ -318,7 +323,7 @@ const ProfileSettings: React.FC = () => {
                   <input
                     type='checkbox'
                     checked={userData.browserNotif}
-                    onChange={() => handleSubscription}
+                    onChange={() => handleSubscription('browser')}
                   />
                 </div>
                 <div className='notification-display'>
@@ -326,7 +331,7 @@ const ProfileSettings: React.FC = () => {
                   <input
                     type='checkbox'
                     checked={userData.emailNotif}
-                    onChange={() => handleSubscription}
+                    onChange={() => handleSubscription('email')}
                   />
                 </div>
                 {userData.emailNotif && (
