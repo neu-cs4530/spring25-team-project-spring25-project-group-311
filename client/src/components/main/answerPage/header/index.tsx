@@ -28,7 +28,9 @@ const AnswerHeader = ({ ansCount, title, forumTitle }: AnswerHeaderProps) => (
       <div className='bold_title answer_question_title'>{title}</div>
       {forumTitle && <div className='centered'> [Posted in {forumTitle}]</div>}
     </div>
-    <AskQuestionButton />
+    <div></div>
+    <div></div>
+    {/* Someone improve this if there is time */}
   </div>
 );
 
