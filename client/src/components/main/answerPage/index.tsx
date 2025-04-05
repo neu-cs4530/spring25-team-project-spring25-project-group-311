@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { getMetaData } from '../../../tool';
 import AnswerView from './answer';
 import AnswerHeader from './header';
