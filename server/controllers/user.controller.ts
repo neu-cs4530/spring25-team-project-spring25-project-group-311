@@ -9,13 +9,15 @@ import {
   UpdateBiographyRequest,
   UpdateEmailRequest,
   AddEmailRequest,
+  AddBadgesRequest,
   AddBadgeRequest,
   AddBannerRequest,
   AddSelectedBannerRequest,
   SubscribeToNotification,
   UserResponse,
-  SendEmailNotif,
   ChangeFreqRequest,
+  Notification,
+  UpdateStreakRequest,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -31,12 +33,8 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
-import { getTopFivePosts, getUserForums } from '../services/forum.service';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const schedule = require('node-schedule');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const nodemailer = require('nodemailer');
+import { saveNotification } from '../services/notification.service';
+import { populateDocument } from '../utils/database.util';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -77,9 +75,20 @@ const userController = (socket: FakeSOSocket) => {
     req.body.newEmail.trim() !== '';
 
   /**
+   * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
+   * and does it have an @ symbol and ends with a . something)?
+   * @param em The email to validate
+   * @returns `true` if the email is valid; otherwise, `false`.
+   */
+  const isEmailValid = (em: string): boolean => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(em);
+  };
+
+  /**
    * Validates that the request body contains all required fields to change a subscription.
-   * @param req The incoming request containing user data.
-   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   * @param req The incoming request containing user data. d
+   * @returns `true` if the body contains valid user fields; otherwise, `false`cd.
    */
   const isChangeSubscriptionBodyValid = (req: SubscribeToNotification): boolean =>
     req.body !== undefined &&
@@ -96,15 +105,30 @@ const userController = (socket: FakeSOSocket) => {
     req.body !== undefined &&
     req.body.username !== undefined &&
     req.body.username.trim() !== '' &&
-    req.body.frequency !== undefined;
+    req.body.emailFreq !== undefined;
 
-  /**
-   * Validates that the request body contains all required fields to send the email to the user.
-   * @param req The incoming request containing user data.
-   * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
-   */
-  const isSendEmailNotifBodyValid = (req: SendEmailNotif): boolean =>
-    req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
+  const isAddPinnedBadgeRequestValid = (req: AddBadgeRequest): boolean =>
+    req.body !== undefined && req.body.username !== undefined && req.body.pinnedBadge !== undefined;
+
+  const areDatesSequential = (dates: Date[]): boolean => {
+    if (dates.length <= 1) {
+      return true;
+    }
+
+    for (let i = 1; i < dates.length; i++) {
+      const prevDate = dates[i - 1];
+      const curDate = dates[i];
+      const expectedDate = new Date(prevDate);
+      expectedDate.setDate(prevDate.getDate() + 1);
+
+      if (curDate.getTime() !== expectedDate.getTime()) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
@@ -323,10 +347,10 @@ const userController = (socket: FakeSOSocket) => {
 
       const { username, newEmail } = req.body;
 
-      const validateEmail = await validate(newEmail);
+      const validateEmail = await isEmailValid(newEmail);
 
-      if (!validateEmail.valid) {
-        res.status(400).send('Invalid email');
+      if (!validateEmail) {
+        res.status(400).send(`Invalid email`);
         return;
       }
 
@@ -426,7 +450,7 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response, either confirming the new badge or an error.
    * @returns A promise resolving to void.
    */
-  const addBadges = async (req: AddBadgeRequest, res: Response): Promise<void> => {
+  const addBadges = async (req: AddBadgesRequest, res: Response): Promise<void> => {
     try {
       const { username, badges } = req.body;
 
@@ -454,9 +478,76 @@ const userController = (socket: FakeSOSocket) => {
         type: 'updated',
       });
 
+      badges.forEach(async badge => {
+        const newNotif: Notification = {
+          title: 'New Badge Added',
+          text: `You have received a new badge: ${badge}`,
+          type: 'browser',
+          user: updatedUser,
+          read: false,
+        };
+
+        const createdNotif = await saveNotification(newNotif);
+        if ('error' in createdNotif) {
+          throw new Error(createdNotif.error);
+        }
+
+        const populatedNotification = await populateDocument(
+          createdNotif._id.toString(),
+          'notification',
+        );
+
+        if ('error' in populatedNotification) {
+          throw new Error(populatedNotification.error);
+        }
+
+        socket.emit('notificationUpdate', {
+          notification: populatedNotification,
+          type: 'created',
+        });
+      });
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when adding user badge: ${error}`);
+    }
+  };
+
+  /**
+   * Adds a pinned badge to a user
+   * @param req The request containing the username and the badge the user would like pinned
+   * @param res The response containing either the user or an error
+   * @returns A promise resolving to void.
+   */
+  const addPinnedBadge = async (req: AddBadgeRequest, res: Response): Promise<void> => {
+    try {
+      const { username, pinnedBadge } = req.body;
+
+      if (!isAddPinnedBadgeRequestValid(req)) {
+        res.status(400).send(`invalid body`);
+      }
+
+      if (!pinnedBadge) {
+        res.status(400).send(`Error when adding a pinned badge: ${pinnedBadge}`);
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const updatedUser = await updateUser(username, { pinnedBadge });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding a pinned badge: ${error}`);
     }
   };
 
@@ -537,7 +628,7 @@ const userController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     try {
       if (!isChangeSubscriptionBodyValid(req)) {
-        res.status(400).send('Invalid user body');
+        res.status(400).send(`Invalid user body`);
         return;
       }
 
@@ -647,89 +738,6 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Sends out an email to the user regarding the top 5 posts in each of their forum.
-   * @param req The request containing the username
-   * @param res The response, either providing the email sent or an error
-   * @returns A promise resolving to void.
-   */
-  const sendEmail = async (req: SendEmailNotif, res: Response): Promise<void> => {
-    try {
-      if (!isSendEmailNotifBodyValid(req)) {
-        res.status(400).send('Invalid user body');
-      }
-
-      const { username } = req.body;
-
-      const foundUser = await getUserByUsername(username);
-      if ('error' in foundUser) {
-        throw Error(foundUser.error);
-      }
-
-      if (!foundUser.emailNotif) {
-        throw Error('User not subscribed to email notifs');
-      }
-
-      const allUserForums = await getUserForums(foundUser.username);
-      const topFivePostsPerForum = await Promise.all(
-        allUserForums.map(f => getTopFivePosts(f.name)),
-      );
-
-      const transporter = nodemailer.createTransport({
-        service: 'Gmail',
-        auth: {
-          user: 'raisa16h21@gmail.com',
-          pass: 'uqby iszq gtfa chld',
-        },
-      });
-
-      let forumItems = '';
-      topFivePostsPerForum.forEach(forum => {
-        forum.forEach(post => {
-          forumItems += `<li>${post.title}</li><ul>`;
-          post.answers.forEach(answer => {
-            forumItems += `<li>${answer.text}</li>`;
-          });
-          forumItems += `</ul>`;
-        });
-      });
-
-      // Email content
-      const mailOptions = {
-        from: 'raisa16h21@gmail.com',
-        to: foundUser.emails[0],
-        subject: 'FakeStackOverflow Email Digest',
-        text: forumItems,
-      };
-
-      let howOftenToSend;
-      switch (foundUser.emailFrequency) {
-        case 'weekly':
-          howOftenToSend = '25 9 * * 3';
-          break;
-        case 'daily':
-          howOftenToSend = '30 18 * * *';
-          break;
-        case 'hourly':
-          howOftenToSend = '30 * * * *';
-          break;
-        default:
-          throw Error('not a valid frequency');
-      }
-
-      const email = schedule.scheduleJob(howOftenToSend, () => {
-        transporter.sendMail(mailOptions, (error: Error) => {
-          if (error) {
-            throw Error('Error sending out email');
-          }
-        });
-      });
-      res.status(200).send(email);
-    } catch (error) {
-      res.status(500).send(`Error when sending email : ${error}`);
-    }
-  };
-
-  /**
    * Changes the frequency of a user's email notifications.
    * @param req The request containing the username and the frequency
    * @param res The response, either providing the updated user or an error
@@ -738,16 +746,17 @@ const userController = (socket: FakeSOSocket) => {
     try {
       if (!isChangeFreqBodyValid(req)) {
         res.status(400).send('Invalid user body');
+        return;
       }
 
-      const { username, frequency } = req.body;
+      const { username, emailFreq } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
 
-      const updatedUser = await updateUser(username, { emailFrequency: frequency });
+      const updatedUser = await updateUser(username, { emailFrequency: emailFreq });
 
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
@@ -764,6 +773,64 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
+    try {
+      const { username, date } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      // if the user doesnt have an activty log give it an empty one
+      if (!foundUser.activityLog) {
+        foundUser.activityLog = [];
+      }
+
+      // if the user doesnt have a streak update the streak with the date
+      if (!foundUser.streak || foundUser.streak.length === 0) {
+        // if the user doesnt already have this date in its activity log add it to its activity log
+        if (!foundUser.activityLog.includes(date)) {
+          foundUser.activityLog.push(date);
+        }
+        foundUser.streak = [date];
+      }
+      // if the user does have a streak
+      else {
+        // if this date is not already in its activity log add it
+        if (!foundUser.activityLog.includes(date)) {
+          foundUser.activityLog.push(date);
+        }
+        // if the user streak does not include this date push the date onto its streak
+        if (!foundUser.streak.includes(date)) {
+          foundUser.streak.push(date);
+          // if the dates are not sequential reset the streak to just this date
+          if (!areDatesSequential(foundUser.streak)) {
+            foundUser.streak = [date];
+          }
+        }
+      }
+
+      const updatedUser = await updateUser(username, {
+        streak: foundUser.streak,
+        activityLog: foundUser.activityLog,
+      });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error updating user streak: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -775,14 +842,15 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/:currEmail/replaceEmail', replaceEmail);
   router.post('/addEmail', addEmail);
   router.post('/addBadges', addBadges);
+  router.post('/addPinnedBadge', addPinnedBadge);
   router.post('/addBanners', addBanners);
   router.post('/addSelectedBanner', addSelectedBanner);
   router.patch('/changeSubscription', changeNotifSubscription);
   router.get('/getQuestionsAsked', getQuestionsAsked);
   router.get('/getAnswersGiven', getAnswersGiven);
   router.get('/getVoteCount', getUpvotesAndDownVotes);
-  router.post('/sendEmail', sendEmail);
   router.patch('/changeFrequency', changeFrequency);
+  router.patch('/updateStreak', updateUserStreak);
   return router;
 };
 

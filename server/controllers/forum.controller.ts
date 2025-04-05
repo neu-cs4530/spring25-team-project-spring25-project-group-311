@@ -10,6 +10,7 @@ import {
   Question,
   PopulatedDatabaseQuestion,
   FindForumQuestionRequest,
+  Notification,
 } from '../types/types';
 import {
   saveForum,
@@ -23,6 +24,8 @@ import {
 import { getUserByUsername } from '../services/user.service';
 import { saveQuestion } from '../services/question.service';
 import { processTags } from '../services/tag.service';
+import { populateDocument } from '../utils/database.util';
+import { saveNotification } from '../services/notification.service';
 
 const forumController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -268,6 +271,36 @@ const forumController = (socket: FakeSOSocket) => {
       if (result && 'error' in result) {
         throw new Error(result.error as string);
       }
+
+      const foundForum = await getForumById(fid);
+      if ('error' in foundForum) {
+        throw new Error(foundForum.error);
+      }
+
+      foundForum.members.forEach(async user => {
+        const member = await getUserByUsername(user);
+        if ('error' in member) {
+          throw new Error(member.error);
+        }
+
+        const newNotif: Notification = {
+          title: 'New Post in One of Your Forums',
+          text: `A new question ${questionFromDb.text} has been asked in your forum ${result.name} `,
+          type: 'browser',
+          user: member,
+          read: false,
+        };
+
+        const savedNotif = await saveNotification(newNotif);
+        if ('error' in savedNotif) {
+          throw new Error(savedNotif.error);
+        }
+        const populatedNotif = await populateDocument(savedNotif._id.toString(), 'notification');
+        socket.emit('notificationUpdate', {
+          notification: populatedNotif,
+          type: 'created',
+        });
+      });
 
       socket.emit('forumUpdate', {
         forum: result,

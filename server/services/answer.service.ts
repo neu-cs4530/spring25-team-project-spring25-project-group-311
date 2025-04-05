@@ -90,3 +90,20 @@ export const getAllAnswers = async (): Promise<PopulatedDatabaseAnswer[]> => {
     return [];
   }
 };
+
+/**
+ * Gets an answer given the ID
+ * @param aid The ID of the given answer
+ * @returns {Promise<AnswerResponse>}Either the found answer or an error.
+ */
+export const getAnswerById = async (aid: string): Promise<AnswerResponse> => {
+  try {
+    const foundAnswer = await AnswerModel.findOne({ _id: aid });
+    if (!foundAnswer) {
+      throw Error('Error getting answer');
+    }
+    return foundAnswer;
+  } catch (error) {
+    return { error: `Error getting answer: ${error}` };
+  }
+};

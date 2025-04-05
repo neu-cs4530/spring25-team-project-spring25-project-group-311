@@ -103,7 +103,7 @@ const resetPassword = async (username: string, newPassword: string): Promise<Saf
 };
 
 const newActiveBanner = async (username: string, banner: string): Promise<SafeDatabaseUser> => {
-  const res = await api.patch(`${USER_API_URL}/newActiveBanner`, {
+  const res = await api.post(`${USER_API_URL}/addSelectedBanner`, {
     username,
     banner,
   });
@@ -218,19 +218,6 @@ const awardBanners = async (username: string, banners: string[]): Promise<SafeDa
   return res.data;
 };
 /**
- * Sends out an email to the user.
- * @param username The unique username of the user.
- */
-const sendEmails = async (username: string): Promise<void> => {
-  const res = await api.post(`${USER_API_URL}/sendEmail`, {
-    username,
-  });
-  if (res.status !== 200) {
-    throw new Error('Error when changing subscriptions to notifications');
-  }
-};
-
-/**
  * Changes the frequency of the email notification
  * @param username The unique username of the user.
  * @param emailFreq The frequency of the email.
@@ -249,6 +236,28 @@ const changeFreq = async (username: string, emailFreq: string): Promise<SafeData
   return res.data;
 };
 
+/**
+ * Adds a pinned badge to the user through the addPinnedBadge endpoint
+ * @param username string representing the user
+ * @param badge string representing the image location
+ * @returns updated user
+ */
+const addPinnedBadge = async (username: string, pinnedBadge: string): Promise<SafeDatabaseUser> => {
+  const res = await api.post(`${USER_API_URL}/addPinnedBadge`, { username, pinnedBadge });
+  if (res.status !== 200) {
+    throw new Error('Error when adding pinned badge');
+  }
+  return res.data;
+};
+
+const updateStreak = async (username: string, date: Date) => {
+  const res = await api.patch(`${USER_API_URL}/updateStreak`, { username, date });
+  if (res.status !== 200) {
+    throw new Error('Error while updating streak');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -263,6 +272,7 @@ export {
   awardBadges,
   awardBanners,
   newActiveBanner,
-  sendEmails,
   changeFreq,
+  addPinnedBadge,
+  updateStreak,
 };
