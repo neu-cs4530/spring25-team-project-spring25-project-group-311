@@ -49,7 +49,6 @@ export interface User extends UserCredentials {
   answersGiven: Answer[];
   numUpvotesDownvotes: number;
   mutedTime?: Date;
-  mutedNotif?: boolean;
 }
 
 /**

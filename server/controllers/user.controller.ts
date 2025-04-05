@@ -854,15 +854,14 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       let endMuteTime;
-      if (foundUser.mutedNotif) {
-        // User is choosing to unmute
-        endMuteTime = new Date('December 17, 1995 03:24:00');
-      } else {
+      if (!foundUser.mutedTime || (foundUser.mutedTime && new Date() > foundUser.mutedTime)) {
+        // User is choosing to mute
         endMuteTime = new Date(Date.now() + 60 * 60 * 1000);
+      } else {
+        endMuteTime = new Date('December 17, 1995 03:24:00');
       }
 
       const updatedUser = await updateUser(username, {
-        mutedNotif: !foundUser.mutedNotif,
         mutedTime: endMuteTime,
       });
 

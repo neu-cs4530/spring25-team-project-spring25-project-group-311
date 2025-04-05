@@ -319,7 +319,7 @@ const ProfileSettings: React.FC = () => {
                   <input
                     type='checkbox'
                     checked={userData.browserNotif}
-                    onChange={() => handleSubscription}
+                    onChange={() => handleSubscription('browser')}
                   />
                 </div>
                 <div className='notification-display'>
@@ -327,7 +327,7 @@ const ProfileSettings: React.FC = () => {
                   <input
                     type='checkbox'
                     checked={userData.emailNotif}
-                    onChange={() => handleSubscription}
+                    onChange={() => handleSubscription('email')}
                   />
                 </div>
                 {userData.emailNotif && (
