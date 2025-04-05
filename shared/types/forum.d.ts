@@ -28,6 +28,9 @@ export interface DatabaseForum extends Omit<Forum, 'questions'> {
   questions: ObjectId[];
 }
 
+/**
+ * Represents a populated database forum.
+ */
 export interface PopulatedDatabaseForum extends Omit<DatabaseForum, 'questions'> {
   questions: PopulatedDatabaseQuestion[];
 }
