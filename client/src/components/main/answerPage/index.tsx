@@ -24,8 +24,11 @@ const AnswerPage = () => {
   return (
     <>
       <VoteComponent question={question} />
-      <AnswerHeader ansCount={question.answers.length} title={question.title} />
-      {isForumTitle && <div className='forum_details'>Posted in {forumTitle}</div>}
+      <AnswerHeader
+        ansCount={question.answers.length}
+        title={question.title}
+        forumTitle={isForumTitle ? forumTitle : undefined}
+      />
       <QuestionBody
         views={question.views.length}
         text={question.text}
