@@ -383,6 +383,11 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Converts a users activity log to readable values for Heatmap Calendar
+   * @param log the activity log of the user
+   * @returns an array of objects with date and count
+   */
   const convertActivityToValues = () => {
     if (!username) return [];
     try {
@@ -406,12 +411,22 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * gets the color class for the heatmap calendar based on the number of contributions
+   * @param count number representing the number of contributions
+   * @returns a string representing the color class
+   */
   const getColorClass = (count: number) => {
     if (count === 0) return 'color-empty';
     const level = Math.min(count, 4);
     return `color-scale-${level}`;
   };
 
+  /**
+   * handles the mouse over event for the heatmap calendar
+   * @param event mouse event
+   * @param value the value of the heatmap calendar
+   */
   const handleMouseOver = (
     event: React.MouseEvent<SVGRectElement>,
     value: ReactCalendarHeatmap.ReactCalendarHeatmapValue<string> | undefined,
@@ -435,6 +450,9 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * handles the mouse leave event for the heatmap calendar
+   */
   const handleMouseLeave = () => {
     setFloatingContent(prev => ({
       ...prev,
@@ -442,6 +460,10 @@ const useProfileSettings = () => {
     }));
   };
 
+  /**
+   * handles the mouse move event for the heatmap calendar
+   * @param event mouse event
+   */
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement> | undefined) => {
     if (floatingContent.visible) {
       setFloatingContent(prev => ({
