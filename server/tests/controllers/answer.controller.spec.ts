@@ -1,17 +1,79 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
 import { ObjectId } from 'mongodb';
+import {
+  DatabaseQuestion,
+  Question,
+  SafeDatabaseUser,
+  DatabaseNotification,
+} from '@fake-stack-overflow/shared';
 import { app } from '../../app';
 import * as answerUtil from '../../services/answer.service';
 import * as databaseUtil from '../../utils/database.util';
+import * as questionUtil from '../../services/question.service';
+import * as userUtil from '../../services/user.service';
+import * as notifUtil from '../../services/notification.service';
 
 const saveAnswerSpy = jest.spyOn(answerUtil, 'saveAnswer');
 const addAnswerToQuestionSpy = jest.spyOn(answerUtil, 'addAnswerToQuestion');
 const popDocSpy = jest.spyOn(databaseUtil, 'populateDocument');
+const getQuestionByIDSpy = jest.spyOn(questionUtil, 'getQuestionByID');
+const getUserByUsernameSpy = jest.spyOn(userUtil, 'getUserByUsername');
+const saveNotificationSpy = jest.spyOn(notifUtil, 'saveNotification');
 
 describe('POST /addAnswer', () => {
   it('should add a new answer to the question', async () => {
     const validQid = new mongoose.Types.ObjectId();
+
+    const validQ: DatabaseQuestion = {
+      title: 'What is love anyway',
+      text: 'L is for I canot recall',
+      tags: [],
+      askedBy: 'singers',
+      askDateTime: new Date('2024-01-01'),
+      answers: [],
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      comments: [],
+      _id: validQid,
+    };
+
+    const validQNonDB: Question = {
+      title: 'What is love anyway',
+      text: 'L is for I canot recall',
+      tags: [],
+      askedBy: 'singers',
+      askDateTime: new Date('2024-01-01'),
+      answers: [],
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      comments: [],
+    };
+
+    const validUser: SafeDatabaseUser = {
+      _id: new mongoose.Types.ObjectId(),
+      dateJoined: new Date('2023-01-01'),
+      emails: [],
+      badges: [],
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [validQNonDB],
+      answersGiven: [],
+      numUpvotesDownvotes: 0,
+      username: 'singers',
+    };
+
+    const savedNotif: DatabaseNotification = {
+      title: 'New Answer to Your Post',
+      text: 'A new answer has been given to your question: L is for I canot recall',
+      type: 'browser',
+      user: validUser._id,
+      read: false,
+      _id: new mongoose.Types.ObjectId(),
+    };
+
     const validAid = new mongoose.Types.ObjectId();
     const mockReqBody = {
       qid: validQid,
@@ -59,9 +121,31 @@ describe('POST /addAnswer', () => {
       comments: [],
     });
 
+    getQuestionByIDSpy.mockResolvedValueOnce(validQ);
+    getUserByUsernameSpy.mockResolvedValueOnce(validUser);
+    saveNotificationSpy.mockResolvedValueOnce(savedNotif);
+
+    popDocSpy.mockResolvedValueOnce({
+      title: 'New Answer to Your Post',
+      text: 'A new answer has been given to your question: L is for I canot recall',
+      type: 'browser',
+      user: validUser,
+      read: false,
+      _id: savedNotif._id,
+    });
+
     const response = await supertest(app).post('/answer/addAnswer').send(mockReqBody);
 
     expect(response.status).toBe(200);
+    expect(getQuestionByIDSpy).toHaveBeenCalledWith(validQid.toString());
+    expect(getUserByUsernameSpy).toHaveBeenCalledWith('singers');
+    expect(saveNotificationSpy).toHaveBeenCalledWith({
+      title: 'New Answer to Your Post',
+      text: 'A new answer has been given to your question: L is for I canot recall',
+      type: 'browser',
+      user: validUser,
+      read: false,
+    });
     expect(response.body).toEqual({
       _id: validAid.toString(),
       text: 'This is a test answer',

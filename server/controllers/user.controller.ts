@@ -481,7 +481,7 @@ const userController = (socket: FakeSOSocket) => {
       badges.forEach(async badge => {
         const newNotif: Notification = {
           title: 'New Badge Added',
-          text: `You have received a new bagde: ${badge}`,
+          text: `You have received a new badge: ${badge}`,
           type: 'browser',
           user: updatedUser,
           read: false,

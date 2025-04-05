@@ -13,6 +13,7 @@ import QuestionModel from '../models/questions.model';
 import { getQuestionByID } from '../services/question.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveNotification } from '../services/notification.service';
+import { safeUser } from '../tests/mockData.models';
 
 const answerController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -98,7 +99,7 @@ const answerController = (socket: FakeSOSocket) => {
       // The new notification
       const newNotif: Notification = {
         title: 'New Answer to Your Post',
-        text: `A new answer has been given to your question ${foundQuestion.text}`,
+        text: `A new answer has been given to your question: ${foundQuestion.text}`,
         type: 'browser',
         user: asker,
         read: false,
