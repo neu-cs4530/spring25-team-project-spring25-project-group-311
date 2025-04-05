@@ -17,6 +17,7 @@ import {
   SubscribeToNotification,
   UserResponse,
   ChangeFreqRequest,
+  Notification,
   UpdateStreakRequest,
 } from '../types/types';
 import {
@@ -33,6 +34,8 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
+import { saveNotification } from '../services/notification.service';
+import { populateDocument } from '../utils/database.util';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -476,6 +479,34 @@ const userController = (socket: FakeSOSocket) => {
         type: 'updated',
       });
 
+      badges.forEach(async badge => {
+        const newNotif: Notification = {
+          title: 'New Badge Added',
+          text: `You have received a new badge: ${badge}`,
+          type: 'browser',
+          user: updatedUser,
+          read: false,
+        };
+
+        const createdNotif = await saveNotification(newNotif);
+        if ('error' in createdNotif) {
+          throw new Error(createdNotif.error);
+        }
+
+        const populatedNotification = await populateDocument(
+          createdNotif._id.toString(),
+          'notification',
+        );
+
+        if ('error' in populatedNotification) {
+          throw new Error(populatedNotification.error);
+        }
+
+        socket.emit('notificationUpdate', {
+          notification: populatedNotification,
+          type: 'created',
+        });
+      });
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when adding user badge: ${error}`);
