@@ -46,7 +46,7 @@ const sendEmail = async (username: string) => {
     const mailOptions = {
       from: 'raisa16h21@gmail.com',
       to: foundUser.emails[0],
-      subject: 'FakeStackOverflow Email Digest',
+      subject: 'CodeTGT Email Digest',
       text: forumItems,
     };
 

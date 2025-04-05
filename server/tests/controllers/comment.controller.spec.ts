@@ -1,12 +1,21 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
+import { DatabaseNotification, SafeDatabaseUser } from '@fake-stack-overflow/shared';
 import { app } from '../../app';
 import * as commentUtil from '../../services/comment.service';
 import * as databaseUtil from '../../utils/database.util';
+import * as answerUtil from '../../services/answer.service';
+import * as questionUtil from '../../services/question.service';
+import * as userUtil from '../../services/user.service';
+import * as notifUtil from '../../services/notification.service';
 
 const saveCommentSpy = jest.spyOn(commentUtil, 'saveComment');
 const addCommentSpy = jest.spyOn(commentUtil, 'addComment');
 const popDocSpy = jest.spyOn(databaseUtil, 'populateDocument');
+const getQuestionByIDSpy = jest.spyOn(questionUtil, 'getQuestionByID');
+const getUserByUsernameSpy = jest.spyOn(userUtil, 'getUserByUsername');
+const saveNotificationSpy = jest.spyOn(notifUtil, 'saveNotification');
+const getAnswerByIdSpy = jest.spyOn(answerUtil, 'getAnswerById');
 
 describe('POST /addComment', () => {
   it('should add a new comment to the question', async () => {
@@ -27,6 +36,28 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: new Date('2024-06-03'),
+    };
+
+    const validUser: SafeDatabaseUser = {
+      _id: new mongoose.Types.ObjectId(),
+      dateJoined: new Date(),
+      emails: [],
+      badges: [],
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [],
+      numUpvotesDownvotes: 0,
+      username: 'dummyUserId',
+    };
+
+    const savedNotif: DatabaseNotification = {
+      _id: new mongoose.Types.ObjectId(),
+      user: validUser._id,
+      title: 'New Comment to Your Post',
+      text: 'A new comment has been given to your post: This is a test question',
+      type: 'browser',
+      read: false,
     };
 
     saveCommentSpy.mockResolvedValueOnce(mockComment);
@@ -58,9 +89,44 @@ describe('POST /addComment', () => {
       comments: [mockComment],
     });
 
+    getQuestionByIDSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: 'dummyUserId',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [],
+      comments: [mockComment._id],
+    });
+
+    getUserByUsernameSpy.mockResolvedValueOnce(validUser);
+    saveNotificationSpy.mockResolvedValueOnce(savedNotif);
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: savedNotif._id,
+      user: validUser,
+      title: 'New Comment to Your Post',
+      text: 'A new comment has been given to your post: This is a test question',
+      type: 'browser',
+      read: false,
+    });
+
     const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
 
     expect(response.status).toBe(200);
+    expect(getQuestionByIDSpy).toHaveBeenCalledWith(validQid.toString());
+    expect(getUserByUsernameSpy).toHaveBeenCalledWith(validUser.username);
+    expect(saveNotificationSpy).toHaveBeenCalledWith({
+      user: validUser,
+      title: 'New Comment to Your Post',
+      text: 'A new comment has been given to your post: This is a test question',
+      type: 'browser',
+      read: false,
+    });
     expect(response.body).toEqual({
       _id: validCid.toString(),
       text: 'This is a test comment',
@@ -89,6 +155,35 @@ describe('POST /addComment', () => {
       commentDateTime: new Date('2024-06-03'),
     };
 
+    const validUser: SafeDatabaseUser = {
+      _id: new mongoose.Types.ObjectId(),
+      dateJoined: new Date(),
+      emails: [],
+      badges: [],
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [
+        {
+          text: 'This is a test answer',
+          ansBy: 'dummyUserId',
+          ansDateTime: new Date('2024-06-03'),
+          comments: [mockComment],
+        },
+      ],
+      numUpvotesDownvotes: 0,
+      username: 'dummyUserId',
+    };
+
+    const savedNotif: DatabaseNotification = {
+      _id: new mongoose.Types.ObjectId(),
+      user: validUser._id,
+      title: 'New Comment to Your Post',
+      text: 'A new comment has been given to your post: This is a test answer',
+      type: 'browser',
+      read: false,
+    };
+
     saveCommentSpy.mockResolvedValueOnce(mockComment);
 
     addCommentSpy.mockResolvedValueOnce({
@@ -107,9 +202,37 @@ describe('POST /addComment', () => {
       comments: [mockComment],
     });
 
+    getAnswerByIdSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    getUserByUsernameSpy.mockResolvedValueOnce(validUser);
+    saveNotificationSpy.mockResolvedValueOnce(savedNotif);
+    popDocSpy.mockResolvedValueOnce({
+      _id: savedNotif._id,
+      user: validUser,
+      title: 'New Comment to Your Post',
+      text: 'A new comment has been given to your post: This is a test answer',
+      type: 'browser',
+      read: false,
+    });
+
     const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
 
     expect(response.status).toBe(200);
+    expect(getAnswerByIdSpy).toHaveBeenCalledWith(validAid.toString());
+    expect(getUserByUsernameSpy).toHaveBeenCalledWith(validUser.username);
+    expect(saveNotificationSpy).toHaveBeenCalledWith({
+      user: validUser,
+      title: 'New Comment to Your Post',
+      text: 'A new comment has been given to your post: This is a test answer',
+      type: 'browser',
+      read: false,
+    });
     expect(response.body).toEqual({
       _id: validCid.toString(),
       text: 'This is a test comment',
