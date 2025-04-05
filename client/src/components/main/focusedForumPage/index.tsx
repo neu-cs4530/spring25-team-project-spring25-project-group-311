@@ -116,6 +116,9 @@ const FocusedForumPage = () => {
               </div>
             </div>
           )}
+          <div id='section-spacing' className='section-spacing'>
+            <div className='created-by'>Created by {forum.createdBy}</div>
+          </div>
         </div>
       </div>
     </div>
