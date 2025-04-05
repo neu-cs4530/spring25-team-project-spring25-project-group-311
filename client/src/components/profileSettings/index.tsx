@@ -27,6 +27,7 @@ const ProfileSettings: React.FC = () => {
     togglePasswordVisibility,
     convertActivityToValues,
     getColorClass,
+    floatingContent,
 
     setEditBioMode,
     setEmailToReplace,
@@ -50,6 +51,9 @@ const ProfileSettings: React.FC = () => {
     handleNewSelectedBanner,
     handleChangeFrequency,
     handleAddPinnedBadge,
+    handleMouseOver,
+    handleMouseLeave,
+    handleMouseMove,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -100,15 +104,38 @@ const ProfileSettings: React.FC = () => {
 
             {/* ---- Heatmap Section ---- */}
             {
-              <CalendarHeatmap
-                startDate={new Date('2025-01-01')}
-                endDate={new Date('2025-12-01')}
-                values={convertActivityToValues() || []}
-                classForValue={value => {
-                  if (!value || !value.count) return 'color-empty';
-                  return getColorClass(value.count);
-                }}
-              />
+              <div onMouseMove={handleMouseMove} style={{ position: 'relative' }}>
+                <CalendarHeatmap
+                  startDate={new Date('2025-01-01')}
+                  endDate={new Date('2025-12-01')}
+                  values={convertActivityToValues() || []}
+                  classForValue={value => {
+                    if (!value || !value.count) return 'color-empty';
+                    return getColorClass(value.count);
+                  }}
+                  onMouseOver={handleMouseOver}
+                  onMouseLeave={handleMouseLeave}
+                />
+                {floatingContent.visible && (
+                  <div
+                    className='tooltip'
+                    style={{
+                      position: 'fixed',
+                      left: floatingContent.x + 10,
+                      top: floatingContent.y + 10,
+                      backgroundColor: 'white',
+                      border: '1px solid black',
+                      padding: '5px',
+                      zIndex: 1000,
+                      pointerEvents: 'none',
+                      whiteSpace: 'nowrap',
+                      borderRadius: '4px',
+                      color: '#000',
+                    }}>
+                    {floatingContent.content}
+                  </div>
+                )}
+              </div>
             }
 
             {/* ---- Biography Section ---- */}

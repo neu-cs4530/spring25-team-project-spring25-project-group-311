@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactCalendarHeatmap from 'react-calendar-heatmap';
 import {
   getUserByUsername,
   deleteUser,
@@ -39,6 +40,12 @@ const useProfileSettings = () => {
   const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [floatingContent, setFloatingContent] = useState({
+    content: '',
+    x: 0,
+    y: 0,
+    visible: false,
+  });
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -405,6 +412,46 @@ const useProfileSettings = () => {
     return `color-scale-${level}`;
   };
 
+  const handleMouseOver = (
+    event: React.MouseEvent<SVGRectElement>,
+    value: ReactCalendarHeatmap.ReactCalendarHeatmapValue<string> | undefined,
+  ) => {
+    if (value) {
+      const contribution: { votes?: number; questions?: number; answers?: number } =
+        userData?.activityLog?.[value.date] ?? {};
+      let content = '';
+      if (contribution) {
+        const { votes = 0, questions = 0, answers = 0 } = contribution;
+        content = `On ${value.date}: Votes: ${votes}, Questions: ${questions}, Answers: ${answers}`;
+      } else {
+        content = `No contributions on ${value.date}`;
+      }
+      setFloatingContent({
+        content,
+        x: event.clientX,
+        y: event.clientY,
+        visible: true,
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setFloatingContent(prev => ({
+      ...prev,
+      visible: false,
+    }));
+  };
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement> | undefined) => {
+    if (floatingContent.visible) {
+      setFloatingContent(prev => ({
+        ...prev,
+        x: event?.clientX ?? 0,
+        y: event?.clientY ?? 0,
+      }));
+    }
+  };
+
   return {
     userData,
     newPassword,
@@ -450,6 +497,10 @@ const useProfileSettings = () => {
     handleAddPinnedBadge,
     convertActivityToValues,
     getColorClass,
+    handleMouseOver,
+    handleMouseLeave,
+    handleMouseMove,
+    floatingContent,
   };
 };
 
