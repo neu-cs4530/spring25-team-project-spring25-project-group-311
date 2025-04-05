@@ -23,6 +23,8 @@ export interface UserCredentials {
  * - `badges`: A list of badges earned by the user.
  * - `banners`: A list of banner images for the user (optional).
  * - `selectedBanner`: The selected banner image for the user (optional).
+ * - `streak`: The user's current streak. (optional)
+ * - `pinnedBadge`: The user's current pinned badge. (optional)
  * - `browserNotif`: A boolean representing whether the user has opted for browser notifications
  * - `emailNotif`: A boolean representing whether the user has opted for email notifications
  * - `questionsAsked`: A list of questions asked by the user
@@ -36,6 +38,9 @@ export interface User extends UserCredentials {
   badges: string[];
   banners?: string[];
   selectedBanner?: string;
+  streak?: Date[];
+  activityLog?: Date[];
+  pinnedBadge?: string;
   browserNotif: boolean;
   emailNotif: boolean;
   emailFrequency?: string;
@@ -51,6 +56,8 @@ export interface User extends UserCredentials {
  * - `dateJoined`: The date when the user registered.
  * - `biography`: A short description or bio of the user (optional).
  * - `emails`: A list of emails provided by the user (optional).
+ * - `streak`: The user's current streak. (optional)
+ * - `pinnedBadge`: The user's current pinned badge. (optional)
  * - `badges`: A list of badges earned by the user.
  * - `browserNotif`: A boolean representing whether the user has opted for browser notifications
  * - `emailNotif`: A boolean representing whether the user has opted for email notifications
@@ -148,10 +155,17 @@ export interface UpdateEmailRequest extends AddEmailRequest {
  * - `username`: The username of the user to add the badge to (body).
  * - `badge`: The badge to add to the user.
  */
-export interface AddBadgeRequest extends Request {
+export interface AddBadgesRequest extends Request {
   body: {
     username: string;
     badges: string[];
+  };
+}
+
+export interface AddBadgeRequest extends Request {
+  body: {
+    username: string;
+    pinnedBadge: string;
   };
 }
 
@@ -189,7 +203,7 @@ export interface SubscribeToNotification extends Request {
 export interface ChangeFreqRequest extends Request {
   body: {
     username: string;
-    frequency: 'weekly' | 'daily' | 'hourly';
+    emailFreq: 'weekly' | 'daily' | 'hourly';
   };
 }
 
@@ -200,5 +214,12 @@ export interface ChangeFreqRequest extends Request {
 export interface SendEmailNotif extends Request {
   body: {
     username: string;
+  };
+}
+
+export interface UpdateStreakRequest extends Request {
+  body: {
+    username: string;
+    date: Date;
   };
 }

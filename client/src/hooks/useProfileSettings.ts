@@ -11,7 +11,7 @@ import {
   awardBadges,
   awardBanners,
   newActiveBanner,
-  sendEmails,
+  addPinnedBadge,
   changeFreq,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
@@ -207,9 +207,6 @@ const useProfileSettings = () => {
         resolve(null); // Resolve the promise
       });
 
-      if (type === 'email') {
-        await sendEmails(username);
-      }
       setSuccessMessage('Subscription changed!');
       setErrorMessage(null);
     } catch (error) {
@@ -223,13 +220,7 @@ const useProfileSettings = () => {
    */
   const handleChangeFrequency = async (frequency: string) => {
     if (!username) return;
-    if (
-      frequency !== 'weekly' &&
-      frequency !== 'hourly' &&
-      frequency !== 'monthly' &&
-      frequency !== 'daily'
-    )
-      return;
+    if (frequency !== 'weekly' && frequency !== 'hourly' && frequency !== 'daily') return;
 
     try {
       const updatedUser = await changeFreq(username, frequency);
@@ -334,6 +325,20 @@ const useProfileSettings = () => {
     handleAwardBanners();
   };
 
+  const handleAddNewBanner = async (banner: string) => {
+    if (!username) return;
+    try {
+      const updatedUser = await awardBanners(username, [banner]);
+      await new Promise(resolve => {
+        setUserData(updatedUser);
+        resolve(null);
+      });
+    } catch (error) {
+      setErrorMessage(`Failed to award banner: ${error}`);
+      setSuccessMessage(null);
+    }
+  };
+
   /**
    * Handler for deleting the user (triggers confirmation modal)
    */
@@ -353,6 +358,24 @@ const useProfileSettings = () => {
         setShowConfirmation(false);
       }
     });
+  };
+
+  /**
+   * handles the on click for pinning a badge to a user
+   * @param badge string representing the location of the image
+   * @returns an updated user with the pinned badge
+   */
+  const handleAddPinnedBadge = async (badge: string) => {
+    if (!username) return;
+    try {
+      const updatedUser = await addPinnedBadge(username, badge);
+      await new Promise(resolve => {
+        setUserData(updatedUser);
+        resolve(null);
+      });
+    } catch (error) {
+      setErrorMessage('Failed to pin badge');
+    }
   };
 
   return {
@@ -396,6 +419,8 @@ const useProfileSettings = () => {
     handleAwardBanners,
     handleNewSelectedBanner,
     handleChangeFrequency,
+    handleAddNewBanner,
+    handleAddPinnedBadge,
   };
 };
 

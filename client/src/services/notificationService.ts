@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { Notification, PopulatedDatabaseNotification } from '@fake-stack-overflow/shared';
+import { PopulatedDatabaseNotification } from '@fake-stack-overflow/shared';
 import { ObjectId } from 'mongodb';
 import api from './config';
 
@@ -20,27 +19,6 @@ const getUserNotifs = async (username: string): Promise<PopulatedDatabaseNotific
 };
 
 /**
- * Function to create notification
- * @param notification the notification details () used to create the notification
- * @returns A created notification
- * @throws Error if there is an issue creating a notification
- */
-const createNotif = async (
-  notification: Omit<Notification, 'sent'>,
-): Promise<PopulatedDatabaseNotification> => {
-  try {
-    const res = await api.post(`${NOTIFICATION_API_URL}/createNotif/`, notification);
-    return res.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(`Error while creating notification: ${error.response.data}`);
-    } else {
-      throw new Error('Error while reating notification');
-    }
-  }
-};
-
-/**
  * Function to mark a notification as read
  * @param notifID The ID of the notification
  * @returns A read notification
@@ -54,4 +32,4 @@ const readNotif = async (notifID: ObjectId): Promise<PopulatedDatabaseNotificati
   return res.data;
 };
 
-export { getUserNotifs, createNotif, readNotif };
+export { getUserNotifs, readNotif };

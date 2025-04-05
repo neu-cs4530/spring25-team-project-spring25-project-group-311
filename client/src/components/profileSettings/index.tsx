@@ -2,7 +2,7 @@ import React from 'react';
 import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
-import NotificationToggleItem from './notificationToggleItem';
+import { useHeaderContext } from '../../contexts/HeaderContext';
 
 const ProfileSettings: React.FC = () => {
   const {
@@ -43,9 +43,13 @@ const ProfileSettings: React.FC = () => {
     handleDeleteUser,
     handleSubscription,
     handleRefresh,
+    handleAddNewBanner,
     handleNewSelectedBanner,
     handleChangeFrequency,
+    handleAddPinnedBadge,
   } = useProfileSettings();
+
+  const { setHeaderBackground } = useHeaderContext();
 
   if (loading) {
     return (
@@ -75,7 +79,21 @@ const ProfileSettings: React.FC = () => {
             <h4>General Information</h4>
             <p>
               <strong>Username:</strong> {userData.username}
+              {userData.pinnedBadge && userData.pinnedBadge !== '' && (
+                <img
+                  src={userData.pinnedBadge}
+                  alt='No image found'
+                  style={{ marginLeft: '1rem', height: '75px', width: '75px' }}
+                />
+              )}
             </p>
+
+            {/* ---- Daily Streak Tracker Section ---- */}
+            {
+              <p>
+                <strong>Current Streak: </strong> {userData.streak ? userData.streak.length : 0}
+              </p>
+            }
 
             {/* ---- Biography Section ---- */}
             {!editBioMode && (
@@ -131,29 +149,11 @@ const ProfileSettings: React.FC = () => {
                     <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
                       <img src={img} style={{ width: '100px', height: '100px' }} />
                       <button
-                        className='pin-button'
+                        className='login-button'
                         style={{ display: 'block', marginTop: '0.5rem' }}
                         // Pinning a badge to the user's profile
                         onClick={() => {
-                          // finds the first strong element in the document (which is the username)
-                          const usernameElement = document.querySelector('p strong');
-                          if (usernameElement) {
-                            // Remove any previously pinned badge
-                            const existingPinnedBadge =
-                              usernameElement.parentNode?.querySelector('img[alt="Pinned badge"]');
-                            if (existingPinnedBadge) {
-                              existingPinnedBadge.remove();
-                            }
-
-                            // Add the new pinned badge
-                            const pinnedBadge = document.createElement('img');
-                            pinnedBadge.src = img;
-                            pinnedBadge.alt = 'Pinned badge';
-                            pinnedBadge.style.marginLeft = '1rem';
-                            pinnedBadge.style.height = '75px';
-                            pinnedBadge.style.width = '75px';
-                            usernameElement.parentNode?.appendChild(pinnedBadge);
-                          }
+                          handleAddPinnedBadge(img);
                         }}>
                         Pin
                       </button>
@@ -166,20 +166,63 @@ const ProfileSettings: React.FC = () => {
             {/* ---- Banners Section ---- */}
             {
               <div style={{ margin: '1rem 0' }}>
-                {' '}
-                Banners
+                <h4>Your Banners</h4>
                 <p>
                   {userData.banners?.map(img => (
                     <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
                       <button
-                        className='pin-button'
-                        style={{ display: 'block', marginTop: '0.5rem' }}
-                        color={img}
+                        className='login-button'
+                        style={{
+                          display: 'block',
+                          marginTop: '0.5rem',
+                          backgroundColor: img,
+                          width: '60px',
+                          height: '30px',
+                        }}
                         onClick={() => {
                           handleNewSelectedBanner(img);
-                        }}>
-                        {img}
-                      </button>
+                          setHeaderBackground(img);
+                        }}></button>
+                    </div>
+                  ))}
+                </p>
+              </div>
+            }
+            {
+              <div style={{ margin: '1rem 0' }}>
+                <h4>Store</h4>
+                <p>
+                  {['red', 'orange', 'yellow', 'purple'].map(color => (
+                    <div
+                      key={color}
+                      style={{ display: 'inline-block', marginRight: '1rem', textAlign: 'center' }}>
+                      <div>
+                        <div
+                          className='badge'
+                          style={{
+                            backgroundColor: color,
+                            width: '60px',
+                            height: '30px',
+                            margin: '0 auto',
+                          }}></div>
+                        {userData.badges.length > 0 && (
+                          <button
+                            className='login-button'
+                            style={{
+                              width: '60px',
+                              height: '30px',
+                              marginTop: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            onClick={() => {
+                              handleAddNewBanner(color);
+                            }}>
+                            Buy
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </p>
@@ -270,35 +313,45 @@ const ProfileSettings: React.FC = () => {
             {canEditProfile && (
               <>
                 <h4>Notifications</h4>
-                <NotificationToggleItem notifType={'browser'} toggleNotif={handleSubscription} />
-                <NotificationToggleItem notifType={'email'} toggleNotif={handleSubscription} />
+                <div className='notification-display'>
+                  <p>Browser-Side Notifications</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.browserNotif}
+                    onChange={() => handleSubscription}
+                  />
+                </div>
+                <div className='notification-display'>
+                  <p>Email Notification</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.emailNotif}
+                    onChange={() => handleSubscription}
+                  />
+                </div>
                 {userData.emailNotif && (
                   <div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='weekly'
-                        defaultChecked
-                        onClick={() => handleChangeFrequency('weekly')}
-                      />
-                      <label>Weekly</label>
-                    </div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='hourly'
-                        onClick={() => handleChangeFrequency('hourly')}
-                      />
-                      <label>Hourly</label>
-                    </div>
-                    <div>
-                      <input
-                        type='radio'
-                        value='daily'
-                        onClick={() => handleChangeFrequency('daily')}
-                      />
-                      <label>Daily</label>
-                    </div>
+                    <input
+                      type='radio'
+                      value='weekly'
+                      checked={userData.emailFrequency === 'weekly'}
+                      onClick={() => handleChangeFrequency('weekly')}
+                    />
+                    <label>Weekly</label>
+                    <input
+                      type='radio'
+                      value='hourly'
+                      checked={userData.emailFrequency === 'hourly'}
+                      onClick={() => handleChangeFrequency('hourly')}
+                    />
+                    <label>Hourly</label>
+                    <input
+                      type='radio'
+                      value='daily'
+                      checked={userData.emailFrequency === 'daily'}
+                      onClick={() => handleChangeFrequency('daily')}
+                    />
+                    <label>Daily</label>
                   </div>
                 )}
               </>

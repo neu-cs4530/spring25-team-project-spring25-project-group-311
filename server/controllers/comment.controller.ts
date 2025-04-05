@@ -6,9 +6,17 @@ import {
   FakeSOSocket,
   PopulatedDatabaseQuestion,
   PopulatedDatabaseAnswer,
+  QuestionResponse,
+  AnswerResponse,
+  UserResponse,
+  Notification,
 } from '../types/types';
 import { addComment, saveComment } from '../services/comment.service';
 import { populateDocument } from '../utils/database.util';
+import { getQuestionByID } from '../services/question.service';
+import { getAnswerById } from '../services/answer.service';
+import { getUserByUsername } from '../services/user.service';
+import { saveNotification } from '../services/notification.service';
 
 const commentController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -95,9 +103,55 @@ const commentController = (socket: FakeSOSocket) => {
         throw new Error(populatedDoc.error);
       }
 
+      let foundParentPost: QuestionResponse | AnswerResponse;
+      let asker: UserResponse;
+
+      if (type === 'question') {
+        foundParentPost = await getQuestionByID(id);
+
+        if ('error' in foundParentPost) {
+          throw new Error(foundParentPost.error as string);
+        }
+
+        asker = await getUserByUsername(foundParentPost.askedBy);
+      } else {
+        foundParentPost = await getAnswerById(id);
+
+        if ('error' in foundParentPost) {
+          throw new Error(foundParentPost.error as string);
+        }
+
+        asker = await getUserByUsername(foundParentPost.ansBy);
+      }
+
+      if ('error' in asker) {
+        throw new Error(asker.error as string);
+      }
+
+      // The new notification
+      const newNotif: Notification = {
+        title: 'New Comment to Your Post',
+        text: `A new comment has been given to your post: ${foundParentPost.text}`,
+        type: 'browser',
+        user: asker,
+        read: false,
+      };
+
+      const savedNotif = await saveNotification(newNotif);
+      if ('error' in savedNotif) {
+        throw new Error(savedNotif.error as string);
+      }
+
+      const populatedNotif = await populateDocument(savedNotif._id.toString(), 'notification');
+
       socket.emit('commentUpdate', {
         result: populatedDoc as PopulatedDatabaseQuestion | PopulatedDatabaseAnswer,
         type,
+      });
+
+      socket.emit('notificationUpdate', {
+        notification: populatedNotif,
+        type: 'created',
       });
       res.json(comFromDb);
     } catch (err: unknown) {
