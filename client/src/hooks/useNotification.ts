@@ -35,7 +35,7 @@ const useNotification = () => {
       const userUnreadNotifs = (await getUserNotifs(user.username)).filter(
         n => n.type === 'browser' && n.read === false,
       );
-      if (user.mutedNotif && user.mutedTime && new Date() < user.mutedTime) {
+      if (user.mutedNotif && user.mutedTime && new Date() < new Date(user.mutedTime)) {
         setUnreadBrowserNotifs([]);
       } else {
         setUnreadBrowserNotifs(userUnreadNotifs);
