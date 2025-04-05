@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './index.css';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
@@ -58,6 +58,34 @@ const ProfileSettings: React.FC = () => {
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
+  const [dailyChallenge, setDailyChallenge] = useState(null);
+  const [challengeCompleted, setChallengeCompleted] = useState(false);
+
+  useEffect(() => {
+    const fetchDailyChallenge = async () => {
+      try {
+        const fetchedChallenge = await completeChallengeAPI(); // Adjust this to match your actual API call
+        setDailyChallenge(fetchedChallenge);
+        setChallengeCompleted(fetchedChallenge.completed); // Assuming 'completed' is a property of the challenge object
+      } catch (error) {
+        console.error('Failed to fetch daily challenge:', error);
+      }
+    };
+
+    fetchDailyChallenge();
+  }, []);
+
+  const handleCompleteChallenge = async () => {
+    if (dailyChallenge) {
+      try {
+        await completeChallengeAPI(dailyChallenge.id);
+        setChallengeCompleted(true);
+        handleRefresh(); //  refresh user data if challenges affect profiles
+      } catch (error) {
+        console.error('Failed to complete challenge:', error);
+      }
+    }
+  };
 
   if (loading) {
     return (
