@@ -60,13 +60,13 @@ const FocusedForumPage = () => {
       </div>
       <div id='sideBarNav' className='sideBarNav'>
         <div>
-          <div className='h1'>
+          <div className='header1'>
             <b>Description</b>
           </div>
           <div className='member-item'> {forum.description}</div>
         </div>
         <div id='section-spacing' className='section-spacing'>
-          <div className='h1'>
+          <div className='header1'>
             <b>Members</b>
           </div>
           <div className='members-list'>
@@ -91,7 +91,7 @@ const FocusedForumPage = () => {
           </div>
           {showAwaitingMembers && (
             <div id='section-spacing' className='section-spacing'>
-              <div className='h1'>
+              <div className='header1'>
                 <b>Awaiting Members</b>
               </div>
               <div className='members-list'>

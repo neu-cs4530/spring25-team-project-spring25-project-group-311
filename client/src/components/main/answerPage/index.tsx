@@ -9,13 +9,6 @@ import VoteComponent from '../voteComponent';
 import CommentSection from '../commentSection';
 import useAnswerPage from '../../../hooks/useAnswerPage';
 
-// /**
-//  * Allows for conditional rendering based on forum membership.
-//  */
-// interface AnswerPageProps {
-//   forumId?: string;
-// }
-
 /**
  * AnswerPage component that displays the full content of a question along with its answers.
  * It also includes the functionality to vote, ask a new question, and post a new answer.
@@ -32,7 +25,7 @@ const AnswerPage = () => {
     <>
       <VoteComponent question={question} />
       <AnswerHeader ansCount={question.answers.length} title={question.title} />
-      {isForumTitle && <div>Posted in {forumTitle}</div>}
+      {isForumTitle && <div className='forum_details'>Posted in {forumTitle}</div>}
       <QuestionBody
         views={question.views.length}
         text={question.text}
