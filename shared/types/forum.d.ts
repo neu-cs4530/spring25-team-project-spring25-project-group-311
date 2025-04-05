@@ -61,6 +61,9 @@ export interface ForumMembershipRequest extends Request {
   };
 }
 
+/**
+ * Express request for forum question ordering.
+ */
 export interface FindForumQuestionRequest extends Request {
   query: {
     fid: string;
