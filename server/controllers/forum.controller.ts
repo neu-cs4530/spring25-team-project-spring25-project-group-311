@@ -250,6 +250,7 @@ const forumController = (socket: FakeSOSocket) => {
       const questionWithTags = {
         ...questionInfo,
         tags: await processTags(questionInfo.tags),
+        forumId: fid,
       };
 
       if (questionWithTags.tags.length === 0) {
