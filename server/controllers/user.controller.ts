@@ -1,5 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import validate from 'deep-email-validator';
+import { ActivityType } from '@fake-stack-overflow/shared/types/activity';
 import {
   UserRequest,
   User,
@@ -32,7 +33,6 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
-import { ActivityType } from  '../../shared/types/activity';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -752,46 +752,28 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(foundUser.error);
       }
 
+      const dateStr = new Date(date).toISOString().split('T')[0];
+
       // if the user doesnt have an activty log give it an empty one
       if (!foundUser.activityLog) {
-        foundUser.activityLog = new Map<Date,[Map<string,number>]>();
-        foundUser.activityLog.set(new Date(), []);
+        foundUser.activityLog = {};
       }
 
+      const activityLog = foundUser.activityLog as Record<
+        string,
+        { votes: number; questions: number; answers: number }
+      >;
       // if the date is not found in the activity log
-      if (!foundUser.activityLog.has(date)) {
-        // add date with new activity
-        const activityMap = new Map<string,number>();
-        activityMap.set(activity, 1);
-        foundUser.activityLog.set(date,[activityMap]);
+      if (!activityLog[dateStr]) {
+        activityLog[dateStr] = { votes: 0, questions: 0, answers: 0 };
       }
-      // if the date is found in the activity log
-      else {
-        const activityMaps = foundUser.activityLog.get(date);
-        if (activityMaps) {
-          let activityFound = false;
-          const newMapList = [];
-          for (const activityMap of activityMaps) {
-            const newMap = new Map<string,number>();
-            activityMap.forEach((value, key) => {
-              if (key === activity) {
-                newMap.set(activity, value + 1);
-                activityFound = true;
-              }
-              else {
-                newMap.set(activity, value);
-              }
-            })
 
-            newMapList.push(newMap);
-          }
-          if (!activityFound) {
-            const newMap = new Map<string,number>();
-            newMap.set(activity, 1);
-            newMapList.push(newMap);
-          }
-          foundUser.activityLog.set(date, newMapList);
-        }
+      // if the date is found in the activity log
+      const validActivities: ActivityType[] = ['votes', 'questions', 'answers'];
+      if (validActivities.includes(activity as ActivityType)) {
+        activityLog[dateStr][activity as ActivityType] += 1;
+      } else {
+        throw new Error(`Invalid activity type: ${activity}`);
       }
 
       // if the user doesnt have a streak update the streak with the date
@@ -800,14 +782,12 @@ const userController = (socket: FakeSOSocket) => {
         foundUser.streak = [date];
       }
       // if the user does have a streak
-      else {
+      else if (!foundUser.streak.includes(date)) {
         // if the user streak does not include this date push the date onto its streak
-        if (!foundUser.streak.includes(date)) {
-          foundUser.streak.push(date);
-          // if the dates are not sequential reset the streak to just this date
-          if (!areDatesSequential(foundUser.streak)) {
-            foundUser.streak = [date];
-          }
+        foundUser.streak.push(date);
+        // if the dates are not sequential reset the streak to just this date
+        if (!areDatesSequential(foundUser.streak)) {
+          foundUser.streak = [date];
         }
       }
 
@@ -827,7 +807,11 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
-      res.status(500).send(`Error updating user streak: ${error}`);
+      res
+        .status(500)
+        .send(
+          `Error updating user streak: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+        );
     }
   };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import CalendarHeatmap from 'react-calendar-heatmap';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
@@ -24,6 +25,8 @@ const ProfileSettings: React.FC = () => {
     canEditProfile,
     showPassword,
     togglePasswordVisibility,
+    convertActivityToValues,
+    getColorClass,
 
     setEditBioMode,
     setEmailToReplace,
@@ -93,6 +96,19 @@ const ProfileSettings: React.FC = () => {
               <p>
                 <strong>Current Streak: </strong> {userData.streak ? userData.streak.length : 0}
               </p>
+            }
+
+            {/* ---- Heatmap Section ---- */}
+            {
+              <CalendarHeatmap
+                startDate={new Date('2025-01-01')}
+                endDate={new Date('2025-12-01')}
+                values={convertActivityToValues() || []}
+                classForValue={value => {
+                  if (!value || !value.count) return 'color-empty';
+                  return getColorClass(value.count);
+                }}
+              />
             }
 
             {/* ---- Biography Section ---- */}

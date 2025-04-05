@@ -4,4 +4,4 @@
  * - `Question` a question a user asks.
  * - `Vote` an upvote or a downvote on a question or answer.
  */
-export type ActivityType = 'Answer' | 'Question' | 'Vote';
+export type ActivityType = 'answers' | 'questions' | 'votes';

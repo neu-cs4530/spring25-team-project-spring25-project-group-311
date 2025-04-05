@@ -247,14 +247,12 @@ const useProfileSettings = () => {
         !userData.badges.includes('/badge_images/One_Hundred_Comments_Badge.png')
       ) {
         badges.push('/badge_images/One_Hundred_Comments_Badge.png');
-      } else if (
+      }
+      if (
         userData?.questionsAsked &&
         userData?.questionsAsked?.length > 0 &&
         !userData.badges.includes('/badge_images/First_Post_Badge.png')
       ) {
-        badges.push('/badge_images/First_Post_Badge.png');
-      }
-      if (userData && !userData.badges.includes('/badge_images/First_Post_Badge.png')) {
         badges.push('/badge_images/First_Post_Badge.png');
       }
 
@@ -378,6 +376,35 @@ const useProfileSettings = () => {
     }
   };
 
+  const convertActivityToValues = () => {
+    if (!username) return [];
+    try {
+      const log: Record<string, { votes?: number; questions?: number; answers?: number }> =
+        userData?.activityLog || {};
+      const values: { date: string; count: number }[] = [];
+      if (log) {
+        for (const date in log) {
+          if (Object.prototype.hasOwnProperty.call(log, date)) {
+            const { votes, questions, answers } = log[date];
+            const total = (votes ?? 0) + (questions ?? 0) + (answers ?? 0);
+
+            values.push({ date, count: total });
+          }
+        }
+      }
+      return values;
+    } catch (error) {
+      setErrorMessage('Failed to convert activity to values');
+      return [];
+    }
+  };
+
+  const getColorClass = (count: number) => {
+    if (count === 0) return 'color-empty';
+    const level = Math.min(count, 4);
+    return `color-scale-${level}`;
+  };
+
   return {
     userData,
     newPassword,
@@ -421,6 +448,8 @@ const useProfileSettings = () => {
     handleChangeFrequency,
     handleAddNewBanner,
     handleAddPinnedBadge,
+    convertActivityToValues,
+    getColorClass,
   };
 };
 

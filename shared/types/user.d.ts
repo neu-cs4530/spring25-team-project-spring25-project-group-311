@@ -40,7 +40,7 @@ export interface User extends UserCredentials {
   banners?: string[];
   selectedBanner?: string;
   streak?: Date[];
-  activityLog?: Map<Date, Map<string, number>[]>;
+  activityLog?: { [ date : String ]: { Vote : number, Question: number, Answer: number }; };
   pinnedBadge?: string;
   browserNotif: boolean;
   emailNotif: boolean;

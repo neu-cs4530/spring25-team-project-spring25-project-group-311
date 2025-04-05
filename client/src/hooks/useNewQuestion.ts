@@ -113,7 +113,8 @@ const useNewQuestion = () => {
       res = await addQuestion(question, fid);
     }
 
-    const userRes = await updateStreak(user.username, question.askDateTime);
+    // Update user streak and activity log
+    const userRes = await updateStreak(user.username, question.askDateTime, 'questions');
     user.streak = userRes.streak;
     user.activityLog = userRes.activityLog;
 

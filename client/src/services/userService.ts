@@ -250,8 +250,8 @@ const addPinnedBadge = async (username: string, pinnedBadge: string): Promise<Sa
   return res.data;
 };
 
-const updateStreak = async (username: string, date: Date) => {
-  const res = await api.patch(`${USER_API_URL}/updateStreak`, { username, date });
+const updateStreak = async (username: string, date: Date, activity: string) => {
+  const res = await api.patch(`${USER_API_URL}/updateStreak`, { username, date, activity });
   if (res.status !== 200) {
     throw new Error('Error while updating streak');
   }
