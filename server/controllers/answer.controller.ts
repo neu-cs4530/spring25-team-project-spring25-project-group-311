@@ -9,11 +9,9 @@ import {
 } from '../types/types';
 import { addAnswerToQuestion, saveAnswer } from '../services/answer.service';
 import { populateDocument } from '../utils/database.util';
-import QuestionModel from '../models/questions.model';
 import { getQuestionByID } from '../services/question.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveNotification } from '../services/notification.service';
-import { safeUser } from '../tests/mockData.models';
 
 const answerController = (socket: FakeSOSocket) => {
   const router = express.Router();
