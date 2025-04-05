@@ -71,6 +71,31 @@ const userController = (socket: FakeSOSocket) => {
     req.body.newEmail.trim() !== '';
 
   /**
+   * Validates that the request body contains all required fields to add badges to a user.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddBadgesBodyValid = (req: AddBadgesRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    !!req.body.badges &&
+    Array.isArray(req.body.badges) &&
+    req.body.badges.length > 0;
+  // Checks that there are actually badges being added
+
+  /**
+   * Validates that the request body contains all required fields to update a user's streak
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isUpdateStreakBodyValid = (req: UpdateStreakRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.date !== undefined;
+
+  /**
    * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
    * and does it have an @ symbol and ends with a . something)?
    * @param em The email to validate
@@ -95,7 +120,7 @@ const userController = (socket: FakeSOSocket) => {
   /**
    * Validates that the request body contains all required fields to change the frequency of a subscription.
    * @param req The incoming request containing user data.
-   * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
    */
   const isChangeFreqBodyValid = (req: ChangeFreqRequest): boolean =>
     req.body !== undefined &&
@@ -103,9 +128,22 @@ const userController = (socket: FakeSOSocket) => {
     req.body.username.trim() !== '' &&
     req.body.emailFreq !== undefined;
 
+  /**
+   * Validates that the request body contains all required fields to pin a badge.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
   const isAddPinnedBadgeRequestValid = (req: AddBadgeRequest): boolean =>
-    req.body !== undefined && req.body.username !== undefined && req.body.pinnedBadge !== undefined;
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.pinnedBadge !== undefined;
 
+  /**
+   * Determines if a list of dates are in sequential order
+   * @param dates The list of dates to check
+   * @returns `true` if the dates are in sequential order; otherwise, `false`.
+   */
   const areDatesSequential = (dates: Date[]): boolean => {
     if (dates.length <= 1) {
       return true;
@@ -124,6 +162,18 @@ const userController = (socket: FakeSOSocket) => {
 
     return true;
   };
+
+  /**
+   * Validates that the request body contains all required fields to add a selected banner.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddSelectedBannerBodyValid = (req: AddSelectedBannerRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.banner !== undefined &&
+    req.body.banner !== '';
 
   /**
    * Handles the creation of a new user account.
@@ -448,6 +498,11 @@ const userController = (socket: FakeSOSocket) => {
    */
   const addBadges = async (req: AddBadgesRequest, res: Response): Promise<void> => {
     try {
+      if (!isAddBadgesBodyValid(req)) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+
       const { username, badges } = req.body;
 
       const foundUser = await getUserByUsername(username);
@@ -492,15 +547,17 @@ const userController = (socket: FakeSOSocket) => {
 
       if (!isAddPinnedBadgeRequestValid(req)) {
         res.status(400).send(`invalid body`);
-      }
-
-      if (!pinnedBadge) {
-        res.status(400).send(`Error when adding a pinned badge: ${pinnedBadge}`);
+        return;
       }
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
+      }
+
+      if (pinnedBadge.length > 0 && !foundUser.badges.includes(pinnedBadge)) {
+        res.status(400).send('Pinned badge not associated with user');
+        return;
       }
 
       const updatedUser = await updateUser(username, { pinnedBadge });
@@ -519,8 +576,22 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds a banner to a user.
+   * @param req The request containing the username and the banner to add.
+   * @param res The response containing either the user or an error
+   * @returns A promise resolving to void
+   */
   const addBanners = async (req: AddBannerRequest, res: Response): Promise<void> => {
     try {
+      if (
+        req.body.username === undefined ||
+        req.body.username.trim() === '' ||
+        req.body.banners === undefined
+      ) {
+        res.status(400).send('Invalid request');
+        return;
+      }
       const { username, banners } = req.body;
 
       if (!Array.isArray(banners) || banners.length === 0) {
@@ -558,13 +629,29 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds a selected banner to a user.
+   * @param req The request containing the username and the selected banner
+   * @param res The response containing either the user or an error
+   * @returns A promise resolving to void
+   */
   const addSelectedBanner = async (req: AddSelectedBannerRequest, res: Response): Promise<void> => {
     try {
+      if (!isAddSelectedBannerBodyValid(req)) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+
       const { username, banner } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
+      }
+
+      if (!foundUser.banners || !foundUser.banners.includes(banner)) {
+        res.status(400).send('Cannot add banner');
+        return;
       }
 
       const updatedUser = await updateUser(username, { selectedBanner: banner });
@@ -699,7 +786,7 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       const upAndDownVoteCount = await getUpvotesAndDownVotesBy(username);
-      res.status(200).send(upAndDownVoteCount);
+      res.status(200).send(`${upAndDownVoteCount}`);
     } catch (error) {
       res.status(500).send(`Error when getting number of up and down votes: ${error}`);
     }
@@ -709,6 +796,7 @@ const userController = (socket: FakeSOSocket) => {
    * Changes the frequency of a user's email notifications.
    * @param req The request containing the username and the frequency
    * @param res The response, either providing the updated user or an error
+   * @returns A promsie resolving to void
    */
   const changeFrequency = async (req: ChangeFreqRequest, res: Response): Promise<void> => {
     try {
@@ -741,8 +829,19 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Updates a user's daily streak
+   * @param req The request containing the username and the date
+   * @param res The response either providing the user or an error
+   * @returns A promise resolving to void
+   */
   const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
     try {
+      if (!isUpdateStreakBodyValid(req)) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+
       const { username, date } = req.body;
 
       const foundUser = await getUserByUsername(username);
@@ -814,9 +913,9 @@ const userController = (socket: FakeSOSocket) => {
   router.post('/addBanners', addBanners);
   router.post('/addSelectedBanner', addSelectedBanner);
   router.patch('/changeSubscription', changeNotifSubscription);
-  router.get('/getQuestionsAsked', getQuestionsAsked);
-  router.get('/getAnswersGiven', getAnswersGiven);
-  router.get('/getVoteCount', getUpvotesAndDownVotes);
+  router.get('/getQuestionsAsked/:username', getQuestionsAsked);
+  router.get('/getAnswersGiven/:username', getAnswersGiven);
+  router.get('/getVoteCount/:username', getUpvotesAndDownVotes);
   router.patch('/changeFrequency', changeFrequency);
   router.patch('/updateStreak', updateUserStreak);
   return router;
