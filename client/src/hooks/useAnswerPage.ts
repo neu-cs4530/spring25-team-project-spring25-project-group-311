@@ -10,6 +10,7 @@ import {
 import useUserContext from './useUserContext';
 import addComment from '../services/commentService';
 import { getQuestionById } from '../services/questionService';
+import { getForumById } from '../services/forumService';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -23,6 +24,8 @@ const useAnswerPage = () => {
   const { qid } = useParams();
   const navigate = useNavigate();
 
+  const [isForumTitle, setIsForumTitle] = useState<boolean>(false);
+  const [forumTitle, setForumTitle] = useState<string>('');
   const { user, socket } = useUserContext();
   const [questionID, setQuestionID] = useState<string>(qid || '');
   const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
@@ -59,7 +62,6 @@ const useAnswerPage = () => {
       if (targetId === undefined) {
         throw new Error('No target ID provided.');
       }
-
       await addComment(targetId, targetType, comment);
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -75,6 +77,11 @@ const useAnswerPage = () => {
       try {
         const res = await getQuestionById(questionID, user.username);
         setQuestion(res || null);
+        if (res.forumId) {
+          setIsForumTitle(true);
+          const forum = await getForumById(res.forumId);
+          setForumTitle(forum.name);
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error fetching question:', error);
@@ -190,6 +197,8 @@ const useAnswerPage = () => {
     question,
     handleNewComment,
     handleNewAnswer,
+    isForumTitle,
+    forumTitle,
   };
 };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getMetaData } from '../../../tool';
 import AnswerView from './answer';
 import AnswerHeader from './header';
@@ -9,19 +9,20 @@ import VoteComponent from '../voteComponent';
 import CommentSection from '../commentSection';
 import useAnswerPage from '../../../hooks/useAnswerPage';
 
-/**
- * Allows for conditional rendering based on forum membership.
- */
-interface AnswerPageProps {
-  forumId?: string;
-}
+// /**
+//  * Allows for conditional rendering based on forum membership.
+//  */
+// interface AnswerPageProps {
+//   forumId?: string;
+// }
 
 /**
  * AnswerPage component that displays the full content of a question along with its answers.
  * It also includes the functionality to vote, ask a new question, and post a new answer.
  */
-const AnswerPage = ({ forumId }: AnswerPageProps) => {
-  const { questionID, question, handleNewComment, handleNewAnswer } = useAnswerPage();
+const AnswerPage = () => {
+  const { questionID, question, handleNewComment, handleNewAnswer, isForumTitle, forumTitle } =
+    useAnswerPage();
 
   if (!question) {
     return null;
@@ -31,6 +32,7 @@ const AnswerPage = ({ forumId }: AnswerPageProps) => {
     <>
       <VoteComponent question={question} />
       <AnswerHeader ansCount={question.answers.length} title={question.title} />
+      {isForumTitle && <div>Posted in {forumTitle}</div>}
       <QuestionBody
         views={question.views.length}
         text={question.text}
