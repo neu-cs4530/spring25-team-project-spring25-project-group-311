@@ -56,35 +56,37 @@ const ProfileSettings: React.FC = () => {
     handleDeleteEmail,
     handleRemovePinnedBadge,
   } = useProfileSettings();
-
+  interface Challenge {
+    _id: string;
+    description: string;
+    completed: boolean;
+  }
   const { setHeaderBackground } = useHeaderContext();
 
-  const [dailyChallenge, setDailyChallenge] = useState(null);
+  const [dailyChallenge, setDailyChallenge] = useState<Challenge | null>(null);
   const [challengeCompleted, setChallengeCompleted] = useState(false);
-
   useEffect(() => {
-    const loadChallenge = async () => {
+    const fetchDailyChallenge = async () => {
       try {
-        const challengeData = await fetchDailyChallenge(); // not void
-        setDailyChallenge(challengeData);
-        setChallengeCompleted(challengeData.completed);
+        const response = await fetch('/api/challenges/daily');
+        const data: Challenge = await response.json();
+        setDailyChallenge(data);
+        setChallengeCompleted(data.completed);
       } catch (error) {
         console.error('Error fetching daily challenge:', error);
       }
     };
 
-    loadChallenge();
+    fetchDailyChallenge();
   }, []);
 
   const handleCompleteChallenge = async () => {
     if (!dailyChallenge) return;
 
     try {
-      const result = await completeChallenge(dailyChallenge._id);
-      if (result.success) {
-        setChallengeCompleted(true);
-        handleRefresh(); // Refresh user data if necessary
-      }
+      await fetch(`/api/challenges/complete/${dailyChallenge._id}`, { method: 'POST' });
+      setChallengeCompleted(true);
+      handleRefresh();
     } catch (error) {
       console.error('Failed to complete challenge:', error);
     }
@@ -130,6 +132,104 @@ const ProfileSettings: React.FC = () => {
                       )}
                     </h6>
                   )}
+    <div className='page-container'>
+      <div className='profile-card'>
+        <h2>Profile</h2>
+        {successMessage && <p className='success-message'>{successMessage}</p>}
+        {errorMessage && <p className='error-message'>{errorMessage}</p>}
+        {userData ? (
+          <>
+            <button
+              className='login-button'
+              onClick={() => {
+                handleRefresh();
+              }}>
+              Refresh
+            </button>
+            <h4>General Information</h4>
+            <p>
+              <strong>Username:</strong> {userData.username}
+              {userData.pinnedBadge && userData.pinnedBadge !== '' && (
+                <img
+                  src={userData.pinnedBadge}
+                  alt='No image found'
+                  style={{ marginLeft: '1rem', height: '75px', width: '75px' }}
+                />
+              )}
+            </p>
+
+            {/* ---- Daily Streak Tracker Section ---- */}
+            {
+              <p>
+                <strong>Current Streak: </strong> {userData.streak ? userData.streak.length : 0}
+              </p>
+            }
+
+            {/* ---- Heatmap Section ---- */}
+            {
+              <div onMouseMove={handleMouseMove} style={{ position: 'relative' }}>
+                <CalendarHeatmap
+                  startDate={new Date('2025-01-01')}
+                  endDate={new Date('2025-12-31')}
+                  values={convertActivityToValues() || []}
+                  classForValue={value => {
+                    if (!value || !value.count) return 'color-empty';
+                    return getColorClass(value.count);
+                  }}
+                  onMouseOver={handleMouseOver}
+                  onMouseLeave={handleMouseLeave}
+                />
+                {floatingContent.visible && (
+                  <div
+                    className='tooltip'
+                    style={{
+                      position: 'fixed',
+                      left: floatingContent.x + 10,
+                      top: floatingContent.y + 10,
+                      backgroundColor: 'white',
+                      border: '1px solid black',
+                      padding: '5px',
+                      zIndex: 1000,
+                      pointerEvents: 'none',
+                      whiteSpace: 'nowrap',
+                      borderRadius: '4px',
+                      color: '#000',
+                    }}>
+                    {floatingContent.content}
+                  </div>
+                )}
+              </div>
+            }
+
+            {/* Daily Challenge Section */}
+            {dailyChallenge && (
+              <div>
+                <h4>Daily Challenge</h4>
+                <p>{dailyChallenge.description}</p>
+                {!challengeCompleted && (
+                  <button onClick={handleCompleteChallenge}>Complete Challenge</button>
+                )}
+                {challengeCompleted && <p>Challenge Completed!</p>}
+              </div>
+            )}
+
+            {/* ---- Biography Section ---- */}
+            {!editBioMode && (
+              <p>
+                <strong>Biography:</strong> {userData.biography || 'No biography yet.'}
+                {canEditProfile && (
+                  <button
+                    className='login-button'
+                    style={{ marginLeft: '1rem' }}
+                    onClick={() => {
+                      setEditBioMode(true);
+                      setNewBio(userData.biography || '');
+                    }}>
+                    Edit
+                  </button>
+                )}
+              </p>
+            )}
 
                   {editBioMode && canEditProfile && (
                     <div style={{ margin: '1rem 0' }}>
@@ -612,3 +712,4 @@ const ProfileSettings: React.FC = () => {
     </>
   );
 };
+export default ProfileSettings;

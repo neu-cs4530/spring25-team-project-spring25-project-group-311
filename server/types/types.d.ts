@@ -26,5 +26,19 @@ export interface DatabaseReadStatus {
   postId: ObjectId;
   read: boolean;
 }
+
+export interface DatabaseChallenge {
+  _id: mongoose.Schema.Types.ObjectId;
+  title: string;
+  description: string;
+  isActive: boolean;
+}
+
+export interface Challenge {
+  title: string;
+  description: string;
+  isActive: boolean;
+}
+
 export type DatabaseReadStatusResponse = DatabaseReadStatus | { error: string };
 export type ReadStatusResponse = boolean | { error: string };

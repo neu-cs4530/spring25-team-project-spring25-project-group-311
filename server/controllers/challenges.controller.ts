@@ -1,5 +1,5 @@
 import express, { Request, Response, Router } from 'express';
-import Challenge from '../models/schema/changelles.schema';
+import challenge from '../models/schema/challenge.schema';
 import ChallengeCompletion from '../models/schema/challengeCompletion.schema';
 import { FakeSOSocket } from '../types/types';
 
@@ -16,14 +16,14 @@ const userController = (socket: FakeSOSocket) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     try {
-      const challenge = await Challenge.findOne({
+      const challengeDate = await challenge.findOne({
         date: { $gte: today, $lt: tomorrow },
       });
-      if (!challenge) {
+      if (!challengeDate) {
         res.status(404).json({ message: 'No challenge available for today' });
-        return; // Explicitly return after sending response
+        return; // return after sending response
       }
-      res.json(challenge);
+      res.json(challengeDate);
     } catch (error) {
       res.status(500).json({ message: error });
     }
@@ -44,7 +44,7 @@ const userController = (socket: FakeSOSocket) => {
 
       if (existingCompletion) {
         res.status(409).json({ message: 'Challenge already completed by this user' });
-        return; // Explicitly return after sending response
+        return; // return after sending response
       }
 
       const completion = new ChallengeCompletion({
