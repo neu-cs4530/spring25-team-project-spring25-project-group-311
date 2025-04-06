@@ -13,7 +13,8 @@ import { DatabaseForum } from '../../../types/types';
 const ForumPage = () => {
   const { forumList } = useForumPage();
   const [sortedForums, setSortedForums] = useState<DatabaseForum[]>([]);
-  const [isSortedAsc, setIsSortedAsc] = useState(true);
+  const [isDateSortedAsc, setIsDateSortedAsc] = useState(false);
+  const [isPopSortedAsc, setIsPopSortedAsc] = useState(false);
   const [userSorted, setUserSorted] = useState(false);
 
   // updates sortedForums based on chages to forumList
@@ -28,14 +29,25 @@ const ForumPage = () => {
     }
   }, [forumList, userSorted]);
 
-  const handleSort = () => {
+  const handleDateSort = () => {
     const sorted = [...sortedForums].sort((a, b) => {
       const dateA = new Date(a.createDateTime).getTime();
       const dateB = new Date(b.createDateTime).getTime();
-      return isSortedAsc ? dateA - dateB : dateB - dateA;
+      return isDateSortedAsc ? dateA - dateB : dateB - dateA;
     });
     setSortedForums(sorted);
-    setIsSortedAsc(!isSortedAsc);
+    setIsDateSortedAsc(!isDateSortedAsc);
+    setUserSorted(true);
+  };
+
+  const handlePopularSort = () => {
+    const sorted = [...sortedForums].sort((a, b) => {
+      const aMemberCount = a.members.length;
+      const bMemberCount = b.members.length;
+      return isPopSortedAsc ? aMemberCount - bMemberCount : bMemberCount - aMemberCount;
+    });
+    setSortedForums(sorted);
+    setIsPopSortedAsc(!isPopSortedAsc);
     setUserSorted(true);
   };
 
@@ -45,8 +57,11 @@ const ForumPage = () => {
         <div className='bold_title'>Forums ({sortedForums?.length})</div>
         <div className='button-group'>
           <CreateForumButton />
-          <button className='greybtn' onClick={handleSort}>
-            Sort by Date {isSortedAsc ? '▲' : '▼'}
+          <button className='greybtn' onClick={handleDateSort}>
+            Sort by Date {isDateSortedAsc ? '▼' : '▲'}
+          </button>
+          <button className='greybtn' onClick={handlePopularSort}>
+            Sort by Popularity {isPopSortedAsc ? '▼' : '▲'}
           </button>
         </div>
       </div>
