@@ -35,6 +35,48 @@ const getQuestionsByOrder = async (
 };
 
 /**
+ * Leave a forum
+ *
+ * @param forumId - The ID of the forum to leave
+ * @param username - The username of the user leaving
+ * @returns The updated forum
+ */
+const leaveForum = async (forumId: string, username: string): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/toggleUserMembership`, {
+    fid: forumId,
+    username,
+    type: 'leave',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when leaving forum');
+  }
+
+  return res.data;
+};
+
+/**
+ * Join a forum
+ *
+ * @param forumId - The ID of the forum to join
+ * @param username - The username of the user joining
+ * @returns The updated forum
+ */
+const joinForum = async (forumId: string, username: string): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/toggleUserMembership`, {
+    fid: forumId,
+    username,
+    type: 'join',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when joining forum');
+  }
+
+  return res.data;
+};
+
+/**
  * Function to get a forum by its id
  *
  * @param forumId - The unique identifier of the forum
@@ -90,4 +132,12 @@ const updateForum = async (forumId: string, updates: Partial<Forum>): Promise<Fo
   }
 };
 
-export { getForums, getForumById, createForum, updateForum, getQuestionsByOrder };
+export {
+  getForums,
+  getForumById,
+  createForum,
+  leaveForum,
+  joinForum,
+  updateForum,
+  getQuestionsByOrder,
+};

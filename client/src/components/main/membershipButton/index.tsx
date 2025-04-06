@@ -12,7 +12,6 @@ interface MembershipButtonProps {
  * The button text and action changes based on whether the user is already a member.
  */
 const MembershipButton = ({ forum, updateForum }: MembershipButtonProps) => {
-  // Use the membership button hook
   const { buttonText, isMember, isAwaitingApproval, error, toggleMembership } = useMembershipButton(
     forum,
     updateForum,
