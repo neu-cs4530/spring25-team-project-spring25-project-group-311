@@ -10,6 +10,10 @@
     width: 98%;
  }
 
+ .notification-card:hover {
+  cursor: pointer;
+ }
+
 .notification-card.notification-title {
   align-self: flex-end;
   background-color: #d1e7ff;
