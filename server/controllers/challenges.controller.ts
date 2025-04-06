@@ -3,7 +3,7 @@ import challenge from '../models/schema/challenge.schema';
 import ChallengeCompletion from '../models/schema/challengeCompletion.schema';
 import { FakeSOSocket } from '../types/types';
 
-const userController = (socket: FakeSOSocket) => {
+const challengeController = (socket: FakeSOSocket) => {
   const router = express.Router();
 
   /**
@@ -16,16 +16,19 @@ const userController = (socket: FakeSOSocket) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     try {
-      const challengeDate = await challenge.findOne({
-        date: { $gte: today, $lt: tomorrow },
-      });
-      if (!challengeDate) {
+      const dailyChallenge = await challenge
+        .findOne({
+          date: { $gte: today, $lt: tomorrow },
+        })
+        .exec();
+
+      if (!dailyChallenge) {
         res.status(404).json({ message: 'No challenge available for today' });
-        return; // return after sending response
+        return;
       }
-      res.json(challengeDate);
+      res.json(dailyChallenge);
     } catch (error) {
-      res.status(500).json({ message: error });
+      res.status(500).json({ message: 'Error fetching daily challenge' });
     }
   });
 
@@ -40,7 +43,7 @@ const userController = (socket: FakeSOSocket) => {
       const existingCompletion = await ChallengeCompletion.findOne({
         userId,
         challengeId,
-      });
+      }).exec();
 
       if (existingCompletion) {
         res.status(409).json({ message: 'Challenge already completed by this user' });
@@ -53,7 +56,7 @@ const userController = (socket: FakeSOSocket) => {
         completionDate: new Date(),
       });
       await completion.save();
-
+      socket.emit('challengeCompleted', { userId, challengeId });
       res.status(201).json({ message: 'Challenge completed successfully', completion });
     } catch (error) {
       res.status(500).json({ message: error });
@@ -63,4 +66,4 @@ const userController = (socket: FakeSOSocket) => {
   return router;
 };
 
-export default userController;
+export default challengeController;

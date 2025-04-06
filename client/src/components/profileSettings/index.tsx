@@ -69,7 +69,10 @@ const ProfileSettings: React.FC = () => {
     const fetchDailyChallenge = async () => {
       try {
         const response = await fetch('/api/challenges/daily');
-        const data: Challenge = await response.json();
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
         setDailyChallenge(data);
         setChallengeCompleted(data.completed);
       } catch (error) {
@@ -84,14 +87,18 @@ const ProfileSettings: React.FC = () => {
     if (!dailyChallenge) return;
 
     try {
-      await fetch(`/api/challenges/complete/${dailyChallenge._id}`, { method: 'POST' });
+      const response = await fetch(`/api/challenges/complete/${dailyChallenge._id}`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       setChallengeCompleted(true);
-      handleRefresh();
+      handleRefresh(); // Optionally refresh user data if challenges affect profiles
     } catch (error) {
       console.error('Failed to complete challenge:', error);
     }
   };
-
   if (loading) {
     return (
       <div className='page-container'>
@@ -209,7 +216,11 @@ const ProfileSettings: React.FC = () => {
                 {!challengeCompleted && (
                   <button onClick={handleCompleteChallenge}>Complete Challenge</button>
                 )}
-                {challengeCompleted && <p>Challenge Completed!</p>}
+                {!challengeCompleted ? (
+                  <button onClick={handleCompleteChallenge}>Complete Challenge</button>
+                ) : (
+                  <p>Challenge Completed!</p>
+                )}
               </div>
             )}
 
