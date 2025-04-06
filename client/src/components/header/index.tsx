@@ -13,7 +13,7 @@ import { useHeaderContext } from '../../contexts/HeaderContext';
  * @param userBanner - The banner color of the current user.
  */
 const Header = () => {
-  const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
+  const { val, handleInputChange, handleKeyDown, handleSignOut, notifCount } = useHeader();
   const { user: currentUser } = useUserContext();
   const { headerBackground } = useHeaderContext();
 
@@ -36,7 +36,7 @@ const Header = () => {
       <button onClick={handleSignOut} className='logout-button'>
         Log out
       </button>
-      <NotificationButton />
+      <NotificationButton count={notifCount} />
       <button
         className='view-profile-button'
         onClick={() => navigate(`/user/${currentUser.username}`)}>
