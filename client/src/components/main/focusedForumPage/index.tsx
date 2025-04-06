@@ -17,6 +17,7 @@ const FocusedForumPage = () => {
   const { forum, updateForum, setQuestionOrder, sortedQuestions } = useFocusedForumPage();
   const [showAwaitingMembers, setShowAwaitingMembers] = useState<boolean>(false);
   const [showAskQuestionButton, setShowAskQuestionButton] = useState<boolean>(true);
+  const [showMembershipButton, setShowMembershipButton] = useState<boolean>(true);
 
   useEffect(() => {
     if (!forum) return;
@@ -32,6 +33,10 @@ const FocusedForumPage = () => {
     }
 
     setShowAskQuestionButton(shouldShowButton);
+
+    if (forum.createdBy === user.username) {
+      setShowMembershipButton(false);
+    }
 
     if (forum.awaitingMembers && forum.awaitingMembers.length > 0) {
       setShowAwaitingMembers(true);
@@ -58,7 +63,7 @@ const FocusedForumPage = () => {
         <div className='space_between right_padding'>
           <div className='bold_title'>{forum.name}</div>
           <div className='buttons-container'>
-            <MembershipButton forum={forum} updateForum={updateForum} />
+            {showMembershipButton && <MembershipButton forum={forum} updateForum={updateForum} />}
             {showAskQuestionButton && <AskQuestionButton forumId={forum._id.toString()} />}
           </div>
         </div>
