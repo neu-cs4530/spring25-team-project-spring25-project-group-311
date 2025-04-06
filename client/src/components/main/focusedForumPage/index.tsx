@@ -19,6 +19,7 @@ const FocusedForumPage = () => {
   const [showAskQuestionButton, setShowAskQuestionButton] = useState<boolean>(true);
   const [showMembershipButton, setShowMembershipButton] = useState<boolean>(true);
 
+  // figuring out button display logic on frontend
   useEffect(() => {
     if (!forum) return;
 

@@ -12,20 +12,13 @@ interface MembershipButtonProps {
  * The button text and action changes based on whether the user is already a member.
  */
 const MembershipButton = ({ forum, updateForum }: MembershipButtonProps) => {
-  const { buttonText, isMember, isAwaitingApproval, error, toggleMembership } = useMembershipButton(
-    forum,
-    updateForum,
-  );
+  const { buttonText, toggleMembership } = useMembershipButton(forum, updateForum);
 
   return (
     <div>
-      <button
-        className={`bluebtn ${isMember ? 'leave-button' : 'join-button'}`}
-        onClick={toggleMembership}>
+      <button className={'bluebtn'} onClick={toggleMembership}>
         {buttonText}
       </button>
-      {isAwaitingApproval && <div className='awaiting-text'>Your request is pending approval</div>}
-      {error && <div className='error-text'>{error}</div>}
     </div>
   );
 };

@@ -77,6 +77,27 @@ const joinForum = async (forumId: string, username: string): Promise<DatabaseFor
 };
 
 /**
+ * Cancel a forum join request
+ *
+ * @param forumId - The ID of the forum to join
+ * @param username - The username of the user canceling their request
+ * @returns The updated forum
+ */
+const cancelJoin = async (forumId: string, username: string): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/toggleUserMembership`, {
+    fid: forumId,
+    username,
+    type: 'cancel',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when joining forum');
+  }
+
+  return res.data;
+};
+
+/**
  * Function to get a forum by its id
  *
  * @param forumId - The unique identifier of the forum
@@ -138,6 +159,7 @@ export {
   createForum,
   leaveForum,
   joinForum,
+  cancelJoin,
   updateForum,
   getQuestionsByOrder,
 };

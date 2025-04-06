@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import useUserContext from './useUserContext';
 import { DatabaseForum } from '../types/types';
-import { getForumById, joinForum, leaveForum } from '../services/forumService';
+import { cancelJoin, getForumById, joinForum, leaveForum } from '../services/forumService';
 
 /**
  * Custom hook for managing forum membership status and actions.
@@ -75,10 +75,14 @@ const useMembershipButton = (
     setIsMember(userInMembers);
     setIsAwaitingApproval(userAwaitingApproval);
 
-    if (userInMembers || userAwaitingApproval) {
+    if (userInMembers) {
       setButtonText('Leave Forum');
-    } else {
+    } else if (userAwaitingApproval) {
+      setButtonText('Cancel Request');
+    } else if (forum.type === 'public') {
       setButtonText('Join Forum');
+    } else if (forum.type === 'private') {
+      setButtonText('Request to Join');
     }
   }, [forum, user]);
 
@@ -92,25 +96,48 @@ const useMembershipButton = (
     setError(null);
 
     try {
-      if (isMember || isAwaitingApproval) {
-        const updatedForum = await leaveForum(forumId, user.username);
+      if (forum.type === 'public') {
+        if (isMember) {
+          const updatedForum = await leaveForum(forumId, user.username);
 
-        setIsMember(false);
-        setIsAwaitingApproval(false);
-        setButtonText('Join Forum');
-        setForum(updatedForum);
-        updateParentForum(updatedForum);
-      } else {
-        const updatedForum = await joinForum(forumId, user.username);
+          setIsMember(false);
+          setButtonText('Join Forum');
+          setForum(updatedForum);
+          updateParentForum(updatedForum);
+        } else {
+          const updatedForum = await joinForum(forumId, user.username);
 
-        const userAwaitingApproval = updatedForum.awaitingMembers?.includes(user.username);
-        const userInMembers = updatedForum.members?.includes(user.username);
+          const userInMembers = updatedForum.members?.includes(user.username);
 
-        setIsAwaitingApproval(userAwaitingApproval);
-        setIsMember(userInMembers);
-        setButtonText('Leave Forum');
-        setForum(updatedForum);
-        updateParentForum(updatedForum);
+          setIsMember(userInMembers);
+          setButtonText('Leave Forum');
+          setForum(updatedForum);
+          updateParentForum(updatedForum);
+        }
+      } else if (forum.type === 'private') {
+        if (isMember) {
+          const updatedForum = await leaveForum(forumId, user.username);
+
+          setIsMember(false);
+          setButtonText('Request to Join');
+          setForum(updatedForum);
+          updateParentForum(updatedForum);
+        } else if (isAwaitingApproval) {
+          const updatedForum = await cancelJoin(forumId, user.username);
+          setIsAwaitingApproval(false);
+          setButtonText('Request to Join');
+          setForum(updatedForum);
+          updateParentForum(updatedForum);
+        } else {
+          const updatedForum = await joinForum(forumId, user.username);
+
+          const userInMembers = updatedForum.members?.includes(user.username);
+
+          setIsMember(userInMembers);
+          setButtonText('Cancel Join Request');
+          setForum(updatedForum);
+          updateParentForum(updatedForum);
+        }
       }
     } catch (err) {
       setError((err as Error).message);
@@ -119,11 +146,8 @@ const useMembershipButton = (
 
   return {
     buttonText,
-    isMember,
-    isAwaitingApproval,
-    error,
     toggleMembership,
-    forum,
+    error,
   };
 };
 
