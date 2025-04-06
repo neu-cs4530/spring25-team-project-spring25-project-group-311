@@ -250,8 +250,7 @@ export const unbanUser = async (fid: string, username: string): Promise<Populate
       return forum;
     }
 
-    let updatedForum: PopulatedDatabaseForum | null;
-    updatedForum = await ForumModel.findOneAndUpdate(
+    const updatedForum: PopulatedDatabaseForum | null = await ForumModel.findOneAndUpdate(
       { _id: fid },
       { $pull: { bannedMembers: username } },
       { new: true },
