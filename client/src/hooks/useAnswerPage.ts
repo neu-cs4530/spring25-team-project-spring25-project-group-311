@@ -24,7 +24,7 @@ const useAnswerPage = () => {
   const { qid } = useParams();
   const navigate = useNavigate();
 
-  const [isForumTitle, setIsForumTitle] = useState<boolean>(false);
+  const [isForumQuestion, setIsForumQuestion] = useState<boolean>(false);
   const [forumTitle, setForumTitle] = useState<string>('');
   const { user, socket } = useUserContext();
   const [questionID, setQuestionID] = useState<string>(qid || '');
@@ -78,7 +78,7 @@ const useAnswerPage = () => {
         const res = await getQuestionById(questionID, user.username);
         setQuestion(res || null);
         if (res.forumId) {
-          setIsForumTitle(true);
+          setIsForumQuestion(true);
           const forum = await getForumById(res.forumId);
           setForumTitle(forum.name);
         }
@@ -197,7 +197,7 @@ const useAnswerPage = () => {
     question,
     handleNewComment,
     handleNewAnswer,
-    isForumTitle,
+    isForumQuestion,
     forumTitle,
   };
 };

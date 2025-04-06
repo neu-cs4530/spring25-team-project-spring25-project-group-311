@@ -14,7 +14,7 @@ import useAnswerPage from '../../../hooks/useAnswerPage';
  * It also includes the functionality to vote, ask a new question, and post a new answer.
  */
 const AnswerPage = () => {
-  const { questionID, question, handleNewComment, handleNewAnswer, isForumTitle, forumTitle } =
+  const { questionID, question, handleNewComment, handleNewAnswer, isForumQuestion, forumTitle } =
     useAnswerPage();
 
   if (!question) {
@@ -27,7 +27,7 @@ const AnswerPage = () => {
       <AnswerHeader
         ansCount={question.answers.length}
         title={question.title}
-        forumTitle={isForumTitle ? forumTitle : undefined}
+        forumTitle={isForumQuestion ? forumTitle : undefined}
       />
       <QuestionBody
         views={question.views.length}

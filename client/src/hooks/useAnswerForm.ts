@@ -4,6 +4,8 @@ import { validateHyperlink } from '../tool';
 import addAnswer from '../services/answerService';
 import useUserContext from './useUserContext';
 import { Answer } from '../types/types';
+import { getQuestionById } from '../services/questionService';
+import { getForumById } from '../services/forumService';
 
 /**
  * Custom hook for managing the state and logic of an answer submission form.
@@ -38,6 +40,21 @@ const useAnswerForm = () => {
    */
   const postAnswer = async () => {
     let isValid = true;
+
+    try {
+      const res = await getQuestionById(questionID, user.username);
+      if (res.forumId) {
+        const forum = await getForumById(res.forumId);
+        if (forum.type === 'private') {
+          if (!forum.members.includes(user.username)) {
+            setTextErr(`Join the private forum ${forum.name} to gain permissions`);
+            isValid = false;
+          }
+        }
+      }
+    } catch (error) {
+      // console.error('');
+    }
 
     if (!text) {
       setTextErr('Answer text cannot be empty');
