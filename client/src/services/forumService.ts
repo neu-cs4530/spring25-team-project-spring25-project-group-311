@@ -90,19 +90,4 @@ const updateForum = async (forumId: string, updates: Partial<Forum>): Promise<Fo
   }
 };
 
-/**
- * Deletes a forum by its name
- *
- * @param forum - The unique identifier of the forum
- * @returns {Promise<Forum>} The deleted forum object
- * @throws {Error} If an error occurs during the deletion process
- */
-const deleteForum = async (forum: string): Promise<Forum> => {
-  const res = await api.delete(`${FORUM_API_URL}/delete/${forum}`);
-  if (res.status !== 200) {
-    throw new Error('Error when deleting forum');
-  }
-  return res.data;
-};
-
-export { getForums, getForumById, createForum, updateForum, deleteForum, getQuestionsByOrder };
+export { getForums, getForumById, createForum, updateForum, getQuestionsByOrder };
