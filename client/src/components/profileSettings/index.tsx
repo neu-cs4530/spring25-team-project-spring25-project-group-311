@@ -48,6 +48,8 @@ const ProfileSettings: React.FC = () => {
     handleChangeFrequency,
     handleMuteNotifications,
     handleAddPinnedBadge,
+    handleDeleteEmail,
+    setEmailToDelete,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -236,13 +238,14 @@ const ProfileSettings: React.FC = () => {
                 <h4>Emails</h4>
                 {userData.emails.map(email => (
                   <div key={email}>
-                    <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />
-                    <button
-                      className='replace-email-button'
-                      style={{ marginLeft: '1rem' }}
-                      onClick={() => setReplaceEmailMode(true)}>
-                      Replace Email
-                    </button>
+                    <EmailDisplayItem
+                      email={email}
+                      selectReplaceEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={() => setReplaceEmailMode(true)}
+                      handleDeleteEmail={setEmailToDelete}
+                      setDeleteEmail={handleDeleteEmail}
+                    />
                   </div>
                 ))}
                 <button
@@ -274,6 +277,7 @@ const ProfileSettings: React.FC = () => {
                   onClick={() => setAddEmailMode(false)}>
                   Cancel
                 </button>
+                {errorMessage && <p>{errorMessage}</p>}
               </div>
             )}
 
@@ -304,7 +308,15 @@ const ProfileSettings: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <EmailDisplayItem key={email} email={email} selectEmail={setEmailToReplace} />
+                    <EmailDisplayItem
+                      key={email}
+                      email={email}
+                      selectReplaceEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={setReplaceEmailMode}
+                      handleDeleteEmail={handleDeleteEmail}
+                      setDeleteEmail={setEmailToDelete}
+                    />
                   ),
                 )}
               </div>

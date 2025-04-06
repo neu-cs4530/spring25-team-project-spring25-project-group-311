@@ -13,6 +13,7 @@ import {
   newActiveBanner,
   addPinnedBadge,
   changeFreq,
+  deleteEmail,
   muteNotifictions,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
@@ -36,6 +37,7 @@ const useProfileSettings = () => {
   const [replaceEmailMode, setReplaceEmailMode] = useState(false);
   const [addEmailMode, setAddEmailMode] = useState(false);
   const [emailToReplace, setEmailToReplace] = useState('');
+  const [emailToDelete, setEmailToDelete] = useState('');
   const [replacementEmail, setReplacementEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -382,6 +384,22 @@ const useProfileSettings = () => {
   };
 
   /**
+   * Handles deleting an email.
+   */
+  const handleDeleteEmail = async () => {
+    if (!username) return;
+    try {
+      await deleteEmail(username, emailToDelete);
+      setSuccessMessage(`Email "${emailToDelete}" deleted successfully.`);
+      setErrorMessage(null);
+      navigate(`/user/${username}`);
+    } catch (error) {
+      setErrorMessage('Failed to delete email.');
+      setSuccessMessage(null);
+    }
+  };
+
+  /**
    * handles the on click for pinning a badge to a user
    * @param badge string representing the location of the image
    * @returns an updated user with the pinned badge
@@ -442,6 +460,8 @@ const useProfileSettings = () => {
     handleChangeFrequency,
     handleAddNewBanner,
     handleAddPinnedBadge,
+    handleDeleteEmail,
+    setEmailToDelete,
     handleMuteNotifications,
   };
 };
