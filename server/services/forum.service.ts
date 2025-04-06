@@ -147,6 +147,47 @@ export const addUserToForum = async (
 };
 
 /**
+ * Cancels a user's request to join a private forum
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to remove from awaiting members.
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const cancelUserJoinRequest = async (
+  fid: string,
+  username: string,
+): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    // nothing to be done
+    if (!forum.awaitingMembers.includes(username) || forum.type === 'public') {
+      return forum;
+    }
+
+    const updatedForum: PopulatedDatabaseForum | null = await ForumModel.findOneAndUpdate(
+      { _id: fid },
+      { $pull: { awaitingMembers: username } },
+      { new: true },
+    ).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when adding user to forum: ${error}` };
+  }
+};
+
+/**
  * Bans a user if they are a member.
  *
  * @param {string} fid - The id of the forum to update
