@@ -328,6 +328,7 @@ const ProfileSettings: React.FC = () => {
                     checked={userData.mutedTime && new Date() < new Date(userData.mutedTime)}
                     onChange={() => handleMuteNotifications()}
                   />
+                  <label>Mute Notification</label>
                 </div>
                 <div className='notification-display'>
                   <p>Email Notification</p>

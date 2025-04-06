@@ -263,7 +263,7 @@ const forumController = (socket: FakeSOSocket) => {
 
         const newNotif: Notification = {
           title: 'New Post in One of Your Forums',
-          text: `A new question ${questionFromDb.text} has been asked in your forum ${result.name} `,
+          text: `A new question: ${questionFromDb.text} has been asked in your forum: ${result.name} `,
           type: 'browser',
           user: member,
           read: false,
