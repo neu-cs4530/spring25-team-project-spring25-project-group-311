@@ -147,11 +147,11 @@ export const addUserToForum = async (
 };
 
 /**
- * Bans a user if they are a member. 
- * 
- * @param fid - The id of the forum to update
- * @param username - The username of the user to ban
- * @returns 
+ * Bans a user if they are a member.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to ban
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
  */
 export const banUser = async (fid: string, username: string): Promise<PopulatedForumResponse> => {
   try {
@@ -161,7 +161,7 @@ export const banUser = async (fid: string, username: string): Promise<PopulatedF
       throw new Error(forum.error);
     }
 
-    // no actino should be taken
+    // no action should be taken
     if (forum.bannedMembers.includes(username) || forum.awaitingMembers.includes(username)) {
       return forum;
     }
@@ -186,6 +186,47 @@ export const banUser = async (fid: string, username: string): Promise<PopulatedF
     return updatedForum;
   } catch (error) {
     return { error: `Error occurred when banning user from forum: ${error}` };
+  }
+};
+
+/**
+ *
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - tThe username of the user to approve
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const approveUser = async (
+  fid: string,
+  username: string,
+): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    let updatedForum: PopulatedDatabaseForum | null;
+    if (forum.type === 'private' && forum.awaitingMembers.includes(username)) {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { members: username }, $pull: { awaitingMembers: username } },
+        { new: true },
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
+    } else {
+      return forum;
+    }
+
+    if (!updatedForum) {
+      throw Error('Error');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when approving user to private forum: ${error}` };
   }
 };
 

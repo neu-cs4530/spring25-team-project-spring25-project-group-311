@@ -11,6 +11,7 @@ import {
   PopulatedDatabaseQuestion,
   FindForumQuestionRequest,
   Notification,
+  ForumModerateRequest,
 } from '../types/types';
 import {
   saveForum,
@@ -20,6 +21,8 @@ import {
   removeUserFromForum,
   addQuestionToForum,
   getForumQuestionsByOrder,
+  approveUser,
+  banUser,
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveQuestion } from '../services/question.service';
@@ -165,6 +168,52 @@ const forumController = (socket: FakeSOSocket) => {
       } else {
         res.status(500).send(`Error when fetching questions by filter`);
       }
+    }
+  };
+
+  const moderateUserMembership = async (
+    req: ForumModerateRequest,
+    res: Response,
+  ): Promise<void> => {
+    if (!req.body || !req.body.fid || !req.body.username || !req.body.moderator || !req.body.type) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { fid, username, moderator, type } = req.body;
+
+    try {
+      const forum = await getForumById(fid);
+      if ('error' in forum) {
+        throw new Error(forum.error);
+      }
+      if (!forum.moderators.includes(moderator)) {
+        throw new Error('Invalid mod permissions');
+      }
+
+      let updatedForum: PopulatedForumResponse;
+      if (type === 'approve') {
+        updatedForum = await approveUser(fid, username);
+      } else if (type === 'ban') {
+        updatedForum = await banUser(fid, username);
+      } else {
+        throw new Error('Invalid type');
+      }
+
+      if ('error' in updatedForum) {
+        throw new Error(updatedForum.error);
+      }
+
+      socket.emit('forumUpdate', {
+        forum: {
+          ...updatedForum,
+          questions: updatedForum.questions.map(question => question._id),
+        } as DatabaseForum,
+        type: 'updated',
+      });
+      res.json(updatedForum);
+    } catch (err) {
+      res.status(500).send(`Error when moderating user membership: ${(err as Error).message}`);
     }
   };
 

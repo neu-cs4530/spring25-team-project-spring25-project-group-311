@@ -65,6 +65,18 @@ export interface ForumMembershipRequest extends Request {
 }
 
 /**
+ * Express request for forum banning and approve operations.
+ */
+export interface ForumModerateRequest extends Request {
+  body: {
+    fid: string;
+    username: string;
+    moderator: string;
+    type: 'approve' | 'ban';
+  };
+}
+
+/**
  * Express request for forum question ordering.
  */
 export interface FindForumQuestionRequest extends Request {
