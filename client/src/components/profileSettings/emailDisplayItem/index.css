@@ -1,8 +1,14 @@
 .emails-list-card {
-    padding: 12px;
-    margin-bottom: 10px;
-    background-color: #f5f5f5;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+  display: flex;
+  padding: 12px;
+  margin-bottom: 10px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.edit-icon {
+  margin: 15px 10px 10px 50px;
+  
+}

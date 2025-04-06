@@ -47,6 +47,8 @@ const ProfileSettings: React.FC = () => {
     handleNewSelectedBanner,
     handleChangeFrequency,
     handleAddPinnedBadge,
+    handleDeleteEmail,
+    setEmailToDelete,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -237,9 +239,11 @@ const ProfileSettings: React.FC = () => {
                   <div key={email}>
                     <EmailDisplayItem
                       email={email}
-                      selectEmail={setEmailToReplace}
+                      selectReplaceEmail={setEmailToReplace}
                       currEditMode={replaceEmailMode}
-                      toggleReplace={setReplaceEmailMode}
+                      toggleReplace={() => setReplaceEmailMode(true)}
+                      handleDeleteEmail={setEmailToDelete}
+                      setDeleteEmail={handleDeleteEmail}
                     />
                   </div>
                 ))}
@@ -272,6 +276,7 @@ const ProfileSettings: React.FC = () => {
                   onClick={() => setAddEmailMode(false)}>
                   Cancel
                 </button>
+                {errorMessage && <p>{errorMessage}</p>}
               </div>
             )}
 
@@ -305,9 +310,11 @@ const ProfileSettings: React.FC = () => {
                     <EmailDisplayItem
                       key={email}
                       email={email}
-                      selectEmail={setEmailToReplace}
+                      selectReplaceEmail={setEmailToReplace}
                       currEditMode={replaceEmailMode}
                       toggleReplace={setReplaceEmailMode}
+                      handleDeleteEmail={handleDeleteEmail}
+                      setDeleteEmail={setEmailToDelete}
                     />
                   ),
                 )}

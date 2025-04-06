@@ -7,7 +7,7 @@ import NotificationCard from '../notificationCard';
  * Notification component renders a page for direct messaging between users.
  * It includes a list of users and a chat window to send and receive messages.
  */
-const NotificationButton = () => {
+const NotificationButton = (count: number) => {
   const {
     showBrowserNotifs,
     setShowBrowserNotifs,
