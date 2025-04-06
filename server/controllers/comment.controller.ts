@@ -10,6 +10,7 @@ import {
   AnswerResponse,
   UserResponse,
   Notification,
+  PopulatedDatabaseNotification,
 } from '../types/types';
 import { addComment, saveComment } from '../services/comment.service';
 import { populateDocument } from '../utils/database.util';
@@ -150,7 +151,7 @@ const commentController = (socket: FakeSOSocket) => {
       });
 
       socket.emit('notificationUpdate', {
-        notification: populatedNotif,
+        notification: populatedNotif as PopulatedDatabaseNotification,
         type: 'created',
       });
       res.json(comFromDb);

@@ -121,6 +121,8 @@ export interface GameMovePayload {
  * - `makeMove`: Client can emit a move in the game.
  * - `joinGame`: Client can join a game.
  * - `leaveGame`: Client can leave a game.
+ * - `joinForum`: Client can join a forum.
+ * - `leaveForum`: Client can leave a forum.
  * - `joinChat`: Client can join a chat.
  * - `leaveChat`: Client can leave a chat.
  */
@@ -130,7 +132,6 @@ export interface ClientToServerEvents {
   leaveGame: (gameID: string) => void;
   joinForum: (forumID: string) => void;
   leaveForum: (forumID: string) => void;
-  makeForumModAction: (forumID: string) => void;
   joinChat: (chatID: string) => void;
   leaveChat: (chatID: string | undefined) => void;
 }

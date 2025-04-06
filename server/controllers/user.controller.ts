@@ -18,6 +18,7 @@ import {
   ChangeFreqRequest,
   Notification,
   UpdateStreakRequest,
+  PopulatedDatabaseNotification,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -502,7 +503,7 @@ const userController = (socket: FakeSOSocket) => {
         }
 
         socket.emit('notificationUpdate', {
-          notification: populatedNotification,
+          notification: populatedNotification as PopulatedDatabaseNotification,
           type: 'created',
         });
       });
