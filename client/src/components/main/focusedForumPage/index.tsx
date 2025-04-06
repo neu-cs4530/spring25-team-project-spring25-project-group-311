@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './index.css';
 import { OrderType } from '@fake-stack-overflow/shared';
 import AskQuestionButton from '../askQuestionButton';
@@ -7,17 +7,39 @@ import MembershipButton from '../membershipButton';
 import { orderTypeDisplayName } from '../../../types/constants';
 import OrderButton from '../questionPage/header/orderButton';
 import QuestionView from '../questionPage/question';
+import useUserContext from '../../../hooks/useUserContext';
 
 /**
  * FocusedForumPage component that displays the full content of a forum.
  */
 const FocusedForumPage = () => {
+  const { user } = useUserContext();
   const { forum, updateForum, setQuestionOrder, sortedQuestions } = useFocusedForumPage();
   const [showAwaitingMembers, setShowAwaitingMembers] = useState<boolean>(false);
+  const [showAskQuestionButton, setShowAskQuestionButton] = useState<boolean>(true);
 
-  if (forum?.awaitingMembers) {
-    if (forum?.awaitingMembers.length > 0) setShowAwaitingMembers(true);
-  }
+  useEffect(() => {
+    if (!forum) return;
+
+    let shouldShowButton = true;
+
+    if (forum.type === 'private' && !forum.members.includes(user.username)) {
+      shouldShowButton = false;
+    }
+
+    if (forum.type === 'public' && forum.bannedMembers.includes(user.username)) {
+      shouldShowButton = false;
+    }
+
+    setShowAskQuestionButton(shouldShowButton);
+
+    if (forum.awaitingMembers && forum.awaitingMembers.length > 0) {
+      setShowAwaitingMembers(true);
+    } else {
+      setShowAwaitingMembers(false);
+    }
+  }, [forum, user.username]);
+
   if (!forum) {
     return null;
   }
@@ -37,7 +59,7 @@ const FocusedForumPage = () => {
           <div className='bold_title'>{forum.name}</div>
           <div className='buttons-container'>
             <MembershipButton forum={forum} updateForum={updateForum} />
-            <AskQuestionButton forumId={forum._id.toString()} />
+            {showAskQuestionButton && <AskQuestionButton forumId={forum._id.toString()} />}
           </div>
         </div>
         <div className='space_between right_padding'>

@@ -45,9 +45,13 @@ const useAnswerForm = () => {
       const res = await getQuestionById(questionID, user.username);
       if (res.forumId) {
         const forum = await getForumById(res.forumId);
+        if (forum.bannedMembers.includes(user.username)) {
+          setTextErr(`You cannot answer ${forum.name} questions as you have been banned.`);
+          isValid = false;
+        }
         if (forum.type === 'private') {
           if (!forum.members.includes(user.username)) {
-            setTextErr(`Join the private forum ${forum.name} to gain permissions`);
+            setTextErr(`Join the private forum ${forum.name} to gain permissions.`);
             isValid = false;
           }
         }

@@ -6,6 +6,7 @@ import {
   VoteUpdatePayload,
   PopulatedDatabaseQuestion,
   PopulatedDatabaseAnswer,
+  DatabaseForum,
 } from '../types/types';
 import useUserContext from './useUserContext';
 import addComment from '../services/commentService';
@@ -25,6 +26,7 @@ const useAnswerPage = () => {
   const navigate = useNavigate();
 
   const [isForumQuestion, setIsForumQuestion] = useState<boolean>(false);
+  const [forum, setForum] = useState<DatabaseForum | null>(null);
   const [forumTitle, setForumTitle] = useState<string>('');
   const { user, socket } = useUserContext();
   const [questionID, setQuestionID] = useState<string>(qid || '');
@@ -79,8 +81,9 @@ const useAnswerPage = () => {
         setQuestion(res || null);
         if (res.forumId) {
           setIsForumQuestion(true);
-          const forum = await getForumById(res.forumId);
-          setForumTitle(forum.name);
+          const databaseForum = await getForumById(res.forumId);
+          setForum(databaseForum);
+          setForumTitle(databaseForum.name);
         }
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -198,6 +201,7 @@ const useAnswerPage = () => {
     handleNewComment,
     handleNewAnswer,
     isForumQuestion,
+    forum,
     forumTitle,
   };
 };

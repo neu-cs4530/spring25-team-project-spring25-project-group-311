@@ -147,6 +147,49 @@ export const addUserToForum = async (
 };
 
 /**
+ * Bans a user if they are a member. 
+ * 
+ * @param fid - The id of the forum to update
+ * @param username - The username of the user to ban
+ * @returns 
+ */
+export const banUser = async (fid: string, username: string): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    // no actino should be taken
+    if (forum.bannedMembers.includes(username) || forum.awaitingMembers.includes(username)) {
+      return forum;
+    }
+
+    let updatedForum: PopulatedDatabaseForum | null;
+    if (forum.members.includes(username)) {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { bannedMembers: username }, $pull: { members: username } },
+        { new: true },
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
+    } else {
+      return forum;
+    }
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when banning user from forum: ${error}` };
+  }
+};
+
+/**
  * Creates and adds a question to a specified forum.
  *
  * @param {string} fid - The ID of the forum to which the question will be added
