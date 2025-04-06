@@ -4,6 +4,10 @@ import api from './config';
 
 const FORUM_API_URL = `${process.env.REACT_APP_SERVER_URL}/forum`;
 
+/**
+ * Gets all the forums on the database.
+ * @returns {Promise<DatabaseForum[]>}
+ */
 const getForums = async (): Promise<DatabaseForum[]> => {
   const res = await api.get(`${FORUM_API_URL}/getForums`);
   if (res.status !== 200) {
@@ -12,6 +16,13 @@ const getForums = async (): Promise<DatabaseForum[]> => {
   return res.data;
 };
 
+/**
+ * Returns the forum questions in a specific order
+ *
+ * @param fid - Forum to get questions from
+ * @param order - order type of questions
+ * @returns {Promise<PopulatedDatabaseQuestion[]>} A populated database question list
+ */
 const getQuestionsByOrder = async (
   fid: string,
   order: OrderType,

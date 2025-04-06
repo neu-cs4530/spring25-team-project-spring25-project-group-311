@@ -153,6 +153,12 @@ const forumController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets the forum questions by the provided order, responds with the list of forum questions by order.
+   *
+   * @param req The request object containing the forum question request
+   * @param res The response object to send the result
+   */
   const getQuestionsByOrder = async (
     req: FindForumQuestionRequest,
     res: Response,
@@ -171,6 +177,12 @@ const forumController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles updating a user moderation event within the forum.
+   * @param req Request containing user, moderator and type
+   * @param res The response object to send the result
+   * @throws Error if invalid body, incorrect moderation perms
+   */
   const moderateUserMembership = async (
     req: ForumModerateRequest,
     res: Response,
@@ -366,6 +378,7 @@ const forumController = (socket: FakeSOSocket) => {
   router.get('/getForum/:forumName', getForum);
   router.get('/getForums', getForums);
   router.post('/toggleUserMembership', toggleUserMembership);
+  router.post('/moderateUserMembership', moderateUserMembership);
   router.post('/addQuestion', addQuestion);
   router.get('/getQuestion', getQuestionsByOrder);
   return router;
