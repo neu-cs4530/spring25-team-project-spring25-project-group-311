@@ -30,6 +30,7 @@ export interface UserCredentials {
  * - `questionsAsked`: A list of questions asked by the user
  * - `answersGiven`: A list of answers given by the user
  * - `numUpvotesDownvotes`: The number of upvotes/downvotes given by the user
+ * - `mutedTime`: The time when notifications should be unmuted.
  */
 export interface User extends UserCredentials {
   dateJoined: Date;
@@ -47,6 +48,7 @@ export interface User extends UserCredentials {
   questionsAsked: Question[];
   answersGiven: Answer[];
   numUpvotesDownvotes: number;
+  mutedTime?: Date;
 }
 
 /**
@@ -211,7 +213,7 @@ export interface ChangeFreqRequest extends Request {
  * Express request for sending an email to the user regarding their forums
  * - `username`: The username of the user to email (param)
  */
-export interface SendEmailNotif extends Request {
+export interface MuteUserNotif extends Request {
   body: {
     username: string;
   };

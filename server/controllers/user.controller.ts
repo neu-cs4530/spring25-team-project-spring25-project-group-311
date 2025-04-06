@@ -18,6 +18,7 @@ import {
   ChangeFreqRequest,
   Notification,
   UpdateStreakRequest,
+  MuteUserNotif,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -74,6 +75,8 @@ const userController = (socket: FakeSOSocket) => {
     req.body.newEmail !== undefined &&
     req.body.newEmail.trim() !== '';
 
+  const isMuteNotifBodyValid = (req: MuteUserNotif): boolean =>
+    req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
   /**
    * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
    * and does it have an @ symbol and ends with a . something)?
@@ -831,6 +834,52 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Mutes a user's notifications for an hour.
+   * @param req The request containing the username
+   * @param res The response, either providing the updated user or an error
+   */
+  const muteNotifications = async (req: MuteUserNotif, res: Response): Promise<void> => {
+    try {
+      if (!isMuteNotifBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let endMuteTime;
+      if (!foundUser.mutedTime || (foundUser.mutedTime && new Date() > foundUser.mutedTime)) {
+        // User is choosing to mute
+        endMuteTime = new Date(Date.now() + 60 * 60 * 1000);
+      } else {
+        endMuteTime = new Date('December 17, 1995 03:24:00');
+      }
+
+      const updatedUser = await updateUser(username, {
+        mutedTime: endMuteTime,
+      });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error changing the frequency: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -851,6 +900,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getVoteCount', getUpvotesAndDownVotes);
   router.patch('/changeFrequency', changeFrequency);
   router.patch('/updateStreak', updateUserStreak);
+  router.patch('/muteNotification', muteNotifications);
   return router;
 };
 

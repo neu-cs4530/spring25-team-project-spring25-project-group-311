@@ -196,6 +196,16 @@ const subscribeNotifs = async (username: string, notifType: string): Promise<Saf
   return res.data;
 };
 
+const muteNotifictions = async (username: string): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/muteNotification`, {
+    username,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when muting notifications');
+  }
+  return res.data;
+};
+
 const awardBadges = async (username: string, badges: string[]): Promise<SafeDatabaseUser> => {
   const res = await api.post(`${USER_API_URL}/addBadges`, {
     username,
@@ -275,4 +285,5 @@ export {
   changeFreq,
   addPinnedBadge,
   updateStreak,
+  muteNotifictions,
 };

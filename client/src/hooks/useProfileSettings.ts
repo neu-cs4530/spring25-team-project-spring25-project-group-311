@@ -13,6 +13,7 @@ import {
   newActiveBanner,
   addPinnedBadge,
   changeFreq,
+  muteNotifictions,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -237,6 +238,26 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Handler for muting notifications.
+   */
+  const handleMuteNotifications = async () => {
+    if (!username) return;
+    try {
+      const updatedUser = await muteNotifictions(username);
+      await new Promise(resolve => {
+        setUserData(updatedUser); // Update the user data
+        resolve(null); // Resolve the promise
+      });
+
+      setSuccessMessage('Subscription changed!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to change subscription.');
+      setSuccessMessage(null);
+    }
+  };
+
   const handleAwardBadges = async () => {
     if (!username) return;
     try {
@@ -421,6 +442,7 @@ const useProfileSettings = () => {
     handleChangeFrequency,
     handleAddNewBanner,
     handleAddPinnedBadge,
+    handleMuteNotifications,
   };
 };
 

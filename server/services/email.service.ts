@@ -2,6 +2,7 @@ import { Error } from 'mongoose';
 import { getTopFivePosts, getUserForums } from './forum.service';
 import { getUserByUsername } from './user.service';
 
+// This package does not support EMCA import types
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const nodemailer = require('nodemailer');
 
