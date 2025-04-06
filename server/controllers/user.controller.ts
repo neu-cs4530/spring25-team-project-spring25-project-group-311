@@ -16,7 +16,9 @@ import {
   SubscribeToNotification,
   UserResponse,
   ChangeFreqRequest,
+  Notification,
   UpdateStreakRequest,
+  MuteUserNotif,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -32,6 +34,8 @@ import {
   getUpvotesAndDownVotesBy,
 } from '../services/question.service';
 import { getAllAnswers } from '../services/answer.service';
+import { saveNotification } from '../services/notification.service';
+import { populateDocument } from '../utils/database.util';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -73,6 +77,8 @@ const userController = (socket: FakeSOSocket) => {
     req.body.email !== undefined &&
     req.body.email.trim() !== '';
 
+  const isMuteNotifBodyValid = (req: MuteUserNotif): boolean =>
+    req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
   /**
    * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
    * and does it have an @ symbol and ends with a . something)?
@@ -477,6 +483,34 @@ const userController = (socket: FakeSOSocket) => {
         type: 'updated',
       });
 
+      badges.forEach(async badge => {
+        const newNotif: Notification = {
+          title: 'New Badge Added',
+          text: `You have received a new badge: ${badge}`,
+          type: 'browser',
+          user: updatedUser,
+          read: false,
+        };
+
+        const createdNotif = await saveNotification(newNotif);
+        if ('error' in createdNotif) {
+          throw new Error(createdNotif.error);
+        }
+
+        const populatedNotification = await populateDocument(
+          createdNotif._id.toString(),
+          'notification',
+        );
+
+        if ('error' in populatedNotification) {
+          throw new Error(populatedNotification.error);
+        }
+
+        socket.emit('notificationUpdate', {
+          notification: populatedNotification,
+          type: 'created',
+        });
+      });
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when adding user badge: ${error}`);
@@ -815,14 +849,14 @@ const userController = (socket: FakeSOSocket) => {
         res.status(400).send('Invalid user body');
         return;
       }
-
+      
       const { username, email } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
-
+      
       const userEmails = foundUser.emails;
 
       if (!userEmails.includes(email)) {
@@ -833,11 +867,11 @@ const userController = (socket: FakeSOSocket) => {
       const updatedEmails = userEmails.filter(em => em !== email);
 
       const updatedUser = await updateUser(username, { emails: updatedEmails });
+      
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
       }
 
-      // Emit socket event for real-time updates
       socket.emit('userUpdate', {
         user: updatedUser,
         type: 'updated',
@@ -848,6 +882,52 @@ const userController = (socket: FakeSOSocket) => {
       res.status(500).send(`Error when adding user email: ${error}`);
     }
   };
+  
+   * Mutes a user's notifications for an hour.
+   * @param req The request containing the username
+   * @param res The response, either providing the updated user or an error
+   */
+  const muteNotifications = async (req: MuteUserNotif, res: Response): Promise<void> => {
+    try {
+      if (!isMuteNotifBodyValid(req)) {
+        res.status(400).send('Email not associated with this user');
+        return;
+      }
+      
+      const { username } = req.body;
+      
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+      
+      let endMuteTime;
+      if (!foundUser.mutedTime || (foundUser.mutedTime && new Date() > foundUser.mutedTime)) {
+        // User is choosing to mute
+        endMuteTime = new Date(Date.now() + 60 * 60 * 1000);
+      } else {
+        endMuteTime = new Date('December 17, 1995 03:24:00');
+      }
+
+      const updatedUser = await updateUser(username, {
+        mutedTime: endMuteTime,
+      });
+      
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+      
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error changing the frequency: ${error}`);
+    }
+  };
+
 
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
@@ -870,6 +950,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/changeFrequency', changeFrequency);
   router.patch('/updateStreak', updateUserStreak);
   router.patch('/deleteEmail', deleteEmail);
+  router.patch('/muteNotification', muteNotifications);
   return router;
 };
 

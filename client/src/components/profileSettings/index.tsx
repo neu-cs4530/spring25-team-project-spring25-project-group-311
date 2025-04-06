@@ -46,6 +46,7 @@ const ProfileSettings: React.FC = () => {
     handleAddNewBanner,
     handleNewSelectedBanner,
     handleChangeFrequency,
+    handleMuteNotifications,
     handleAddPinnedBadge,
     handleDeleteEmail,
     setEmailToDelete,
@@ -331,6 +332,13 @@ const ProfileSettings: React.FC = () => {
                     type='checkbox'
                     checked={userData.browserNotif}
                     onChange={() => handleSubscription('browser')}
+                  />
+                </div>
+                <div>
+                  <input
+                    type='checkbox'
+                    checked={userData.mutedTime && new Date() < new Date(userData.mutedTime)}
+                    onChange={() => handleMuteNotifications()}
                   />
                 </div>
                 <div className='notification-display'>

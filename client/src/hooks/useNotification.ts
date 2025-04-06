@@ -13,7 +13,6 @@ import { getUserNotifs, readNotif } from '../services/notificationService';
  */
 const useNotification = () => {
   const { user, socket } = useUserContext();
-  const [showBrowserNotifs, setShowBrowserNotifs] = useState<boolean>(false);
   const [unreadBrowserNotifs, setUnreadBrowserNotifs] = useState<PopulatedDatabaseNotification[]>(
     [],
   );
@@ -36,7 +35,11 @@ const useNotification = () => {
       const userUnreadNotifs = (await getUserNotifs(user.username)).filter(
         n => n.type === 'browser' && n.read === false,
       );
-      setUnreadBrowserNotifs(userUnreadNotifs);
+      if (user.mutedTime && new Date() < new Date(user.mutedTime)) {
+        setUnreadBrowserNotifs([]);
+      } else {
+        setUnreadBrowserNotifs(userUnreadNotifs);
+      }
     };
 
     const handleNotificationUpdate = (notifUpdate: NotificationUpdatePayload) => {
@@ -73,8 +76,6 @@ const useNotification = () => {
   }, [user, socket]);
 
   return {
-    showBrowserNotifs,
-    setShowBrowserNotifs,
     unreadBrowserNotifs,
     error,
     handleReadNotification,
