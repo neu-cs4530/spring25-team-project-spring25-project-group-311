@@ -469,7 +469,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const mockSafeUserEmails = {
@@ -524,7 +524,7 @@ describe('Test userController', () => {
 
     it('should return 400 for request missing username', async () => {
       const mockReqBody = {
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -535,7 +535,7 @@ describe('Test userController', () => {
     it('should return 400 for request having empty username', async () => {
       const mockReqBody = {
         username: '',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -556,7 +556,7 @@ describe('Test userController', () => {
     it('should return 400 for request having empty email', async () => {
       const mockReqBody = {
         username: 'newUser',
-        newEmail: '',
+        email: '',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -567,7 +567,7 @@ describe('Test userController', () => {
     it('should return 400 for request having an invalid email', async () => {
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'abcefghijklmnopqrstuvwxyz',
+        email: 'abcefghijklmnopqrstuvwxyz',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -591,7 +591,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -609,7 +609,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
@@ -648,7 +648,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -687,7 +687,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const mockSafeUserEmails = {
@@ -745,7 +745,7 @@ describe('Test userController', () => {
     });
 
     it('should return 404 for not having a current email parameter', async () => {
-      const mockReqBody = { username: 'newUser', newEmail: 'raisa16h21@gmail.com' };
+      const mockReqBody = { username: 'newUser', email: 'raisa16h21@gmail.com' };
 
       const response = await supertest(app).patch('/user/replaceEmail').send(mockReqBody);
 
@@ -754,7 +754,7 @@ describe('Test userController', () => {
 
     it('should return 400 for request missing username', async () => {
       const mockReqBody = {
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app)
@@ -767,7 +767,7 @@ describe('Test userController', () => {
     it('should return 400 for request having empty username', async () => {
       const mockReqBody = {
         username: '',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app)
@@ -792,7 +792,7 @@ describe('Test userController', () => {
     it('should return 400 for request having empty new email', async () => {
       const mockReqBody = {
         username: 'newUser',
-        newEmail: '',
+        email: '',
       };
 
       const response = await supertest(app)
@@ -805,7 +805,7 @@ describe('Test userController', () => {
     it('should return 400 for request having an invalid new email', async () => {
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'abcefghijklmnopqrstuvwxyz',
+        email: 'abcefghijklmnopqrstuvwxyz',
       };
 
       const response = await supertest(app)
@@ -831,7 +831,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -859,7 +859,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'emcd.ny@gmail.com',
+        email: 'emcd.ny@gmail.com',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
@@ -879,7 +879,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       const response = await supertest(app)
@@ -909,7 +909,7 @@ describe('Test userController', () => {
 
       const mockReqBody = {
         username: 'newUser',
-        newEmail: 'raisa16h21@gmail.com',
+        email: 'raisa16h21@gmail.com',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
