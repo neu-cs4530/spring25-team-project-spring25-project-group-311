@@ -24,6 +24,7 @@ import {
   approveUser,
   banUser,
   cancelUserJoinRequest,
+  unbanUser,
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveQuestion } from '../services/question.service';
@@ -209,6 +210,8 @@ const forumController = (socket: FakeSOSocket) => {
         updatedForum = await approveUser(fid, username);
       } else if (type === 'ban') {
         updatedForum = await banUser(fid, username);
+      } else if (type === 'unban') {
+        updatedForum = await unbanUser(fid, username);
       } else {
         throw new Error('Invalid type');
       }

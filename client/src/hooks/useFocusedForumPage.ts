@@ -146,6 +146,7 @@ const useFocusedForumPage = () => {
 
   return {
     forum,
+    setForum,
     updateForum,
     setQuestionOrder,
     sortedQuestions,

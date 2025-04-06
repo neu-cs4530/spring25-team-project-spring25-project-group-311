@@ -231,6 +231,45 @@ export const banUser = async (fid: string, username: string): Promise<PopulatedF
 };
 
 /**
+ * Unbans a user if they are banned.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to unban
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const unbanUser = async (fid: string, username: string): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    // no action should be taken
+    if (!forum.bannedMembers.includes(username)) {
+      return forum;
+    }
+
+    let updatedForum: PopulatedDatabaseForum | null;
+    updatedForum = await ForumModel.findOneAndUpdate(
+      { _id: fid },
+      { $pull: { bannedMembers: username } },
+      { new: true },
+    ).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when banning user from forum: ${error}` };
+  }
+};
+
+/**
  *
  *
  * @param {string} fid - The id of the forum to update
