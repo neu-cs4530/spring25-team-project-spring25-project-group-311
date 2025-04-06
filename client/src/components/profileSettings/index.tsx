@@ -322,6 +322,13 @@ const ProfileSettings: React.FC = () => {
                     onChange={() => handleSubscription('browser')}
                   />
                 </div>
+                <div>
+                  <input
+                    type='checkbox'
+                    checked={userData.mutedTime && new Date() < new Date(userData.mutedTime)}
+                    onChange={() => handleMuteNotifications()}
+                  />
+                </div>
                 <div className='notification-display'>
                   <p>Email Notification</p>
                   <input
