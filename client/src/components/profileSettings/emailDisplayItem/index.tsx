@@ -1,4 +1,5 @@
 import './index.css';
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 
 /**
  * EmailDisplayItem component displays an email and allows the user to select it to replace it.
@@ -8,13 +9,35 @@ import './index.css';
  */
 const EmailDisplayItem = ({
   email,
-  selectEmail,
+  selectReplaceEmail,
+  currEditMode,
+  toggleReplace,
+  setDeleteEmail,
+  handleDeleteEmail,
 }: {
   email: string;
-  selectEmail: (email: string) => void;
+  selectReplaceEmail: (email: string) => void;
+  currEditMode: boolean;
+  toggleReplace: (val: boolean) => void;
+  handleDeleteEmail: (email: string) => void;
+  setDeleteEmail: (email: string) => void;
 }) => (
-  <div onClick={() => selectEmail(email)} className='emails-list-card'>
+  <div className='emails-list-card'>
     <p>{email}</p>
+    <FaPencilAlt
+      className='edit-icon'
+      onClick={() => {
+        toggleReplace(currEditMode);
+        selectReplaceEmail(email);
+      }}
+    />
+    <FaTrash
+      className='edit-icon'
+      onClick={() => {
+        setDeleteEmail(email);
+        handleDeleteEmail(email);
+      }}
+    />
   </div>
 );
 

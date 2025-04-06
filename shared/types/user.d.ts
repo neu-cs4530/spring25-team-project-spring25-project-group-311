@@ -133,10 +133,10 @@ export interface UpdateBiographyRequest extends Request {
  * - `username`: The username whose email is being added (body).
  * - `newEmail`: The new email to add.
  */
-export interface AddEmailRequest extends Request {
+export interface AddOrDeleteEmailRequest extends Request {
   body: {
     username: string;
-    newEmail: string;
+    email: string;
   };
 }
 
@@ -146,7 +146,7 @@ export interface AddEmailRequest extends Request {
  * - `newEmail`: The new email to put in (body).
  * - `currEmail`: The current email provided to be replaced (param).
  */
-export interface UpdateEmailRequest extends AddEmailRequest {
+export interface UpdateEmailRequest extends AddOrDeleteEmailRequest {
   params: {
     currEmail: string;
   };

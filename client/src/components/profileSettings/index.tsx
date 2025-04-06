@@ -50,6 +50,8 @@ const ProfileSettings: React.FC = () => {
     handleChangeFrequency,
     handleMuteNotifications,
     handleAddPinnedBadge,
+    handleDeleteEmail,
+    setEmailToDelete,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -120,177 +122,234 @@ const ProfileSettings: React.FC = () => {
                 {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
               </p>
 
-              {/* ---- Reset Password Section ---- */}
-              {canEditProfile && (
-                <>
-                  <h4>Reset Password</h4>
-                  <input
-                    className='input-text'
-                    type={'text'}
-                    placeholder='New Password'
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                  />
-                  <input
-                    className='input-text'
-                    type={'text'}
-                    placeholder='Confirm New Password'
-                    value={confirmNewPassword}
-                    onChange={e => setConfirmNewPassword(e.target.value)}
-                  />
-                  <button className='login-button' onClick={handleResetPassword}>
-                    Reset
-                  </button>
-                </>
-              )}
-
-              {/* ---- Danger Zone (Delete User) ---- */}
-              {canEditProfile && (
-                <>
-                  <h4>Danger Zone</h4>
-                  <button className='delete-button' onClick={handleDeleteUser}>
-                    Delete This User
-                  </button>
-                </>
-              )}
-            </>
-          ) : (
-            <p>No user data found. Make sure the username parameter is correct.</p>
-          )}
-        </Tab>
-        <Tab eventKey='stats' title='User Statistics'>
-          {userData ? (
-            <>
-              <h4>User Statistics</h4>
-              <div>
-                <h6>Pinned Badges</h6>
-                {userData.pinnedBadge && userData.pinnedBadge !== '' && (
-                  <img
-                    src={userData.pinnedBadge}
-                    alt='No image found'
-                    style={{ marginLeft: '1rem', height: '75px', width: '75px' }}
-                  />
-                )}
-              </div>
-              {
+            {/* ---- Badges Section ---- */}
+            {userData.badges.length > 0 && (
+              <div style={{ margin: '1rem 0' }}>
                 <p>
-                  <strong>Current Streak: </strong> {userData.streak ? userData.streak.length : 0}
+                  {userData.badges.map(img => (
+                    <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
+                      <img src={img} style={{ width: '100px', height: '100px' }} />
+                      <button
+                        className='login-button'
+                        style={{ display: 'block', marginTop: '0.5rem' }}
+                        // Pinning a badge to the user's profile
+                        onClick={() => {
+                          handleAddPinnedBadge(img);
+                        }}>
+                        Pin
+                      </button>
+                    </div>
+                  ))}
                 </p>
-              }
-              {/* ---- Badges Section ---- */}
-              {userData.badges.length > 0 && (
-                <div style={{ margin: '1rem 0' }}>
-                  <p>
-                    {userData.badges.map(img => (
-                      <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
-                        <img src={img} style={{ width: '100px', height: '100px' }} />
-                        {canEditProfile && (
+              </div>
+            )}
+
+            {/* ---- Banners Section ---- */}
+            {
+              <div style={{ margin: '1rem 0' }}>
+                <h4>Your Banners</h4>
+                <p>
+                  {userData.banners?.map(img => (
+                    <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
+                      <button
+                        className='login-button'
+                        style={{
+                          display: 'block',
+                          marginTop: '0.5rem',
+                          backgroundColor: img,
+                          width: '60px',
+                          height: '30px',
+                        }}
+                        onClick={() => {
+                          handleNewSelectedBanner(img);
+                          setHeaderBackground(img);
+                        }}></button>
+                    </div>
+                  ))}
+                </p>
+              </div>
+            }
+            {
+              <div style={{ margin: '1rem 0' }}>
+                <h4>Store</h4>
+                <p>
+                  {['red', 'orange', 'yellow', 'purple'].map(color => (
+                    <div
+                      key={color}
+                      style={{ display: 'inline-block', marginRight: '1rem', textAlign: 'center' }}>
+                      <div>
+                        <div
+                          className='badge'
+                          style={{
+                            backgroundColor: color,
+                            width: '60px',
+                            height: '30px',
+                            margin: '0 auto',
+                          }}></div>
+                        {userData.badges.length > 0 && (
                           <button
                             className='login-button'
-                            style={{ display: 'block', marginTop: '0.5rem' }}
-                            // Pinning a badge to the user's profile
+                            style={{
+                              width: '60px',
+                              height: '30px',
+                              marginTop: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
                             onClick={() => {
-                              handleAddPinnedBadge(img);
+                              handleAddNewBanner(color);
                             }}>
-                            Pin
+                            Buy
                           </button>
                         )}
                       </div>
-                    ))}
-                  </p>
-                </div>
-              )}
-            </>
-          ) : (
-            <p>No user data found. Make sure the username parameter is correct.</p>
-          )}
-        </Tab>
-        {canEditProfile && (
-          <Tab eventKey='notifications' title='User Notifications'>
-            {userData ? (
-              <>
-                <h4>Notifications</h4>
-                <h6>Emails</h6>
-                {/* ---- Email Section ---- */}
-                {!addEmailMode && !replaceEmailMode && (
-                  <div>
-                    {userData.emails.map(email => (
-                      <div key={email}>
-                        <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />
-                        <button
-                          className='replace-email-button'
-                          style={{ marginLeft: '1rem' }}
-                          onClick={() => setReplaceEmailMode(true)}>
-                          Replace Email
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      className='add-email-button'
-                      style={{ marginLeft: '1rem' }}
-                      onClick={() => setAddEmailMode(true)}>
-                      Add Email
-                    </button>
-                  </div>
-                )}
+                    </div>
+                  ))}
+                </p>
+              </div>
+            }
 
-                {addEmailMode && (
-                  <div style={{ margin: '1rem 0' }}>
-                    <input
-                      className='input-text'
-                      type='text'
-                      value={newEmail}
-                      onChange={e => setNewEmail(e.target.value)}
+            {/* ---- Email Section ---- */}
+            {!addEmailMode && !replaceEmailMode && (
+              <div>
+                <h4>Emails</h4>
+                {userData.emails.map(email => (
+                  <div key={email}>
+                    <EmailDisplayItem
+                      email={email}
+                      selectReplaceEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={() => setReplaceEmailMode(true)}
+                      handleDeleteEmail={setEmailToDelete}
+                      setDeleteEmail={handleDeleteEmail}
                     />
-                    <button
-                      className='login-button'
-                      style={{ marginLeft: '1rem' }}
-                      onClick={handleAddEmail}>
-                      Add Email
-                    </button>
-                    <button
-                      className='delete-button'
-                      style={{ marginLeft: '1rem' }}
-                      onClick={() => setAddEmailMode(false)}>
-                      Cancel
-                    </button>
                   </div>
-                )}
+                ))}
+                <button
+                  className='add-email-button'
+                  style={{ marginLeft: '1rem' }}
+                  onClick={() => setAddEmailMode(true)}>
+                  Add Email
+                </button>
+              </div>
+            )}
+
+            {addEmailMode && canEditProfile && (
+              <div style={{ margin: '1rem 0' }}>
+                <input
+                  className='input-text'
+                  type='text'
+                  value={newEmail}
+                  onChange={e => setNewEmail(e.target.value)}
+                />
+                <button
+                  className='login-button'
+                  style={{ marginLeft: '1rem' }}
+                  onClick={handleAddEmail}>
+                  Add Email
+                </button>
+                <button
+                  className='delete-button'
+                  style={{ marginLeft: '1rem' }}
+                  onClick={() => setAddEmailMode(false)}>
+                  Cancel
+                </button>
+                {errorMessage && <p>{errorMessage}</p>}
+              </div>
+            )}
 
                 {/* ---- If the email we are trying to replace is the same as 
             the current email, we put in the input text. Else we display the email as is.---- */}
-                {replaceEmailMode && (
+            {replaceEmailMode && canEditProfile && (
+              <div>
+                {userData.emails.map(email =>
+                  email === emailToReplace ? (
+                    <div key={email}>
+                      <input
+                        className='input-text'
+                        type='text'
+                        value={replacementEmail}
+                        onChange={e => setReplacementEmail(e.target.value)}
+                      />
+                      <button
+                        className='login-button'
+                        style={{ marginLeft: '1rem' }}
+                        onClick={handleReplaceEmail}>
+                        Replace Email
+                      </button>
+                      <button
+                        className='delete-button'
+                        style={{ marginLeft: '1rem' }}
+                        onClick={() => setReplaceEmailMode(false)}>
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <EmailDisplayItem
+                      key={email}
+                      email={email}
+                      selectReplaceEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={setReplaceEmailMode}
+                      handleDeleteEmail={handleDeleteEmail}
+                      setDeleteEmail={setEmailToDelete}
+                    />
+                  ),
+                )}
+              </div>
+            )}
+
+            {/* ---- Toggling Notifications Section ---- */}
+            {canEditProfile && (
+              <>
+                <h4>Notifications</h4>
+                <div className='notification-display'>
+                  <p>Browser-Side Notifications</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.browserNotif}
+                    onChange={() => handleSubscription('browser')}
+                  />
+                </div>
+                <div>
+                  <input
+                    type='checkbox'
+                    checked={userData.mutedTime && new Date() < new Date(userData.mutedTime)}
+                    onChange={() => handleMuteNotifications()}
+                  />
+                </div>
+                <div className='notification-display'>
+                  <p>Email Notification</p>
+                  <input
+                    type='checkbox'
+                    checked={userData.emailNotif}
+                    onChange={() => handleSubscription('email')}
+                  />
+                </div>
+                {userData.emailNotif && (
                   <div>
-                    {userData.emails.map(email =>
-                      email === emailToReplace ? (
-                        <div key={email}>
-                          <input
-                            className='input-text'
-                            type='text'
-                            value={replacementEmail}
-                            onChange={e => setReplacementEmail(e.target.value)}
-                          />
-                          <button
-                            className='login-button'
-                            style={{ marginLeft: '1rem' }}
-                            onClick={handleReplaceEmail}>
-                            Replace Email
-                          </button>
-                          <button
-                            className='delete-button'
-                            style={{ marginLeft: '1rem' }}
-                            onClick={() => setReplaceEmailMode(false)}>
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <EmailDisplayItem
-                          key={email}
-                          email={email}
-                          selectEmail={setEmailToReplace}
-                        />
-                      ),
-                    )}
+                    <input
+                      type='radio'
+                      value='weekly'
+                      checked={userData.emailFrequency === 'weekly'}
+                      onClick={() => handleChangeFrequency('weekly')}
+                    />
+                    <label>Weekly</label>
+                    <input
+                      type='radio'
+                      value='hourly'
+                      checked={userData.emailFrequency === 'hourly'}
+                      onClick={() => handleChangeFrequency('hourly')}
+                    />
+                    <label>Hourly</label>
+                    <input
+                      type='radio'
+                      value='daily'
+                      checked={userData.emailFrequency === 'daily'}
+                      onClick={() => handleChangeFrequency('daily')}
+                    />
+                    <label>Daily</label>
                   </div>
                 )}
               </>
