@@ -23,6 +23,7 @@ import {
   getForumQuestionsByOrder,
   approveUser,
   banUser,
+  cancelUserJoinRequest,
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveQuestion } from '../services/question.service';
@@ -251,6 +252,8 @@ const forumController = (socket: FakeSOSocket) => {
         updatedForum = await addUserToForum(fid, username);
       } else if (type === 'leave') {
         updatedForum = await removeUserFromForum(fid, username);
+      } else if (type === 'cancel') {
+        updatedForum = await cancelUserJoinRequest(fid, username);
       } else {
         throw new Error('Invalid type');
       }

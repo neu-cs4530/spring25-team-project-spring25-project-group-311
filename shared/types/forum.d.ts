@@ -60,7 +60,7 @@ export interface ForumMembershipRequest extends Request {
   body: {
     fid: string;
     username: string;
-    type: 'join' | 'leave';
+    type: 'join' | 'leave' | 'cancel';
   };
 }
 
