@@ -91,7 +91,7 @@ export interface UserUpdatePayload {
  * - `type`: The type of modification (`'created'`, `'deleted'`, or `'updated'`).
  */
 export interface ForumUpdatePayload {
-  forum: DatabaseForum;
+  forum: PopulatedDatabaseForum;
   type: 'created' | 'deleted' | 'updated';
 }
 
@@ -128,6 +128,9 @@ export interface ClientToServerEvents {
   makeMove: (move: GameMovePayload) => void;
   joinGame: (gameID: string) => void;
   leaveGame: (gameID: string) => void;
+  joinForum: (forumID: string) => void;
+  leaveForum: (forumID: string) => void;
+  makeForumModAction: (forumID: string) => void;
   joinChat: (chatID: string) => void;
   leaveChat: (chatID: string | undefined) => void;
 }
@@ -154,7 +157,6 @@ export interface ServerToClientEvents {
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;
-  forumUpdate: (forum: PopulatedDatabaseForum) => void;
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;

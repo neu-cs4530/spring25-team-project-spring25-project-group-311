@@ -12,6 +12,7 @@ import {
   FindForumQuestionRequest,
   Notification,
   ForumModerateRequest,
+  PopulatedDatabaseNotification,
 } from '../types/types';
 import {
   saveForum,
@@ -364,7 +365,7 @@ const forumController = (socket: FakeSOSocket) => {
         }
         const populatedNotif = await populateDocument(savedNotif._id.toString(), 'notification');
         socket.emit('notificationUpdate', {
-          notification: populatedNotif,
+          notification: populatedNotif as PopulatedDatabaseNotification,
           type: 'created',
         });
       });

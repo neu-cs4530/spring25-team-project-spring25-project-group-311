@@ -15,7 +15,7 @@ import { approveUser, banUser, unbanUser } from '../../../services/forumService'
  */
 const FocusedForumPage = () => {
   const { user } = useUserContext();
-  const { forum, setForum, updateForum, setQuestionOrder, sortedQuestions } = useFocusedForumPage();
+  const { forum, updateForum, setQuestionOrder, sortedQuestions } = useFocusedForumPage();
   const [showAwaitingMembers, setShowAwaitingMembers] = useState<boolean>(false);
   const [showAskQuestionButton, setShowAskQuestionButton] = useState<boolean>(true);
   const [showMembershipButton, setShowMembershipButton] = useState<boolean>(true);
@@ -28,8 +28,7 @@ const FocusedForumPage = () => {
    */
   const handleApproveUser = async (forumId: string, member: string) => {
     try {
-      const updatedForum = await approveUser(forumId, member, user.username);
-      setForum(updatedForum);
+      await approveUser(forumId, member, user.username);
     } catch (error) {
       // console.error('Error approving user:', error);
     }
@@ -42,8 +41,7 @@ const FocusedForumPage = () => {
    */
   const handleBanUser = async (forumId: string, member: string) => {
     try {
-      const updatedForum = await banUser(forumId, member, user.username);
-      setForum(updatedForum);
+      await banUser(forumId, member, user.username);
     } catch (error) {
       // console.error('Error banning user:', error);
     }
@@ -56,8 +54,7 @@ const FocusedForumPage = () => {
    */
   const handleUnbanUser = async (forumId: string, member: string) => {
     try {
-      const updatedForum = await unbanUser(forumId, member, user.username);
-      setForum(updatedForum);
+      await unbanUser(forumId, member, user.username);
     } catch (error) {
       // console.error('Error banning user:', error);
     }
