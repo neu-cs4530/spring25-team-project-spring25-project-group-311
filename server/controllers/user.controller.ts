@@ -849,14 +849,14 @@ const userController = (socket: FakeSOSocket) => {
         res.status(400).send('Invalid user body');
         return;
       }
-      
+
       const { username, email } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
-      
+
       const userEmails = foundUser.emails;
 
       if (!userEmails.includes(email)) {
@@ -867,7 +867,7 @@ const userController = (socket: FakeSOSocket) => {
       const updatedEmails = userEmails.filter(em => em !== email);
 
       const updatedUser = await updateUser(username, { emails: updatedEmails });
-      
+
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
       }
@@ -882,7 +882,8 @@ const userController = (socket: FakeSOSocket) => {
       res.status(500).send(`Error when adding user email: ${error}`);
     }
   };
-  
+
+  /**
    * Mutes a user's notifications for an hour.
    * @param req The request containing the username
    * @param res The response, either providing the updated user or an error
@@ -893,14 +894,14 @@ const userController = (socket: FakeSOSocket) => {
         res.status(400).send('Email not associated with this user');
         return;
       }
-      
+
       const { username } = req.body;
-      
+
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
-      
+
       let endMuteTime;
       if (!foundUser.mutedTime || (foundUser.mutedTime && new Date() > foundUser.mutedTime)) {
         // User is choosing to mute
@@ -912,11 +913,11 @@ const userController = (socket: FakeSOSocket) => {
       const updatedUser = await updateUser(username, {
         mutedTime: endMuteTime,
       });
-      
+
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
       }
-      
+
       socket.emit('userUpdate', {
         user: updatedUser,
         type: 'updated',
@@ -927,7 +928,6 @@ const userController = (socket: FakeSOSocket) => {
       res.status(500).send(`Error changing the frequency: ${error}`);
     }
   };
-
 
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
