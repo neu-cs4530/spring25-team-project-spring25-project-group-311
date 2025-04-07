@@ -15,6 +15,10 @@
   background-color: #d1e7ff;
 }
 
+.notification-card:hover {
+  cursor: pointer;
+ }
+
  .notification-header {
   display: flex;
   justify-content: space-between;
