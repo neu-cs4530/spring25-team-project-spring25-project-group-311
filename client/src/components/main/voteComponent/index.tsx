@@ -3,6 +3,7 @@ import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
 import { PopulatedDatabaseQuestion } from '../../../types/types';
 import useVoteStatus from '../../../hooks/useVoteStatus';
+import { updateStreak } from '../../../services/userService';
 
 /**
  * Interface represents the props for the VoteComponent.
@@ -35,6 +36,11 @@ const VoteComponent = ({ question }: VoteComponentProps) => {
         } else if (type === 'downvote') {
           await downvoteQuestion(question._id, user.username);
         }
+
+        // Update streak and activity log
+        const userRes = await updateStreak(user.username, new Date(), 'votes');
+        user.streak = userRes.streak;
+        user.activityLog = userRes.activityLog;
       }
     } catch (error) {
       // Handle error

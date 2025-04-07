@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 /**
  * Mongoose schema for the User collection.
@@ -47,8 +47,8 @@ const userSchema: Schema = new Schema(
       default: 0,
     },
     activityLog: {
-      type: [Date],
-      default: [],
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
     selectedBanner: {
       type: String,

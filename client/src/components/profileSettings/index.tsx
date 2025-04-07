@@ -24,6 +24,11 @@ const ProfileSettings: React.FC = () => {
     showConfirmation,
     pendingAction,
     canEditProfile,
+    showPassword,
+    togglePasswordVisibility,
+    convertActivityToValues,
+    getColorClass,
+    floatingContent,
 
     setEditBioMode,
     setEmailToReplace,
@@ -48,6 +53,9 @@ const ProfileSettings: React.FC = () => {
     handleChangeFrequency,
     handleMuteNotifications,
     handleAddPinnedBadge,
+    handleMouseOver,
+    handleMouseLeave,
+    handleMouseMove,
     handleDeleteEmail,
   } = useProfileSettings();
 
