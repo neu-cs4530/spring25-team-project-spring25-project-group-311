@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
  */
 const NotificationButton = () => {
   const navigate = useNavigate();
+
   return (
     <div className='notif-section'>
       <button

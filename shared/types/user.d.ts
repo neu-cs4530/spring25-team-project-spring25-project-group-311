@@ -2,6 +2,7 @@ import { Request } from 'express';
 import { ObjectId } from 'mongodb';
 import { Question } from './question';
 import { Answer } from './answer';
+import { ActivityType } from './activity';
 
 /**
  * Represents user credentials for authentication.
@@ -30,6 +31,7 @@ export interface UserCredentials {
  * - `questionsAsked`: A list of questions asked by the user
  * - `answersGiven`: A list of answers given by the user
  * - `numUpvotesDownvotes`: The number of upvotes/downvotes given by the user
+ * - `mutedTime`: The time when notifications should be unmuted.
  */
 export interface User extends UserCredentials {
   dateJoined: Date;
@@ -39,7 +41,7 @@ export interface User extends UserCredentials {
   banners?: string[];
   selectedBanner?: string;
   streak?: Date[];
-  activityLog?: Date[];
+  activityLog?: { [date: string]: { votes: number; questions: number; answers: number } };
   pinnedBadge?: string;
   browserNotif: boolean;
   emailNotif: boolean;
@@ -47,6 +49,7 @@ export interface User extends UserCredentials {
   questionsAsked: Question[];
   answersGiven: Answer[];
   numUpvotesDownvotes: number;
+  mutedTime?: Date;
 }
 
 /**
@@ -131,10 +134,10 @@ export interface UpdateBiographyRequest extends Request {
  * - `username`: The username whose email is being added (body).
  * - `newEmail`: The new email to add.
  */
-export interface AddEmailRequest extends Request {
+export interface AddOrDeleteEmailRequest extends Request {
   body: {
     username: string;
-    newEmail: string;
+    email: string;
   };
 }
 
@@ -144,7 +147,7 @@ export interface AddEmailRequest extends Request {
  * - `newEmail`: The new email to put in (body).
  * - `currEmail`: The current email provided to be replaced (param).
  */
-export interface UpdateEmailRequest extends AddEmailRequest {
+export interface UpdateEmailRequest extends AddOrDeleteEmailRequest {
   params: {
     currEmail: string;
   };
@@ -211,7 +214,7 @@ export interface ChangeFreqRequest extends Request {
  * Express request for sending an email to the user regarding their forums
  * - `username`: The username of the user to email (param)
  */
-export interface SendEmailNotif extends Request {
+export interface MuteUserNotif extends Request {
   body: {
     username: string;
   };
@@ -221,5 +224,6 @@ export interface UpdateStreakRequest extends Request {
   body: {
     username: string;
     date: Date;
+    activity: ActivityType;
   };
 }

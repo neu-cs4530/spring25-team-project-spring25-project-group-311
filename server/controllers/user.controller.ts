@@ -1,5 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import validate from 'deep-email-validator';
+import { ActivityType } from '@fake-stack-overflow/shared/types/activity';
 import {
   UserRequest,
   User,
@@ -8,7 +9,7 @@ import {
   FakeSOSocket,
   UpdateBiographyRequest,
   UpdateEmailRequest,
-  AddEmailRequest,
+  AddOrDeleteEmailRequest,
   AddBadgesRequest,
   AddBadgeRequest,
   AddBannerRequest,
@@ -19,6 +20,7 @@ import {
   Notification,
   UpdateStreakRequest,
   PopulatedDatabaseNotification,
+  MuteUserNotif,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -68,13 +70,17 @@ const userController = (socket: FakeSOSocket) => {
    * @param req The incoming request containing user data.
    * @returns `true` if the body contains valid user fields; otherwise, `false`.
    */
-  const isAddOrUpdateEmailBodyValid = (req: AddEmailRequest | UpdateEmailRequest): boolean =>
+  const isAddDeleteOrUpdateEmailBodyValid = (
+    req: AddOrDeleteEmailRequest | UpdateEmailRequest,
+  ): boolean =>
     req.body !== undefined &&
     req.body.username !== undefined &&
     req.body.username.trim() !== '' &&
-    req.body.newEmail !== undefined &&
-    req.body.newEmail.trim() !== '';
+    req.body.email !== undefined &&
+    req.body.email.trim() !== '';
 
+  const isMuteNotifBodyValid = (req: MuteUserNotif): boolean =>
+    req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
   /**
    * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
    * and does it have an @ symbol and ends with a . something)?
@@ -338,17 +344,17 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response, either confirming the addition or returning an error.
    * @returns A promise resolving to void
    */
-  const addEmail = async (req: AddEmailRequest, res: Response): Promise<void> => {
+  const addEmail = async (req: AddOrDeleteEmailRequest, res: Response): Promise<void> => {
     try {
       // Check that the given request is valid
-      if (!isAddOrUpdateEmailBodyValid(req)) {
+      if (!isAddDeleteOrUpdateEmailBodyValid(req)) {
         res.status(400).send('Invalid user body');
         return;
       }
 
-      const { username, newEmail } = req.body;
+      const { username, email } = req.body;
 
-      const validateEmail = await isEmailValid(newEmail);
+      const validateEmail = await isEmailValid(email);
 
       if (!validateEmail) {
         res.status(400).send(`Invalid email`);
@@ -362,12 +368,12 @@ const userController = (socket: FakeSOSocket) => {
 
       const userEmails = foundUser.emails;
 
-      if (userEmails.includes(newEmail)) {
+      if (userEmails.includes(email)) {
         res.status(400).send('Email already associated with this user');
         return;
       }
 
-      userEmails.push(newEmail);
+      userEmails.push(email);
 
       const updatedUser = await updateUser(username, { emails: userEmails });
       if ('error' in updatedUser) {
@@ -395,15 +401,15 @@ const userController = (socket: FakeSOSocket) => {
   const replaceEmail = async (req: UpdateEmailRequest, res: Response): Promise<void> => {
     try {
       // Check that the given request is valid
-      if (!isAddOrUpdateEmailBodyValid(req)) {
+      if (!isAddDeleteOrUpdateEmailBodyValid(req)) {
         res.status(400).send('Invalid user body');
         return;
       }
 
-      const { username, newEmail } = req.body;
+      const { username, email } = req.body;
       const { currEmail } = req.params;
 
-      const validateEmail = await validate(newEmail);
+      const validateEmail = await validate(email);
 
       if (!validateEmail.valid) {
         res.status(400).send('Invalid email');
@@ -421,13 +427,13 @@ const userController = (socket: FakeSOSocket) => {
         return;
       }
 
-      if (userEmails.includes(newEmail)) {
+      if (userEmails.includes(email)) {
         res.status(400).send('Email already associated with this user');
         return;
       }
 
       const currEmailIndx = userEmails.indexOf(currEmail);
-      userEmails[currEmailIndx] = newEmail;
+      userEmails[currEmailIndx] = email;
 
       const updatedUser = await updateUser(username, { emails: userEmails });
       if ('error' in updatedUser) {
@@ -776,39 +782,48 @@ const userController = (socket: FakeSOSocket) => {
 
   const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
     try {
-      const { username, date } = req.body;
+      const { username, date, activity } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
 
+      const dateStr = new Date(date).toISOString().split('T')[0];
+
       // if the user doesnt have an activty log give it an empty one
       if (!foundUser.activityLog) {
-        foundUser.activityLog = [];
+        foundUser.activityLog = {};
+      }
+
+      const activityLog = foundUser.activityLog as Record<
+        string,
+        { votes: number; questions: number; answers: number }
+      >;
+      // if the date is not found in the activity log
+      if (!activityLog[dateStr]) {
+        activityLog[dateStr] = { votes: 0, questions: 0, answers: 0 };
+      }
+
+      // if the date is found in the activity log
+      const validActivities: ActivityType[] = ['votes', 'questions', 'answers'];
+      if (validActivities.includes(activity as ActivityType)) {
+        activityLog[dateStr][activity as ActivityType] += 1;
+      } else {
+        throw new Error(`Invalid activity type: ${activity}`);
       }
 
       // if the user doesnt have a streak update the streak with the date
       if (!foundUser.streak || foundUser.streak.length === 0) {
-        // if the user doesnt already have this date in its activity log add it to its activity log
-        if (!foundUser.activityLog.includes(date)) {
-          foundUser.activityLog.push(date);
-        }
         foundUser.streak = [date];
       }
       // if the user does have a streak
-      else {
-        // if this date is not already in its activity log add it
-        if (!foundUser.activityLog.includes(date)) {
-          foundUser.activityLog.push(date);
-        }
+      else if (!foundUser.streak.includes(date)) {
         // if the user streak does not include this date push the date onto its streak
-        if (!foundUser.streak.includes(date)) {
-          foundUser.streak.push(date);
-          // if the dates are not sequential reset the streak to just this date
-          if (!areDatesSequential(foundUser.streak)) {
-            foundUser.streak = [date];
-          }
+        foundUser.streak.push(date);
+        // if the dates are not sequential reset the streak to just this date
+        if (!areDatesSequential(foundUser.streak)) {
+          foundUser.streak = [date];
         }
       }
 
@@ -828,7 +843,104 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
-      res.status(500).send(`Error updating user streak: ${error}`);
+      res
+        .status(500)
+        .send(
+          `Error updating user streak: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+        );
+    }
+  };
+
+  /**
+   * Deletes an emal from a user's account
+   * @param req The request containing the username and the email to remove.
+   * @param res The response, either confirming the removal or returning an error.
+   * @returns A promise resolving to void
+   */
+  const deleteEmail = async (req: AddOrDeleteEmailRequest, res: Response): Promise<void> => {
+    try {
+      // Check that the given request is valid
+      if (!isAddDeleteOrUpdateEmailBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username, email } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userEmails = foundUser.emails;
+
+      if (!userEmails.includes(email)) {
+        res.status(400).send('Email not associated with this user');
+        return;
+      }
+
+      const updatedEmails = userEmails.filter(em => em !== email);
+
+      const updatedUser = await updateUser(username, { emails: updatedEmails });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding user email: ${error}`);
+    }
+  };
+
+  /**
+   * Mutes a user's notifications for an hour.
+   * @param req The request containing the username
+   * @param res The response, either providing the updated user or an error
+   */
+  const muteNotifications = async (req: MuteUserNotif, res: Response): Promise<void> => {
+    try {
+      if (!isMuteNotifBodyValid(req)) {
+        res.status(400).send('Email not associated with this user');
+        return;
+      }
+
+      const { username } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let endMuteTime;
+      if (!foundUser.mutedTime || (foundUser.mutedTime && new Date() > foundUser.mutedTime)) {
+        // User is choosing to mute
+        endMuteTime = new Date(Date.now() + 60 * 60 * 1000);
+      } else {
+        endMuteTime = new Date('December 17, 1995 03:24:00');
+      }
+
+      const updatedUser = await updateUser(username, {
+        mutedTime: endMuteTime,
+      });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error changing the frequency: ${error}`);
     }
   };
 
@@ -852,6 +964,8 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getVoteCount', getUpvotesAndDownVotes);
   router.patch('/changeFrequency', changeFrequency);
   router.patch('/updateStreak', updateUserStreak);
+  router.patch('/deleteEmail', deleteEmail);
+  router.patch('/muteNotification', muteNotifications);
   return router;
 };
 
