@@ -9,3 +9,4 @@ export * from './tag';
 export * from './user';
 export * from './forum';
 export * from './notification';
+export * from './activity';

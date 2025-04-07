@@ -144,10 +144,28 @@ const updateBiography = async (
 const addEmail = async (username: string, newEmail: string): Promise<SafeDatabaseUser> => {
   const res = await api.post(`${USER_API_URL}/addEmail`, {
     username,
-    newEmail,
+    email: newEmail,
   });
   if (res.status !== 200) {
     throw new Error('Error when adding email');
+  }
+  return res.data;
+};
+
+/**
+ * Deletes an email for the user
+ * @param username The unique username of the user
+ * @param newEmail The email to delete for this user
+ * @returns A promise resolving to the updated user
+ * @throws Error if the request fails
+ */
+const deleteEmail = async (username: string, emailToDelete: string): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/deleteEmail`, {
+    username,
+    email: emailToDelete,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when deleting email');
   }
   return res.data;
 };
@@ -167,7 +185,7 @@ const replaceEmail = async (
 ): Promise<SafeDatabaseUser> => {
   const res = await api.patch(`${USER_API_URL}/${currEmail}/replaceEmail`, {
     username,
-    newEmail,
+    email: newEmail,
   });
   if (res.status !== 200) {
     throw new Error('Error when replacing email');
@@ -192,6 +210,16 @@ const subscribeNotifs = async (username: string, notifType: string): Promise<Saf
   });
   if (res.status !== 200) {
     throw new Error('Error when changing subscriptions to notifications');
+  }
+  return res.data;
+};
+
+const muteNotifictions = async (username: string): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/muteNotification`, {
+    username,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when muting notifications');
   }
   return res.data;
 };
@@ -250,8 +278,8 @@ const addPinnedBadge = async (username: string, pinnedBadge: string): Promise<Sa
   return res.data;
 };
 
-const updateStreak = async (username: string, date: Date) => {
-  const res = await api.patch(`${USER_API_URL}/updateStreak`, { username, date });
+const updateStreak = async (username: string, date: Date, activity: string) => {
+  const res = await api.patch(`${USER_API_URL}/updateStreak`, { username, date, activity });
   if (res.status !== 200) {
     throw new Error('Error while updating streak');
   }
@@ -275,4 +303,6 @@ export {
   changeFreq,
   addPinnedBadge,
   updateStreak,
+  deleteEmail,
+  muteNotifictions,
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactCalendarHeatmap from 'react-calendar-heatmap';
 import {
   getUserByUsername,
   deleteUser,
@@ -13,6 +14,8 @@ import {
   newActiveBanner,
   addPinnedBadge,
   changeFreq,
+  deleteEmail,
+  muteNotifictions,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -35,10 +38,17 @@ const useProfileSettings = () => {
   const [replaceEmailMode, setReplaceEmailMode] = useState(false);
   const [addEmailMode, setAddEmailMode] = useState(false);
   const [emailToReplace, setEmailToReplace] = useState('');
+  const [emailToDelete, setEmailToDelete] = useState('');
   const [replacementEmail, setReplacementEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [floatingContent, setFloatingContent] = useState({
+    content: '',
+    x: 0,
+    y: 0,
+    visible: false,
+  });
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -237,6 +247,26 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Handler for muting notifications.
+   */
+  const handleMuteNotifications = async () => {
+    if (!username) return;
+    try {
+      const updatedUser = await muteNotifictions(username);
+      await new Promise(resolve => {
+        setUserData(updatedUser); // Update the user data
+        resolve(null); // Resolve the promise
+      });
+
+      setSuccessMessage('Subscription changed!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to change subscription.');
+      setSuccessMessage(null);
+    }
+  };
+
   const handleAwardBadges = async () => {
     if (!username) return;
     try {
@@ -247,14 +277,12 @@ const useProfileSettings = () => {
         !userData.badges.includes('/badge_images/One_Hundred_Comments_Badge.png')
       ) {
         badges.push('/badge_images/One_Hundred_Comments_Badge.png');
-      } else if (
+      }
+      if (
         userData?.questionsAsked &&
         userData?.questionsAsked?.length > 0 &&
         !userData.badges.includes('/badge_images/First_Post_Badge.png')
       ) {
-        badges.push('/badge_images/First_Post_Badge.png');
-      }
-      if (userData && !userData.badges.includes('/badge_images/First_Post_Badge.png')) {
         badges.push('/badge_images/First_Post_Badge.png');
       }
 
@@ -361,6 +389,22 @@ const useProfileSettings = () => {
   };
 
   /**
+   * Handles deleting an email.
+   */
+  const handleDeleteEmail = async () => {
+    if (!username) return;
+    try {
+      await deleteEmail(username, emailToDelete);
+      setSuccessMessage(`Email "${emailToDelete}" deleted successfully.`);
+      setErrorMessage(null);
+      navigate(`/user/${username}`);
+    } catch (error) {
+      setErrorMessage('Failed to delete email.');
+      setSuccessMessage(null);
+    }
+  };
+
+  /**
    * handles the on click for pinning a badge to a user
    * @param badge string representing the location of the image
    * @returns an updated user with the pinned badge
@@ -375,6 +419,97 @@ const useProfileSettings = () => {
       });
     } catch (error) {
       setErrorMessage('Failed to pin badge');
+    }
+  };
+
+  /**
+   * Converts a users activity log to readable values for Heatmap Calendar
+   * @param log the activity log of the user
+   * @returns an array of objects with date and count
+   */
+  const convertActivityToValues = () => {
+    if (!username) return [];
+    try {
+      const log: Record<string, { votes?: number; questions?: number; answers?: number }> =
+        userData?.activityLog || {};
+      const values: { date: string; count: number }[] = [];
+      if (log) {
+        for (const date in log) {
+          if (Object.prototype.hasOwnProperty.call(log, date)) {
+            const { votes, questions, answers } = log[date];
+            const total = (votes ?? 0) + (questions ?? 0) + (answers ?? 0);
+
+            values.push({ date, count: total });
+          }
+        }
+      }
+      return values;
+    } catch (error) {
+      setErrorMessage('Failed to convert activity to values');
+      return [];
+    }
+  };
+
+  /**
+   * gets the color class for the heatmap calendar based on the number of contributions
+   * @param count number representing the number of contributions
+   * @returns a string representing the color class
+   */
+  const getColorClass = (count: number) => {
+    if (count === 0) return 'color-empty';
+    const level = Math.min(count, 4);
+    return `color-scale-${level}`;
+  };
+
+  /**
+   * handles the mouse over event for the heatmap calendar
+   * @param event mouse event
+   * @param value the value of the heatmap calendar
+   */
+  const handleMouseOver = (
+    event: React.MouseEvent<SVGRectElement>,
+    value: ReactCalendarHeatmap.ReactCalendarHeatmapValue<string> | undefined,
+  ) => {
+    if (value) {
+      const contribution: { votes?: number; questions?: number; answers?: number } =
+        userData?.activityLog?.[value.date] ?? {};
+      let content = '';
+      if (contribution) {
+        const { votes = 0, questions = 0, answers = 0 } = contribution;
+        content = `On ${value.date}: Votes: ${votes}, Questions: ${questions}, Answers: ${answers}`;
+      } else {
+        content = `No contributions on ${value.date}`;
+      }
+      setFloatingContent({
+        content,
+        x: event.clientX,
+        y: event.clientY,
+        visible: true,
+      });
+    }
+  };
+
+  /**
+   * handles the mouse leave event for the heatmap calendar
+   */
+  const handleMouseLeave = () => {
+    setFloatingContent(prev => ({
+      ...prev,
+      visible: false,
+    }));
+  };
+
+  /**
+   * handles the mouse move event for the heatmap calendar
+   * @param event mouse event
+   */
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement> | undefined) => {
+    if (floatingContent.visible) {
+      setFloatingContent(prev => ({
+        ...prev,
+        x: event?.clientX ?? 0,
+        y: event?.clientY ?? 0,
+      }));
     }
   };
 
@@ -421,6 +556,15 @@ const useProfileSettings = () => {
     handleChangeFrequency,
     handleAddNewBanner,
     handleAddPinnedBadge,
+    convertActivityToValues,
+    getColorClass,
+    handleMouseOver,
+    handleMouseLeave,
+    handleMouseMove,
+    floatingContent,
+    handleDeleteEmail,
+    setEmailToDelete,
+    handleMuteNotifications,
   };
 };
 
