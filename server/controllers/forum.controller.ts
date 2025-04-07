@@ -10,6 +10,7 @@ import {
   Question,
   PopulatedDatabaseQuestion,
   FindForumQuestionRequest,
+  ForumTypeUpdateRequest,
   Notification,
   ForumModerateRequest,
   PopulatedDatabaseNotification,
@@ -21,6 +22,7 @@ import {
   addUserToForum,
   removeUserFromForum,
   addQuestionToForum,
+  updateForumTypeSetting,
   getForumQuestionsByOrder,
   approveUser,
   banUser,
@@ -177,6 +179,46 @@ const forumController = (socket: FakeSOSocket) => {
       } else {
         res.status(500).send(`Error when fetching questions by filter`);
       }
+    }
+  };
+
+  /**
+   * Updates the forum type
+   * @param req - Request containing fid, forum creator, and type
+   * @param res The response object to send the result
+   */
+  const updateForumType = async (req: ForumTypeUpdateRequest, res: Response): Promise<void> => {
+    if (!req.body || !req.body.fid || !req.body.forumCreator || !req.body.type) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { fid, forumCreator, type } = req.body;
+    try {
+      const forum = await getForumById(fid);
+      if ('error' in forum) {
+        throw new Error(forum.error);
+      }
+      if (!(forum.createdBy === forumCreator)) {
+        throw new Error('Invalid permissions, must be a forum owner');
+      }
+
+      const updatedForum = await updateForumTypeSetting(fid, type);
+
+      if ('error' in updatedForum) {
+        throw new Error(updatedForum.error);
+      }
+
+      socket.to(fid).emit('forumUpdate', {
+        forum: {
+          ...updatedForum,
+          questions: updatedForum.questions.map(question => question._id),
+        } as DatabaseForum,
+        type: 'updated',
+      });
+      res.json(updatedForum);
+    } catch (err) {
+      res.status(500).send(`Error when moderating user membership: ${(err as Error).message}`);
     }
   };
 
@@ -438,6 +480,7 @@ const forumController = (socket: FakeSOSocket) => {
   router.get('/getForums', getForums);
   router.post('/toggleUserMembership', toggleUserMembership);
   router.post('/moderateUserMembership', moderateUserMembership);
+  router.post('/updateForumType', updateForumType);
   router.post('/addQuestion', addQuestion);
   router.get('/getQuestion', getQuestionsByOrder);
   return router;

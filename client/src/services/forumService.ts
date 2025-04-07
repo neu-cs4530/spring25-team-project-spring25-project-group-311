@@ -56,6 +56,32 @@ const leaveForum = async (forumId: string, username: string): Promise<DatabaseFo
 };
 
 /**
+ * Updates the forum type
+ *
+ * @param forumID - forum to update
+ * @param username - making the request
+ * @param type - new type for the forum
+ * @returns updated forum
+ */
+const updateForumType = async (
+  forumID: string,
+  username: string,
+  type: 'private' | 'public',
+): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/updateForumType`, {
+    fid: forumID,
+    forumCreator: username,
+    type,
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when leaving forum');
+  }
+
+  return res.data;
+};
+
+/**
  * Join a forum
  *
  * @param forumId - The ID of the forum to join
@@ -241,6 +267,7 @@ export {
   createForum,
   leaveForum,
   joinForum,
+  updateForumType,
   cancelJoin,
   approveUser,
   banUser,

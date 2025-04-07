@@ -16,6 +16,8 @@ const FocusedForumPage = () => {
   const { user } = useUserContext();
   const {
     forum,
+    type,
+    handleForumTypeChange,
     updateForum,
     handleApproveUser,
     handleBanUser,
@@ -27,6 +29,7 @@ const FocusedForumPage = () => {
   const [showAskQuestionButton, setShowAskQuestionButton] = useState<boolean>(true);
   const [showMembershipButton, setShowMembershipButton] = useState<boolean>(true);
   const [showModOptions, setShowModOptions] = useState<boolean>(false);
+  const [showCreatorOptions, setShowCreatorOptions] = useState<boolean>(false);
 
   // figuring out button display logic on frontend
   useEffect(() => {
@@ -60,6 +63,11 @@ const FocusedForumPage = () => {
     // mod perms
     if (forum.moderators.includes(user.username)) {
       setShowModOptions(true);
+    }
+
+    // creator perms
+    if (forum.createdBy === user.username) {
+      setShowCreatorOptions(true);
     }
   }, [forum, user.username]);
 
@@ -174,6 +182,35 @@ const FocusedForumPage = () => {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+          {showCreatorOptions && (
+            <div className='section-spacing'>
+              <label className='header1'>
+                <b>Forum Type:</b>
+              </label>
+              <div className='form_radio_group'>
+                <label className='form_radio_label'>
+                  <input
+                    type='radio'
+                    name='forumType'
+                    value='public'
+                    checked={type === 'public'}
+                    onChange={() => handleForumTypeChange('public')}
+                  />
+                  Public
+                </label>
+                <label className='form_radio_label'>
+                  <input
+                    type='radio'
+                    name='forumType'
+                    value='private'
+                    checked={type === 'private'}
+                    onChange={() => handleForumTypeChange('private')}
+                  />
+                  Private
+                </label>
               </div>
             </div>
           )}
