@@ -29,7 +29,6 @@ const AnswerHeader = ({ ansCount, title, forumTitle }: AnswerHeaderProps) => (
     </div>
     <div></div>
     <div></div>
-    {/* Someone improve this if there is time */}
   </div>
 );
 
