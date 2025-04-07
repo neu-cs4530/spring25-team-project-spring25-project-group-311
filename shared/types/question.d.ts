@@ -37,6 +37,7 @@ export interface Question {
   upVotes: string[];
   downVotes: string[];
   comments: Comment[];
+  forumId?: string;
 }
 
 /**

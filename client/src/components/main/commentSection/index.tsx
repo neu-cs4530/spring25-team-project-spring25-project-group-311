@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getMetaData } from '../../../tool';
-import { Comment, DatabaseComment } from '../../../types/types';
+import { Comment, DatabaseComment, DatabaseForum } from '../../../types/types';
 import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
 
@@ -12,6 +12,7 @@ import useUserContext from '../../../hooks/useUserContext';
  */
 interface CommentSectionProps {
   comments: DatabaseComment[];
+  forum?: DatabaseForum;
   handleAddComment: (comment: Comment) => void;
 }
 
@@ -21,7 +22,7 @@ interface CommentSectionProps {
  * @param comments: an array of Comment objects
  * @param handleAddComment: function to handle the addition of a new comment
  */
-const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => {
+const CommentSection = ({ comments, forum, handleAddComment }: CommentSectionProps) => {
   const { user } = useUserContext();
   const [text, setText] = useState<string>('');
   const [textErr, setTextErr] = useState<string>('');
@@ -31,6 +32,22 @@ const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => 
    * Function to handle the addition of a new comment.
    */
   const handleAddCommentClick = () => {
+    if (forum) {
+      if (forum.type === 'private') {
+        if (!forum.members.includes(user.username)) {
+          setTextErr(`You must join ${forum.name} before you can post`);
+          return;
+        }
+      }
+
+      if (forum.bannedMembers.includes(user.username)) {
+        setTextErr(
+          `You cannot comment on a ${forum.name} question as you are banned from ${forum.name}`,
+        );
+        return;
+      }
+    }
+
     if (text.trim() === '' || user.username.trim() === '') {
       setTextErr(text.trim() === '' ? 'Comment text cannot be empty' : '');
       return;

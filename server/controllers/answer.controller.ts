@@ -6,6 +6,7 @@ import {
   FakeSOSocket,
   PopulatedDatabaseAnswer,
   Notification,
+  PopulatedDatabaseNotification,
 } from '../types/types';
 import { addAnswerToQuestion, saveAnswer } from '../services/answer.service';
 import { populateDocument } from '../utils/database.util';
@@ -117,7 +118,7 @@ const answerController = (socket: FakeSOSocket) => {
       });
 
       socket.emit('notificationUpdate', {
-        notification: populatedNotif,
+        notification: populatedNotif as PopulatedDatabaseNotification,
         type: 'created',
       });
       res.json(ansFromDb);

@@ -1,5 +1,12 @@
-.focused_forum_container {
-  padding: 20px;
+.main {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.middle_main {
+  width: 85%;
+  overflow: auto;
 }
 
 .forum_title {
@@ -11,4 +18,65 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+
+.btns {
+  margin-right: 15%;
+}
+
+.question_list:last-child {
+  border-bottom: #000000 1px dashed;
+}
+
+.sideBarNav {
+  display: flex;
+  flex-direction: column;
+  width: 15%;
+  border-left: dashed;
+  align-items: flex-start;
+  padding: 2.5%
+}
+
+.section-spacing {
+  margin-top: 20px;
+}
+
+.moderator-badge {
+  color: grey;
+  padding-left: 3px;
+}
+
+.member-item {
+  padding: 3%;
+  position: relative;
+}
+
+.created-by {
+  padding: 2%;
+  position: relative;
+  color: grey;
+}
+
+.member-buttons {
+  display: none; /* Hide buttons by default */
+  position: absolute;
+  left: 0px;
+  top: 25px;
+  z-index: 10;
+
+  background: var(--header-background, #dddddd);
+  border-radius: 4px; 
+}
+
+.member-item:hover .member-buttons {
+  display: flex; /* Show buttons on hover */
+  flex-direction: column;
+}
+
+.approve-btn, .unban-btn, .ban-btn {
+  cursor: pointer;
+}
+
+.heading1 {
+  font-size: 1.25em;
 }

@@ -1,7 +1,6 @@
 import { PopulatedDatabaseAnswer } from './answer';
 import { PopulatedDatabaseChat } from './chat';
 import { DatabaseMessage } from './message';
-import { DatabaseForum } from './forum';
 import { PopulatedDatabaseQuestion } from './question';
 import { SafeDatabaseUser } from './user';
 import { BaseMove, GameInstance, GameInstanceID, GameMove, GameState } from './game';
@@ -91,7 +90,7 @@ export interface UserUpdatePayload {
  * - `type`: The type of modification (`'created'`, `'deleted'`, or `'updated'`).
  */
 export interface ForumUpdatePayload {
-  forum: DatabaseForum;
+  forum: PopulatedDatabaseForum;
   type: 'created' | 'deleted' | 'updated';
 }
 
@@ -121,6 +120,8 @@ export interface GameMovePayload {
  * - `makeMove`: Client can emit a move in the game.
  * - `joinGame`: Client can join a game.
  * - `leaveGame`: Client can leave a game.
+ * - `joinForum`: Client can join a forum.
+ * - `leaveForum`: Client can leave a forum.
  * - `joinChat`: Client can join a chat.
  * - `leaveChat`: Client can leave a chat.
  */
@@ -128,6 +129,8 @@ export interface ClientToServerEvents {
   makeMove: (move: GameMovePayload) => void;
   joinGame: (gameID: string) => void;
   leaveGame: (gameID: string) => void;
+  joinForum: (forumID: string) => void;
+  leaveForum: (forumID: string) => void;
   joinChat: (chatID: string) => void;
   leaveChat: (chatID: string | undefined) => void;
 }
@@ -154,7 +157,6 @@ export interface ServerToClientEvents {
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;
-  forumUpdate: (forum: PopulatedDatabaseForum) => void;
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
