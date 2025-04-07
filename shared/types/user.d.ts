@@ -2,6 +2,7 @@ import { Request } from 'express';
 import { ObjectId } from 'mongodb';
 import { Question } from './question';
 import { Answer } from './answer';
+import { ActivityType } from './activity';
 
 /**
  * Represents user credentials for authentication.
@@ -40,7 +41,7 @@ export interface User extends UserCredentials {
   banners?: string[];
   selectedBanner?: string;
   streak?: Date[];
-  activityLog?: Date[];
+  activityLog?: { [date: string]: { votes: number; questions: number; answers: number } };
   pinnedBadge?: string;
   browserNotif: boolean;
   emailNotif: boolean;
@@ -223,5 +224,6 @@ export interface UpdateStreakRequest extends Request {
   body: {
     username: string;
     date: Date;
+    activity: ActivityType;
   };
 }

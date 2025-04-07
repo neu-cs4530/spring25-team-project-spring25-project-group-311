@@ -158,7 +158,7 @@ const useAnswerPage = () => {
      *
      * @param voteData - The updated vote data for a question
      */
-    const handleVoteUpdate = (voteData: VoteUpdatePayload) => {
+    const handleVoteUpdate = async (voteData: VoteUpdatePayload) => {
       if (voteData.qid === questionID) {
         setQuestion(prevQuestion =>
           prevQuestion

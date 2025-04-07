@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactCalendarHeatmap from 'react-calendar-heatmap';
 import {
   getUserByUsername,
   deleteUser,
@@ -42,6 +43,12 @@ const useProfileSettings = () => {
   const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [floatingContent, setFloatingContent] = useState({
+    content: '',
+    x: 0,
+    y: 0,
+    visible: false,
+  });
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -270,14 +277,12 @@ const useProfileSettings = () => {
         !userData.badges.includes('/badge_images/One_Hundred_Comments_Badge.png')
       ) {
         badges.push('/badge_images/One_Hundred_Comments_Badge.png');
-      } else if (
+      }
+      if (
         userData?.questionsAsked &&
         userData?.questionsAsked?.length > 0 &&
         !userData.badges.includes('/badge_images/First_Post_Badge.png')
       ) {
-        badges.push('/badge_images/First_Post_Badge.png');
-      }
-      if (userData && !userData.badges.includes('/badge_images/First_Post_Badge.png')) {
         badges.push('/badge_images/First_Post_Badge.png');
       }
 
@@ -417,6 +422,97 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Converts a users activity log to readable values for Heatmap Calendar
+   * @param log the activity log of the user
+   * @returns an array of objects with date and count
+   */
+  const convertActivityToValues = () => {
+    if (!username) return [];
+    try {
+      const log: Record<string, { votes?: number; questions?: number; answers?: number }> =
+        userData?.activityLog || {};
+      const values: { date: string; count: number }[] = [];
+      if (log) {
+        for (const date in log) {
+          if (Object.prototype.hasOwnProperty.call(log, date)) {
+            const { votes, questions, answers } = log[date];
+            const total = (votes ?? 0) + (questions ?? 0) + (answers ?? 0);
+
+            values.push({ date, count: total });
+          }
+        }
+      }
+      return values;
+    } catch (error) {
+      setErrorMessage('Failed to convert activity to values');
+      return [];
+    }
+  };
+
+  /**
+   * gets the color class for the heatmap calendar based on the number of contributions
+   * @param count number representing the number of contributions
+   * @returns a string representing the color class
+   */
+  const getColorClass = (count: number) => {
+    if (count === 0) return 'color-empty';
+    const level = Math.min(count, 4);
+    return `color-scale-${level}`;
+  };
+
+  /**
+   * handles the mouse over event for the heatmap calendar
+   * @param event mouse event
+   * @param value the value of the heatmap calendar
+   */
+  const handleMouseOver = (
+    event: React.MouseEvent<SVGRectElement>,
+    value: ReactCalendarHeatmap.ReactCalendarHeatmapValue<string> | undefined,
+  ) => {
+    if (value) {
+      const contribution: { votes?: number; questions?: number; answers?: number } =
+        userData?.activityLog?.[value.date] ?? {};
+      let content = '';
+      if (contribution) {
+        const { votes = 0, questions = 0, answers = 0 } = contribution;
+        content = `On ${value.date}: Votes: ${votes}, Questions: ${questions}, Answers: ${answers}`;
+      } else {
+        content = `No contributions on ${value.date}`;
+      }
+      setFloatingContent({
+        content,
+        x: event.clientX,
+        y: event.clientY,
+        visible: true,
+      });
+    }
+  };
+
+  /**
+   * handles the mouse leave event for the heatmap calendar
+   */
+  const handleMouseLeave = () => {
+    setFloatingContent(prev => ({
+      ...prev,
+      visible: false,
+    }));
+  };
+
+  /**
+   * handles the mouse move event for the heatmap calendar
+   * @param event mouse event
+   */
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement> | undefined) => {
+    if (floatingContent.visible) {
+      setFloatingContent(prev => ({
+        ...prev,
+        x: event?.clientX ?? 0,
+        y: event?.clientY ?? 0,
+      }));
+    }
+  };
+
   return {
     userData,
     newPassword,
@@ -460,6 +556,12 @@ const useProfileSettings = () => {
     handleChangeFrequency,
     handleAddNewBanner,
     handleAddPinnedBadge,
+    convertActivityToValues,
+    getColorClass,
+    handleMouseOver,
+    handleMouseLeave,
+    handleMouseMove,
+    floatingContent,
     handleDeleteEmail,
     setEmailToDelete,
     handleMuteNotifications,

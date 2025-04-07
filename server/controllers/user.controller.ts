@@ -1,5 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import validate from 'deep-email-validator';
+import { ActivityType } from '@fake-stack-overflow/shared/types/activity';
 import {
   UserRequest,
   User,
@@ -780,39 +781,48 @@ const userController = (socket: FakeSOSocket) => {
 
   const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
     try {
-      const { username, date } = req.body;
+      const { username, date, activity } = req.body;
 
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
       }
 
+      const dateStr = new Date(date).toISOString().split('T')[0];
+
       // if the user doesnt have an activty log give it an empty one
       if (!foundUser.activityLog) {
-        foundUser.activityLog = [];
+        foundUser.activityLog = {};
+      }
+
+      const activityLog = foundUser.activityLog as Record<
+        string,
+        { votes: number; questions: number; answers: number }
+      >;
+      // if the date is not found in the activity log
+      if (!activityLog[dateStr]) {
+        activityLog[dateStr] = { votes: 0, questions: 0, answers: 0 };
+      }
+
+      // if the date is found in the activity log
+      const validActivities: ActivityType[] = ['votes', 'questions', 'answers'];
+      if (validActivities.includes(activity as ActivityType)) {
+        activityLog[dateStr][activity as ActivityType] += 1;
+      } else {
+        throw new Error(`Invalid activity type: ${activity}`);
       }
 
       // if the user doesnt have a streak update the streak with the date
       if (!foundUser.streak || foundUser.streak.length === 0) {
-        // if the user doesnt already have this date in its activity log add it to its activity log
-        if (!foundUser.activityLog.includes(date)) {
-          foundUser.activityLog.push(date);
-        }
         foundUser.streak = [date];
       }
       // if the user does have a streak
-      else {
-        // if this date is not already in its activity log add it
-        if (!foundUser.activityLog.includes(date)) {
-          foundUser.activityLog.push(date);
-        }
+      else if (!foundUser.streak.includes(date)) {
         // if the user streak does not include this date push the date onto its streak
-        if (!foundUser.streak.includes(date)) {
-          foundUser.streak.push(date);
-          // if the dates are not sequential reset the streak to just this date
-          if (!areDatesSequential(foundUser.streak)) {
-            foundUser.streak = [date];
-          }
+        foundUser.streak.push(date);
+        // if the dates are not sequential reset the streak to just this date
+        if (!areDatesSequential(foundUser.streak)) {
+          foundUser.streak = [date];
         }
       }
 
@@ -832,7 +842,11 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
-      res.status(500).send(`Error updating user streak: ${error}`);
+      res
+        .status(500)
+        .send(
+          `Error updating user streak: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+        );
     }
   };
 

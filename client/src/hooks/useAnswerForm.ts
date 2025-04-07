@@ -4,6 +4,7 @@ import { validateHyperlink } from '../tool';
 import addAnswer from '../services/answerService';
 import useUserContext from './useUserContext';
 import { Answer } from '../types/types';
+import { updateStreak } from '../services/userService';
 
 /**
  * Custom hook for managing the state and logic of an answer submission form.
@@ -62,6 +63,11 @@ const useAnswerForm = () => {
     };
 
     const res = await addAnswer(questionID, answer);
+
+    // Update streak and activity log
+    const userRes = await updateStreak(user.username, answer.ansDateTime, 'answers');
+    user.streak = userRes.streak;
+    user.activityLog = userRes.activityLog;
 
     if (res && res._id) {
       // navigate to the question that was answered
