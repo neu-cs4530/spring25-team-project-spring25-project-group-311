@@ -6,7 +6,7 @@ const QUESTION_API_URL = `${process.env.REACT_APP_SERVER_URL}/question`;
 const FORUM_API_URL = `${process.env.REACT_APP_SERVER_URL}/forum`;
 
 /**
- * Function to get questions by filter.
+ * Function to get questions by filter. Handles forum questions as well.
  *
  * @param order - The order in which to fetch questions. Default is 'newest'.
  * @param search - The search term to filter questions. Default is an empty string.

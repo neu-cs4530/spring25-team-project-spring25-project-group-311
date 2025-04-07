@@ -147,6 +147,169 @@ export const addUserToForum = async (
 };
 
 /**
+ * Cancels a user's request to join a private forum
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to remove from awaiting members.
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const cancelUserJoinRequest = async (
+  fid: string,
+  username: string,
+): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    // nothing to be done
+    if (!forum.awaitingMembers.includes(username) || forum.type === 'public') {
+      return forum;
+    }
+
+    const updatedForum: PopulatedDatabaseForum | null = await ForumModel.findOneAndUpdate(
+      { _id: fid },
+      { $pull: { awaitingMembers: username } },
+      { new: true },
+    ).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when adding user to forum: ${error}` };
+  }
+};
+
+/**
+ * Bans a user if they are a member.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to ban
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const banUser = async (fid: string, username: string): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    // no action should be taken
+    if (forum.bannedMembers.includes(username) || forum.awaitingMembers.includes(username)) {
+      return forum;
+    }
+
+    let updatedForum: PopulatedDatabaseForum | null;
+    if (forum.members.includes(username)) {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { bannedMembers: username }, $pull: { members: username } },
+        { new: true },
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
+    } else {
+      return forum;
+    }
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when banning user from forum: ${error}` };
+  }
+};
+
+/**
+ * Unbans a user if they are banned.
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - The username of the user to unban
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const unbanUser = async (fid: string, username: string): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    // no action should be taken
+    if (!forum.bannedMembers.includes(username)) {
+      return forum;
+    }
+
+    const updatedForum: PopulatedDatabaseForum | null = await ForumModel.findOneAndUpdate(
+      { _id: fid },
+      { $pull: { bannedMembers: username } },
+      { new: true },
+    ).populate<{
+      questions: PopulatedDatabaseQuestion[];
+    }>([{ path: 'questions', model: QuestionModel }]);
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when banning user from forum: ${error}` };
+  }
+};
+
+/**
+ *
+ *
+ * @param {string} fid - The id of the forum to update
+ * @param {string} username - tThe username of the user to approve
+ * @returns {Promise<PopulatedForumResponse>} - Resolves with the found forum or an error message.
+ */
+export const approveUser = async (
+  fid: string,
+  username: string,
+): Promise<PopulatedForumResponse> => {
+  try {
+    const forum = await getForumById(fid);
+
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    let updatedForum: PopulatedDatabaseForum | null;
+    if (forum.type === 'private' && forum.awaitingMembers.includes(username)) {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { $addToSet: { members: username }, $pull: { awaitingMembers: username } },
+        { new: true },
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
+    } else {
+      return forum;
+    }
+
+    if (!updatedForum) {
+      throw Error('Error');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: `Error occurred when approving user to private forum: ${error}` };
+  }
+};
+
+/**
  * Creates and adds a question to a specified forum.
  *
  * @param {string} fid - The ID of the forum to which the question will be added
@@ -232,7 +395,7 @@ export const removeUserFromForum = async (
 };
 
 /**
- * Retrieves questions of a forumordered by specified criteria.
+ * Retrieves questions of a forum ordered by specified criteria.
  * @param {OrderType} order - The order type to filter the questions
  * @param {string} fid - The forum from which to return the questions
  * @returns {Promise<Question[]>} - The ordered list of questions
@@ -244,7 +407,7 @@ export const getForumQuestionsByOrder = async (
   try {
     const forum = await ForumModel.findOne({ _id: fid }).populate<{
       questions: PopulatedDatabaseQuestion[];
-    }>([{ path: 'questions', model: QuestionModel }]);
+    }>([{ path: 'questions', model: QuestionModel, populate: { path: 'tags', model: TagModel } }]);
 
     if (!forum) {
       return [];

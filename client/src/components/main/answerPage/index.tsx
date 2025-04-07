@@ -14,7 +14,15 @@ import useAnswerPage from '../../../hooks/useAnswerPage';
  * It also includes the functionality to vote, ask a new question, and post a new answer.
  */
 const AnswerPage = () => {
-  const { questionID, question, handleNewComment, handleNewAnswer } = useAnswerPage();
+  const {
+    questionID,
+    question,
+    handleNewComment,
+    handleNewAnswer,
+    isForumQuestion,
+    forum,
+    forumTitle,
+  } = useAnswerPage();
 
   if (!question) {
     return null;
@@ -23,7 +31,11 @@ const AnswerPage = () => {
   return (
     <>
       <VoteComponent question={question} />
-      <AnswerHeader ansCount={question.answers.length} title={question.title} />
+      <AnswerHeader
+        ansCount={question.answers.length}
+        title={question.title}
+        forumTitle={isForumQuestion ? forumTitle : undefined}
+      />
       <QuestionBody
         views={question.views.length}
         text={question.text}
@@ -32,6 +44,7 @@ const AnswerPage = () => {
       />
       <CommentSection
         comments={question.comments}
+        forum={isForumQuestion && forum ? forum : undefined}
         handleAddComment={(comment: Comment) => handleNewComment(comment, 'question', questionID)}
       />
       {question.answers.map(a => (
@@ -40,6 +53,7 @@ const AnswerPage = () => {
           text={a.text}
           ansBy={a.ansBy}
           meta={getMetaData(new Date(a.ansDateTime))}
+          forum={isForumQuestion && forum ? forum : undefined}
           comments={a.comments}
           handleAddComment={(comment: Comment) =>
             handleNewComment(comment, 'answer', String(a._id))

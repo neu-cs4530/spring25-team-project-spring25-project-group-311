@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { ObjectId } from 'mongodb';
-import { PopulatedDatabaseQuestion, Question } from './question';
+import { OrderType, PopulatedDatabaseQuestion, Question } from './question';
 
 /**
  * Represents a forum in the database.
@@ -28,6 +28,9 @@ export interface DatabaseForum extends Omit<Forum, 'questions'> {
   questions: ObjectId[];
 }
 
+/**
+ * Represents a populated database forum.
+ */
 export interface PopulatedDatabaseForum extends Omit<DatabaseForum, 'questions'> {
   questions: PopulatedDatabaseQuestion[];
 }
@@ -57,7 +60,29 @@ export interface ForumMembershipRequest extends Request {
   body: {
     fid: string;
     username: string;
-    type: 'join' | 'leave';
+    type: 'join' | 'leave' | 'cancel';
+  };
+}
+
+/**
+ * Express request for forum banning and approve operations.
+ */
+export interface ForumModerateRequest extends Request {
+  body: {
+    fid: string;
+    username: string;
+    moderator: string;
+    type: 'approve' | 'ban';
+  };
+}
+
+/**
+ * Express request for forum question ordering.
+ */
+export interface FindForumQuestionRequest extends Request {
+  query: {
+    fid: string;
+    order: OrderType;
   };
 }
 

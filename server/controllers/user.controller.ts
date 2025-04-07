@@ -19,6 +19,7 @@ import {
   ChangeFreqRequest,
   Notification,
   UpdateStreakRequest,
+  PopulatedDatabaseNotification,
   MuteUserNotif,
 } from '../types/types';
 import {
@@ -508,7 +509,7 @@ const userController = (socket: FakeSOSocket) => {
         }
 
         socket.emit('notificationUpdate', {
-          notification: populatedNotification,
+          notification: populatedNotification as PopulatedDatabaseNotification,
           type: 'created',
         });
       });
