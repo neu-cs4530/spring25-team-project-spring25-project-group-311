@@ -1,0 +1,24 @@
+.user {
+    display: flex;
+    flex-direction: row;
+    border-top: #000000 1px dashed;
+  }
+  
+  .userStats {
+    color: #000000;
+    position: relative;
+    text-align: right;
+    width: 30%;
+  }
+  
+  .user_mid {
+    margin-left: 2rem;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 60%;
+  }
+
+  .userUsername {
+    color: cornflowerblue;
+  }
+  
