@@ -32,10 +32,10 @@ const sendEmail = async (username: string) => {
       },
     });
 
-    let forumItems = `Hi ${username} here is your digest\n`;
+    let forumItems = `Hi ${username} here is your digest\n\n`;
     topFivePostsPerForum.forEach(forum => {
-      forum.forEach(post => {
-        forumItems += `\t${post.title}\n`;
+      forum.forEach((post, indx) => {
+        forumItems += `\t${indx}) ${post.title}\n`;
         post.answers.forEach(answer => {
           forumItems += `\t\t${answer.text}\n`;
         });

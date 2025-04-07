@@ -278,7 +278,7 @@ const ProfileSettings: React.FC = () => {
                       />
                       {floatingContent.visible && (
                         <div
-                          className='tooltip'
+                          className='heatmap-tooltip'
                           style={{
                             position: 'fixed',
                             left: floatingContent.x + 10,

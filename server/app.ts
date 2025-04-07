@@ -61,8 +61,9 @@ async function scheduleHourlyEmails() {
       throw Error('error getting users');
     }
     allUsers.forEach(user => {
+      // Sends every half an hour.
       if (user.emailNotif && user.emailFrequency == 'hourly') {
-        schedule.scheduleJob('13 * * * *', async () => {
+        schedule.scheduleJob('30 * * * *', async () => {
           console.log('Hourly email sending scheduled.');
           await sendEmail(user.username);
         });
@@ -74,7 +75,7 @@ async function scheduleHourlyEmails() {
 }
 
 /**
- * Schedules all the hourly email jobs
+ * Schedules all the daily email jobs
  */
 async function scheduleDailyEmails() {
   try {
@@ -83,6 +84,7 @@ async function scheduleDailyEmails() {
       throw Error('error getting users');
     }
     allUsers.forEach(user => {
+      // Sends every day at 6:30PM
       if (user.emailNotif && user.emailFrequency == 'daily') {
         schedule.scheduleJob('30 18 * * *', async () => {
           await sendEmail(user.username);
@@ -95,7 +97,7 @@ async function scheduleDailyEmails() {
 }
 
 /**
- * Schedules all the hourly email jobs
+ * Schedules all the weekly email jobs
  */
 async function scheduleWeeklyEmails() {
   try {
@@ -104,8 +106,9 @@ async function scheduleWeeklyEmails() {
       throw Error('error getting users');
     }
     allUsers.forEach(user => {
+      // Sends out every Friday at 6:30 PM
       if (user.emailNotif && user.emailFrequency == 'weekly') {
-        schedule.scheduleJob('16 15 * * 5', async () => {
+        schedule.scheduleJob('30 18 * * 5', async () => {
           await sendEmail(user.username);
         });
         console.log('woo');
