@@ -386,13 +386,13 @@ const useProfileSettings = () => {
   /**
    * Handles deleting an email.
    */
-  const handleDeleteEmail = async () => {
+  const handleDeleteEmail = async (email: string) => {
     if (!username) return;
     try {
-      await deleteEmail(username, emailToDelete);
-      setSuccessMessage(`Email "${emailToDelete}" deleted successfully.`);
+      const updatedUser = await deleteEmail(username, email);
+      setSuccessMessage(`Email "${email}" deleted successfully.`);
       setErrorMessage(null);
-      navigate(`/user/${username}`);
+      setUserData(updatedUser);
     } catch (error) {
       setErrorMessage('Failed to delete email.');
       setSuccessMessage(null);

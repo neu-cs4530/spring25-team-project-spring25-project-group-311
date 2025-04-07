@@ -243,8 +243,7 @@ const ProfileSettings: React.FC = () => {
                       selectReplaceEmail={setEmailToReplace}
                       currEditMode={replaceEmailMode}
                       toggleReplace={() => setReplaceEmailMode(true)}
-                      handleDeleteEmail={setEmailToDelete}
-                      setDeleteEmail={handleDeleteEmail}
+                      handleDeleteEmail={handleDeleteEmail}
                     />
                   </div>
                 ))}
@@ -315,7 +314,6 @@ const ProfileSettings: React.FC = () => {
                       currEditMode={replaceEmailMode}
                       toggleReplace={setReplaceEmailMode}
                       handleDeleteEmail={handleDeleteEmail}
-                      setDeleteEmail={setEmailToDelete}
                     />
                   ),
                 )}
