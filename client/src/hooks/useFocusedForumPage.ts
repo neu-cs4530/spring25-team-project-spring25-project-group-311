@@ -14,6 +14,7 @@ import {
   getForumById,
   getQuestionsByOrder,
   unbanUser,
+  updateForumType,
 } from '../services/forumService';
 
 /**
@@ -31,9 +32,16 @@ const useFocusedForumPage = () => {
   const [sortedQuestions, setSortedQuestions] = useState<PopulatedDatabaseQuestion[]>([]);
   const [forumID, setForumID] = useState<string>(fid || '');
   const [forum, setForum] = useState<DatabaseForum | null>(null);
+  const [type, setType] = useState<'public' | 'private'>('public');
 
   const updateForum = (updatedForum: DatabaseForum) => {
     setForum(updatedForum);
+  };
+
+  const handleForumTypeChange = async (newType: 'public' | 'private') => {
+    const updatedForum = await updateForumType(forumID, user.username, newType);
+    setForum(updatedForum);
+    setType(newType);
   };
 
   /**
@@ -42,12 +50,8 @@ const useFocusedForumPage = () => {
    * @param member - member to approve
    */
   const handleApproveUser = async (member: string) => {
-    try {
-      const updatedForum = await approveUser(forumID, member, user.username);
-      setForum(updatedForum);
-    } catch (error) {
-      // console.error('Error approving user:', error);
-    }
+    const updatedForum = await approveUser(forumID, member, user.username);
+    setForum(updatedForum);
   };
 
   /**
@@ -56,12 +60,8 @@ const useFocusedForumPage = () => {
    * @param member - user to ban
    */
   const handleBanUser = async (member: string) => {
-    try {
-      const updatedForum = await banUser(forumID, member, user.username);
-      setForum(updatedForum);
-    } catch (error) {
-      // console.error('Error banning user:', error);
-    }
+    const updatedForum = await banUser(forumID, member, user.username);
+    setForum(updatedForum);
   };
 
   /**
@@ -194,6 +194,8 @@ const useFocusedForumPage = () => {
 
   return {
     forum,
+    type,
+    handleForumTypeChange,
     setForum,
     updateForum,
     handleApproveUser,

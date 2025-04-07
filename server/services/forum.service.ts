@@ -310,6 +310,71 @@ export const approveUser = async (
 };
 
 /**
+ * Updates a forum to the new type, if private forum becomes public
+ * all members are approved automatically.
+ *
+ * @param {string} fid - The ID of the forum to update type
+ * @param type - New type of the forum
+ */
+export const updateForumTypeSetting = async (
+  fid: string,
+  type: string,
+): Promise<PopulatedForumResponse> => {
+  try {
+    if (!(type === 'private' || type === 'public')) {
+      throw new Error('Invalid type');
+    }
+
+    const forum = await getForumById(fid);
+    if ('error' in forum) {
+      throw new Error(forum.error);
+    }
+
+    // nothing to be done
+    if (forum.type === type) {
+      return forum;
+    }
+
+    let updatedForum: PopulatedDatabaseForum | null;
+    if (type === 'private') {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        { type: 'private' },
+        { new: true },
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
+    } else if (type === 'public') {
+      updatedForum = await ForumModel.findOneAndUpdate(
+        { _id: fid },
+        [
+          {
+            $set: {
+              type: 'public',
+              members: { $concatArrays: ['$members', '$awaitingMembers'] },
+              awaitingMembers: [],
+            },
+          },
+        ],
+        { new: true },
+      ).populate<{
+        questions: PopulatedDatabaseQuestion[];
+      }>([{ path: 'questions', model: QuestionModel }]);
+    } else {
+      throw Error('Invalid type');
+    }
+
+    if (!updatedForum) {
+      throw Error('Error updating forum');
+    }
+
+    return updatedForum;
+  } catch (error) {
+    return { error: 'Error when updating forum type' };
+  }
+};
+
+/**
  * Creates and adds a question to a specified forum.
  *
  * @param {string} fid - The ID of the forum to which the question will be added
