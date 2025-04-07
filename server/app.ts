@@ -36,6 +36,7 @@ const socket: FakeSOSocket = new Server(server, {
   cors: { origin: '*' },
 });
 
+// This package does not support EMCA import types
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const schedule = require('node-schedule');
 

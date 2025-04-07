@@ -14,6 +14,8 @@ import {
   newActiveBanner,
   addPinnedBadge,
   changeFreq,
+  deleteEmail,
+  muteNotifictions,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -36,6 +38,7 @@ const useProfileSettings = () => {
   const [replaceEmailMode, setReplaceEmailMode] = useState(false);
   const [addEmailMode, setAddEmailMode] = useState(false);
   const [emailToReplace, setEmailToReplace] = useState('');
+  const [emailToDelete, setEmailToDelete] = useState('');
   const [replacementEmail, setReplacementEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -244,6 +247,26 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Handler for muting notifications.
+   */
+  const handleMuteNotifications = async () => {
+    if (!username) return;
+    try {
+      const updatedUser = await muteNotifictions(username);
+      await new Promise(resolve => {
+        setUserData(updatedUser); // Update the user data
+        resolve(null); // Resolve the promise
+      });
+
+      setSuccessMessage('Subscription changed!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to change subscription.');
+      setSuccessMessage(null);
+    }
+  };
+
   const handleAwardBadges = async () => {
     if (!username) return;
     try {
@@ -363,6 +386,22 @@ const useProfileSettings = () => {
         setShowConfirmation(false);
       }
     });
+  };
+
+  /**
+   * Handles deleting an email.
+   */
+  const handleDeleteEmail = async () => {
+    if (!username) return;
+    try {
+      await deleteEmail(username, emailToDelete);
+      setSuccessMessage(`Email "${emailToDelete}" deleted successfully.`);
+      setErrorMessage(null);
+      navigate(`/user/${username}`);
+    } catch (error) {
+      setErrorMessage('Failed to delete email.');
+      setSuccessMessage(null);
+    }
   };
 
   /**
@@ -523,6 +562,9 @@ const useProfileSettings = () => {
     handleMouseLeave,
     handleMouseMove,
     floatingContent,
+    handleDeleteEmail,
+    setEmailToDelete,
+    handleMuteNotifications,
   };
 };
 

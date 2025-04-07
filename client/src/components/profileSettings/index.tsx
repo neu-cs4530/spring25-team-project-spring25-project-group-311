@@ -50,10 +50,13 @@ const ProfileSettings: React.FC = () => {
     handleAddNewBanner,
     handleNewSelectedBanner,
     handleChangeFrequency,
+    handleMuteNotifications,
     handleAddPinnedBadge,
     handleMouseOver,
     handleMouseLeave,
     handleMouseMove,
+    handleDeleteEmail,
+    setEmailToDelete,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -278,13 +281,14 @@ const ProfileSettings: React.FC = () => {
                 <h4>Emails</h4>
                 {userData.emails.map(email => (
                   <div key={email}>
-                    <EmailDisplayItem email={email} selectEmail={setEmailToReplace} />
-                    <button
-                      className='replace-email-button'
-                      style={{ marginLeft: '1rem' }}
-                      onClick={() => setReplaceEmailMode(true)}>
-                      Replace Email
-                    </button>
+                    <EmailDisplayItem
+                      email={email}
+                      selectReplaceEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={() => setReplaceEmailMode(true)}
+                      handleDeleteEmail={setEmailToDelete}
+                      setDeleteEmail={handleDeleteEmail}
+                    />
                   </div>
                 ))}
                 <button
@@ -316,6 +320,7 @@ const ProfileSettings: React.FC = () => {
                   onClick={() => setAddEmailMode(false)}>
                   Cancel
                 </button>
+                {errorMessage && <p>{errorMessage}</p>}
               </div>
             )}
 
@@ -346,7 +351,15 @@ const ProfileSettings: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <EmailDisplayItem key={email} email={email} selectEmail={setEmailToReplace} />
+                    <EmailDisplayItem
+                      key={email}
+                      email={email}
+                      selectReplaceEmail={setEmailToReplace}
+                      currEditMode={replaceEmailMode}
+                      toggleReplace={setReplaceEmailMode}
+                      handleDeleteEmail={handleDeleteEmail}
+                      setDeleteEmail={setEmailToDelete}
+                    />
                   ),
                 )}
               </div>
@@ -361,7 +374,14 @@ const ProfileSettings: React.FC = () => {
                   <input
                     type='checkbox'
                     checked={userData.browserNotif}
-                    onChange={() => handleSubscription}
+                    onChange={() => handleSubscription('browser')}
+                  />
+                </div>
+                <div>
+                  <input
+                    type='checkbox'
+                    checked={userData.mutedTime && new Date() < new Date(userData.mutedTime)}
+                    onChange={() => handleMuteNotifications()}
                   />
                 </div>
                 <div className='notification-display'>
@@ -369,7 +389,7 @@ const ProfileSettings: React.FC = () => {
                   <input
                     type='checkbox'
                     checked={userData.emailNotif}
-                    onChange={() => handleSubscription}
+                    onChange={() => handleSubscription('email')}
                   />
                 </div>
                 {userData.emailNotif && (
