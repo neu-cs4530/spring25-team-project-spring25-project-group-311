@@ -8,7 +8,12 @@ import {
   DatabaseForum,
   AddForumQuestionRequest,
   Question,
+  PopulatedDatabaseQuestion,
+  FindForumQuestionRequest,
+  ForumTypeUpdateRequest,
   Notification,
+  ForumModerateRequest,
+  PopulatedDatabaseNotification,
 } from '../types/types';
 import {
   saveForum,
@@ -17,6 +22,12 @@ import {
   addUserToForum,
   removeUserFromForum,
   addQuestionToForum,
+  updateForumTypeSetting,
+  getForumQuestionsByOrder,
+  approveUser,
+  banUser,
+  cancelUserJoinRequest,
+  unbanUser,
 } from '../services/forum.service';
 import { getUserByUsername } from '../services/user.service';
 import { saveQuestion } from '../services/question.service';
@@ -92,7 +103,7 @@ const forumController = (socket: FakeSOSocket) => {
         throw new Error(result.error);
       }
 
-      socket.emit('forumUpdate', {
+      socket.to(String(result._id)).emit('forumUpdate', {
         forum: result,
         type: 'created',
       });
@@ -148,6 +159,124 @@ const forumController = (socket: FakeSOSocket) => {
   };
 
   /**
+   * Gets the forum questions by the provided order, responds with the list of forum questions by order.
+   *
+   * @param req The request object containing the forum question request
+   * @param res The response object to send the result
+   */
+  const getQuestionsByOrder = async (
+    req: FindForumQuestionRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { fid, order } = req.query;
+
+    try {
+      const qlist: PopulatedDatabaseQuestion[] = await getForumQuestionsByOrder(order, fid);
+      res.json(qlist);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching questions by filter: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching questions by filter`);
+      }
+    }
+  };
+
+  /**
+   * Updates the forum type
+   * @param req - Request containing fid, forum creator, and type
+   * @param res The response object to send the result
+   */
+  const updateForumType = async (req: ForumTypeUpdateRequest, res: Response): Promise<void> => {
+    if (!req.body || !req.body.fid || !req.body.forumCreator || !req.body.type) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { fid, forumCreator, type } = req.body;
+    try {
+      const forum = await getForumById(fid);
+      if ('error' in forum) {
+        throw new Error(forum.error);
+      }
+      if (!(forum.createdBy === forumCreator)) {
+        throw new Error('Invalid permissions, must be a forum owner');
+      }
+
+      const updatedForum = await updateForumTypeSetting(fid, type);
+
+      if ('error' in updatedForum) {
+        throw new Error(updatedForum.error);
+      }
+
+      socket.to(fid).emit('forumUpdate', {
+        forum: {
+          ...updatedForum,
+          questions: updatedForum.questions.map(question => question._id),
+        } as DatabaseForum,
+        type: 'updated',
+      });
+      res.json(updatedForum);
+    } catch (err) {
+      res.status(500).send(`Error when moderating user membership: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * Handles updating a user moderation event within the forum.
+   * @param req Request containing user, moderator and type
+   * @param res The response object to send the result
+   * @throws Error if invalid body, incorrect moderation perms
+   */
+  const moderateUserMembership = async (
+    req: ForumModerateRequest,
+    res: Response,
+  ): Promise<void> => {
+    if (!req.body || !req.body.fid || !req.body.username || !req.body.moderator || !req.body.type) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { fid, username, moderator, type } = req.body;
+
+    try {
+      const forum = await getForumById(fid);
+      if ('error' in forum) {
+        throw new Error(forum.error);
+      }
+      if (!forum.moderators.includes(moderator)) {
+        throw new Error('Invalid mod permissions');
+      }
+
+      let updatedForum: PopulatedForumResponse;
+      if (type === 'approve') {
+        updatedForum = await approveUser(fid, username);
+      } else if (type === 'ban') {
+        updatedForum = await banUser(fid, username);
+      } else if (type === 'unban') {
+        updatedForum = await unbanUser(fid, username);
+      } else {
+        throw new Error('Invalid type');
+      }
+
+      if ('error' in updatedForum) {
+        throw new Error(updatedForum.error);
+      }
+
+      socket.to(fid).emit('forumUpdate', {
+        forum: {
+          ...updatedForum,
+          questions: updatedForum.questions.map(question => question._id),
+        } as DatabaseForum,
+        type: 'updated',
+      });
+      res.json(updatedForum);
+    } catch (err) {
+      res.status(500).send(`Error when moderating user membership: ${(err as Error).message}`);
+    }
+  };
+
+  /**
    * Adds or removes a user to the forum
    *
    * @param req - The request containing the username, forumId, and type of membership change
@@ -169,6 +298,8 @@ const forumController = (socket: FakeSOSocket) => {
         updatedForum = await addUserToForum(fid, username);
       } else if (type === 'leave') {
         updatedForum = await removeUserFromForum(fid, username);
+      } else if (type === 'cancel') {
+        updatedForum = await cancelUserJoinRequest(fid, username);
       } else {
         throw new Error('Invalid type');
       }
@@ -177,7 +308,7 @@ const forumController = (socket: FakeSOSocket) => {
         throw new Error(updatedForum.error);
       }
 
-      socket.emit('forumUpdate', {
+      socket.to(fid).emit('forumUpdate', {
         forum: {
           ...updatedForum,
           questions: updatedForum.questions.map(question => question._id),
@@ -232,6 +363,7 @@ const forumController = (socket: FakeSOSocket) => {
       const questionWithTags = {
         ...questionInfo,
         tags: await processTags(questionInfo.tags),
+        forumId: fid,
       };
 
       if (questionWithTags.tags.length === 0) {
@@ -275,12 +407,12 @@ const forumController = (socket: FakeSOSocket) => {
         }
         const populatedNotif = await populateDocument(savedNotif._id.toString(), 'notification');
         socket.emit('notificationUpdate', {
-          notification: populatedNotif,
+          notification: populatedNotif as PopulatedDatabaseNotification,
           type: 'created',
         });
       });
 
-      socket.emit('forumUpdate', {
+      socket.to(fid).emit('forumUpdate', {
         forum: result,
         type: 'updated',
       });
@@ -290,12 +422,25 @@ const forumController = (socket: FakeSOSocket) => {
     }
   };
 
+  socket.on('connection', conn => {
+    conn.on('joinForum', (forumID: string) => {
+      conn.join(forumID);
+    });
+
+    conn.on('leaveForum', (forumID: string) => {
+      conn.leave(forumID);
+    });
+  });
+
   // Define routes for the forum-related operations
   router.post('/create', createForum);
   router.get('/getForum/:forumName', getForum);
   router.get('/getForums', getForums);
   router.post('/toggleUserMembership', toggleUserMembership);
+  router.post('/moderateUserMembership', moderateUserMembership);
+  router.post('/updateForumType', updateForumType);
   router.post('/addQuestion', addQuestion);
+  router.get('/getQuestion', getQuestionsByOrder);
   return router;
 };
 

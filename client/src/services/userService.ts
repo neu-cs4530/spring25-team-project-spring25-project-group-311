@@ -278,6 +278,23 @@ const addPinnedBadge = async (username: string, pinnedBadge: string): Promise<Sa
   return res.data;
 };
 
+/**
+ * Removes a pinned badge from the user
+ * @param username string representing the user
+ * @param pinnedBadge string representing the badge to unpin
+ * @returns updated user
+ */
+const removePinnedBadge = async (
+  username: string,
+  pinnedBadge: string,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/removePinnedBadge`, { username, pinnedBadge });
+  if (res.status !== 200) {
+    throw new Error('Error when removing pinned badge');
+  }
+  return res.data;
+};
+
 const updateStreak = async (username: string, date: Date, activity: string) => {
   const res = await api.patch(`${USER_API_URL}/updateStreak`, { username, date, activity });
   if (res.status !== 200) {
@@ -302,6 +319,7 @@ export {
   newActiveBanner,
   changeFreq,
   addPinnedBadge,
+  removePinnedBadge,
   updateStreak,
   deleteEmail,
   muteNotifictions,

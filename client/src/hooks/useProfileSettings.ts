@@ -16,6 +16,7 @@ import {
   changeFreq,
   deleteEmail,
   muteNotifictions,
+  removePinnedBadge,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -38,7 +39,6 @@ const useProfileSettings = () => {
   const [replaceEmailMode, setReplaceEmailMode] = useState(false);
   const [addEmailMode, setAddEmailMode] = useState(false);
   const [emailToReplace, setEmailToReplace] = useState('');
-  const [emailToDelete, setEmailToDelete] = useState('');
   const [replacementEmail, setReplacementEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -173,6 +173,7 @@ const useProfileSettings = () => {
       });
 
       setSuccessMessage('Email added!');
+      setNewEmail('');
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage('Failed to add email.');
@@ -391,13 +392,13 @@ const useProfileSettings = () => {
   /**
    * Handles deleting an email.
    */
-  const handleDeleteEmail = async () => {
+  const handleDeleteEmail = async (email: string) => {
     if (!username) return;
     try {
-      await deleteEmail(username, emailToDelete);
-      setSuccessMessage(`Email "${emailToDelete}" deleted successfully.`);
+      const updatedUser = await deleteEmail(username, email);
+      setSuccessMessage(`Email "${email}" deleted successfully.`);
       setErrorMessage(null);
-      navigate(`/user/${username}`);
+      setUserData(updatedUser);
     } catch (error) {
       setErrorMessage('Failed to delete email.');
       setSuccessMessage(null);
@@ -419,6 +420,24 @@ const useProfileSettings = () => {
       });
     } catch (error) {
       setErrorMessage('Failed to pin badge');
+    }
+  };
+
+  /**
+   * handles the on click for pinning a badge to a user
+   * @param badge string representing the location of the image
+   * @returns an updated user with the pinned badge
+   */
+  const handleRemovePinnedBadge = async (badge: string) => {
+    if (!username) return;
+    try {
+      const updatedUser = await removePinnedBadge(username, badge);
+      await new Promise(resolve => {
+        setUserData(updatedUser);
+        resolve(null);
+      });
+    } catch (error) {
+      setErrorMessage('Failed to unpin badge');
     }
   };
 
@@ -563,8 +582,8 @@ const useProfileSettings = () => {
     handleMouseMove,
     floatingContent,
     handleDeleteEmail,
-    setEmailToDelete,
     handleMuteNotifications,
+    handleRemovePinnedBadge,
   };
 };
 

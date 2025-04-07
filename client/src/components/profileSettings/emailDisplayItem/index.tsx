@@ -12,7 +12,6 @@ const EmailDisplayItem = ({
   selectReplaceEmail,
   currEditMode,
   toggleReplace,
-  setDeleteEmail,
   handleDeleteEmail,
 }: {
   email: string;
@@ -20,10 +19,9 @@ const EmailDisplayItem = ({
   currEditMode: boolean;
   toggleReplace: (val: boolean) => void;
   handleDeleteEmail: (email: string) => void;
-  setDeleteEmail: (email: string) => void;
 }) => (
   <div className='emails-list-card'>
-    <p>{email}</p>
+    <p style={{ marginTop: '3%' }}>{email}</p>
     <FaPencilAlt
       className='edit-icon'
       onClick={() => {
@@ -34,7 +32,6 @@ const EmailDisplayItem = ({
     <FaTrash
       className='edit-icon'
       onClick={() => {
-        setDeleteEmail(email);
         handleDeleteEmail(email);
       }}
     />

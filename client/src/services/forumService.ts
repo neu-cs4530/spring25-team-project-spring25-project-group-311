@@ -1,9 +1,13 @@
 import axios from 'axios';
-import { DatabaseForum, Forum, PopulatedDatabaseForum } from '../types/types';
+import { DatabaseForum, Forum, OrderType, PopulatedDatabaseQuestion } from '../types/types';
 import api from './config';
 
 const FORUM_API_URL = `${process.env.REACT_APP_SERVER_URL}/forum`;
 
+/**
+ * Gets all the forums on the database.
+ * @returns {Promise<DatabaseForum[]>}
+ */
 const getForums = async (): Promise<DatabaseForum[]> => {
   const res = await api.get(`${FORUM_API_URL}/getForums`);
   if (res.status !== 200) {
@@ -12,11 +16,192 @@ const getForums = async (): Promise<DatabaseForum[]> => {
   return res.data;
 };
 
-const getPopulatedForums = async (): Promise<PopulatedDatabaseForum[]> => {
-  const res = await api.get(`${FORUM_API_URL}/getForums`);
+/**
+ * Returns the forum questions in a specific order
+ *
+ * @param fid - Forum to get questions from
+ * @param order - order type of questions
+ * @returns {Promise<PopulatedDatabaseQuestion[]>} A populated database question list
+ */
+const getQuestionsByOrder = async (
+  fid: string,
+  order: OrderType,
+): Promise<PopulatedDatabaseQuestion[]> => {
+  const res = await api.get(`${FORUM_API_URL}/getQuestion?order=${order}&fid=${fid}`);
   if (res.status !== 200) {
-    throw new Error('Error when fetching forums');
+    throw new Error('Error when fetching questions by order');
   }
+  return res.data;
+};
+
+/**
+ * Leave a forum
+ *
+ * @param forumId - The ID of the forum to leave
+ * @param username - The username of the user leaving
+ * @returns The updated forum
+ */
+const leaveForum = async (forumId: string, username: string): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/toggleUserMembership`, {
+    fid: forumId,
+    username,
+    type: 'leave',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when leaving forum');
+  }
+
+  return res.data;
+};
+
+/**
+ * Updates the forum type
+ *
+ * @param forumID - forum to update
+ * @param username - making the request
+ * @param type - new type for the forum
+ * @returns updated forum
+ */
+const updateForumType = async (
+  forumID: string,
+  username: string,
+  type: 'private' | 'public',
+): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/updateForumType`, {
+    fid: forumID,
+    forumCreator: username,
+    type,
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when leaving forum');
+  }
+
+  return res.data;
+};
+
+/**
+ * Join a forum
+ *
+ * @param forumId - The ID of the forum to join
+ * @param username - The username of the user joining
+ * @returns The updated forum
+ */
+const joinForum = async (forumId: string, username: string): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/toggleUserMembership`, {
+    fid: forumId,
+    username,
+    type: 'join',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when joining forum');
+  }
+
+  return res.data;
+};
+
+/**
+ * Cancel a forum join request
+ *
+ * @param forumId - The ID of the forum to join
+ * @param username - The username of the user canceling their request
+ * @returns The updated forum
+ */
+const cancelJoin = async (forumId: string, username: string): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/toggleUserMembership`, {
+    fid: forumId,
+    username,
+
+    type: 'cancel',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when joining forum');
+  }
+
+  return res.data;
+};
+
+/**
+ * Approve a user waiting to join a forum
+ *
+ * @param forumId - The ID of the forum to approve the user join
+ * @param username - The username of the user getting approved
+ * @param moderator - The username of the moderator approving
+ * @returns the updated forum
+ */
+const approveUser = async (
+  forumId: string,
+  username: string,
+  moderator: string,
+): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/moderateUserMembership`, {
+    fid: forumId,
+    username,
+    moderator,
+    type: 'approve',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when approving a user join request');
+  }
+
+  return res.data;
+};
+
+/**
+ * Ban a user in a forum
+ *
+ * @param forumId - The ID of the forum
+ * @param username - The username of the user getting banned
+ * @param moderator - The username of the moderator banning
+ * @returns the updated forum
+ */
+const banUser = async (
+  forumId: string,
+  username: string,
+  moderator: string,
+): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/moderateUserMembership`, {
+    fid: forumId,
+    username,
+    moderator,
+    type: 'ban',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when banning user from forum');
+  }
+
+  return res.data;
+};
+
+/**
+ * Unban a user in a forum
+ *
+ * @param forumId - The ID of the forum
+ * @param username - The username of the user getting banned
+ * @param moderator - The username of the moderator banning
+ * @returns the updated forum
+ */
+const unbanUser = async (
+  forumId: string,
+  username: string,
+  moderator: string,
+): Promise<DatabaseForum> => {
+  const res = await api.post(`${FORUM_API_URL}/moderateUserMembership`, {
+    fid: forumId,
+    username,
+    moderator,
+    type: 'unban',
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error when unbanning user from forum');
+  }
+
   return res.data;
 };
 
@@ -76,19 +261,17 @@ const updateForum = async (forumId: string, updates: Partial<Forum>): Promise<Fo
   }
 };
 
-/**
- * Deletes a forum by its name
- *
- * @param forum - The unique identifier of the forum
- * @returns {Promise<Forum>} The deleted forum object
- * @throws {Error} If an error occurs during the deletion process
- */
-const deleteForum = async (forum: string): Promise<Forum> => {
-  const res = await api.delete(`${FORUM_API_URL}/delete/${forum}`);
-  if (res.status !== 200) {
-    throw new Error('Error when deleting forum');
-  }
-  return res.data;
+export {
+  getForums,
+  getForumById,
+  createForum,
+  leaveForum,
+  joinForum,
+  updateForumType,
+  cancelJoin,
+  approveUser,
+  banUser,
+  unbanUser,
+  updateForum,
+  getQuestionsByOrder,
 };
-
-export { getForums, getForumById, createForum, updateForum, deleteForum, getPopulatedForums };
