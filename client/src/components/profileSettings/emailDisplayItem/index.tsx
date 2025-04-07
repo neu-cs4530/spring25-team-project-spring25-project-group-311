@@ -23,7 +23,7 @@ const EmailDisplayItem = ({
   setDeleteEmail: (email: string) => void;
 }) => (
   <div className='emails-list-card'>
-    <p>{email}</p>
+    <p style={{ marginTop: '3%' }}>{email}</p>
     <FaPencilAlt
       className='edit-icon'
       onClick={() => {

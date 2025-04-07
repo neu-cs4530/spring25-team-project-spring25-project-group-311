@@ -2,19 +2,23 @@
    using padding instead of forced vertical centering */
    .page-container {
     width: 100%;
-    min-height: 100vh;
+    min-height: auto;
     background: #f7f7f7;
     display: flex;
     justify-content: center; /* horizontally center the card */
     padding: 40px 0;         /* top & bottom spacing */
     box-sizing: border-box;
   }
-  
+
+  .confirm-text {
+    padding-top: 20px;
+  }
+
   /* A card-like container that holds the actual profile content */
   .profile-card {
     width: 100%;
     max-width: 600px;        /* limit the card width */
-    max-height: 700px;       
+    max-height: auto;       
     overflow-y: auto;
     background: #fff;        /* white background */
     border-radius: 5px;      /* slight rounding on edges */

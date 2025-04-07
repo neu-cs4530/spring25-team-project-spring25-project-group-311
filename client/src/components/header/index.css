@@ -27,6 +27,10 @@
   transition: background-color 0.3s;
 }
 
+.logout-button:hover {
+  background-color: #0056b3;
+}
+
 .view-profile-button {
   background-color: #007bff;
   color: white;
