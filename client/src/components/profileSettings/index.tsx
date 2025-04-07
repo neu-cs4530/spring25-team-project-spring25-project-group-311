@@ -78,15 +78,16 @@ const ProfileSettings: React.FC = () => {
         <Tab eventKey='generalInfo' title='General Info'>
           <div className='page-container'>
             <div className='profile-card'>
+              {errorMessage && <p className='error-message'>{errorMessage}</p>}
               {userData ? (
                 <>
-                  <h4>General Information</h4>
-                  <p style={{ marginTop: '5%' }}>
+                  <h2>General Information</h2>
+                  <h6 style={{ marginTop: '5%' }}>
                     <strong>Username:</strong> {userData.username}
-                  </p>
+                  </h6>
                   {/* ---- Biography Section ---- */}
                   {!editBioMode && (
-                    <p>
+                    <h6>
                       <strong>Biography:</strong> {userData.biography || 'No biography yet.'}
                       {canEditProfile && (
                         <button
@@ -99,7 +100,7 @@ const ProfileSettings: React.FC = () => {
                           Edit
                         </button>
                       )}
-                    </p>
+                    </h6>
                   )}
 
                   {editBioMode && canEditProfile && (
@@ -125,17 +126,19 @@ const ProfileSettings: React.FC = () => {
                     </div>
                   )}
 
-                  <p>
+                  <h6>
                     <strong>Date Joined:</strong>{' '}
                     {userData.dateJoined
                       ? new Date(userData.dateJoined).toLocaleDateString()
                       : 'N/A'}
-                  </p>
+                  </h6>
 
                   {/* ---- Reset Password Section ---- */}
                   {canEditProfile && (
                     <>
-                      <h4>Reset Password</h4>
+                      <h5 style={{ marginTop: '5%' }}>
+                        <strong>Reset Password</strong>
+                      </h5>
                       <input
                         className='input-text'
                         type={'text'}
@@ -162,7 +165,9 @@ const ProfileSettings: React.FC = () => {
                   {/* ---- Danger Zone (Delete User) ---- */}
                   {canEditProfile && (
                     <>
-                      <h4>Danger Zone</h4>
+                      <h5 style={{ marginTop: '5%' }}>
+                        <strong>Danger Zone</strong>
+                      </h5>
                       <button className='delete-button' onClick={handleDeleteUser}>
                         Delete This User
                       </button>
@@ -197,9 +202,10 @@ const ProfileSettings: React.FC = () => {
         <Tab eventKey='stats' title='User Statistics'>
           <div className='page-container'>
             <div className='profile-card'>
+              {errorMessage && <p className='error-message'>{errorMessage}</p>}
               {userData ? (
                 <>
-                  <h4>Statistical Information: {userData.username}</h4>
+                  <h2>Statistical Information: {userData.username}</h2>
                   <h6 style={{ marginTop: '5%' }}>
                     <strong>Pinned Badges:</strong>
                     {userData.pinnedBadge && userData.pinnedBadge !== '' && (
@@ -300,12 +306,13 @@ const ProfileSettings: React.FC = () => {
           <Tab eventKey='notifications' title='Email and Notifications'>
             <div className='page-container'>
               <div className='profile-card'>
+                {errorMessage && <p className='error-message'>{errorMessage}</p>}
                 {userData ? (
                   <>
-                    <h4>Email and Notification Settings</h4>
-                    <h6>
-                      <strong>Emails</strong>
-                    </h6>
+                    <h2>Email and Notification Settings</h2>
+                    <h5 style={{ marginTop: '5%' }}>
+                      <strong>{userData.username} Emails</strong>
+                    </h5>
                     {/* ---- Email Section ---- */}
                     {!addEmailMode && !replaceEmailMode && (
                       <div>
@@ -354,7 +361,7 @@ const ProfileSettings: React.FC = () => {
 
                     {/* ---- If the email we are trying to replace is the same as 
             the current email, we put in the input text. Else we display the email as is.---- */}
-                    {replaceEmailMode && canEditProfile && (
+                    {replaceEmailMode && (
                       <div>
                         {userData.emails.map(email =>
                           email === emailToReplace ? (
@@ -393,62 +400,173 @@ const ProfileSettings: React.FC = () => {
                     )}
 
                     {/* ---- Toggling Notifications Section ---- */}
-                    {canEditProfile && (
+                    {
                       <>
-                        <h4>Notifications</h4>
+                        <h5 style={{ marginTop: '10%' }}>
+                          <strong>{userData.username} Notification Types</strong>
+                        </h5>
                         <div className='notification-display'>
-                          <p>Browser-Side Notifications</p>
                           <input
                             type='checkbox'
                             checked={userData.browserNotif}
                             onChange={() => handleSubscription('browser')}
                           />
+                          <label style={{ marginLeft: '10px' }}>
+                            <strong>Browser-Side Notifications</strong>
+                          </label>
+                          {userData.browserNotif && (
+                            <div style={{ marginTop: '1.5%', marginLeft: '7%' }}>
+                              <input
+                                type='checkbox'
+                                checked={
+                                  userData.mutedTime && new Date() < new Date(userData.mutedTime)
+                                }
+                                onChange={() => handleMuteNotifications()}
+                              />
+                              <label style={{ marginLeft: '10px' }}>
+                                <strong>Mute Browser Notifications</strong> (for an hour)
+                              </label>
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <input
-                            type='checkbox'
-                            checked={
-                              userData.mutedTime && new Date() < new Date(userData.mutedTime)
-                            }
-                            onChange={() => handleMuteNotifications()}
-                          />
-                          <label>Mute Notification</label>
-                        </div>
+
                         <div className='notification-display'>
-                          <p>Email Notification</p>
                           <input
                             type='checkbox'
                             checked={userData.emailNotif}
                             onChange={() => handleSubscription('email')}
                           />
+                          <label style={{ marginLeft: '10px' }}>
+                            <strong>Email Notifications</strong>
+                          </label>
                         </div>
                         {userData.emailNotif && (
-                          <div>
-                            <input
-                              type='radio'
-                              value='weekly'
-                              checked={userData.emailFrequency === 'weekly'}
-                              onClick={() => handleChangeFrequency('weekly')}
-                            />
-                            <label>Weekly</label>
-                            <input
-                              type='radio'
-                              value='hourly'
-                              checked={userData.emailFrequency === 'hourly'}
-                              onClick={() => handleChangeFrequency('hourly')}
-                            />
-                            <label>Hourly</label>
-                            <input
-                              type='radio'
-                              value='daily'
-                              checked={userData.emailFrequency === 'daily'}
-                              onClick={() => handleChangeFrequency('daily')}
-                            />
-                            <label>Daily</label>
+                          <div style={{ marginTop: '1.5%', marginLeft: '7%' }}>
+                            <h6>
+                              <strong>Frequency of Email Notifications</strong>
+                            </h6>
+                            <div>
+                              <input
+                                type='radio'
+                                value='weekly'
+                                checked={userData.emailFrequency === 'weekly'}
+                                onClick={() => handleChangeFrequency('weekly')}
+                              />
+                              <label style={{ marginLeft: '10px' }}>Weekly</label>
+                            </div>
+                            <div>
+                              <input
+                                type='radio'
+                                value='hourly'
+                                checked={userData.emailFrequency === 'hourly'}
+                                onClick={() => handleChangeFrequency('hourly')}
+                              />
+                              <label style={{ marginLeft: '10px' }}>Hourly</label>
+                            </div>
+                            <div>
+                              <input
+                                type='radio'
+                                value='daily'
+                                checked={userData.emailFrequency === 'daily'}
+                                onClick={() => handleChangeFrequency('daily')}
+                              />
+                              <label style={{ marginLeft: '10px' }}>Daily</label>
+                            </div>
                           </div>
                         )}
                       </>
-                    )}
+                    }
+                  </>
+                ) : (
+                  <p>No user data found. Make sure the username parameter is correct.</p>
+                )}
+              </div>
+            </div>
+          </Tab>
+        )}
+        {canEditProfile && (
+          <Tab eventKey='customization' title='Customization'>
+            <div className='page-container'>
+              <div className='profile-card'>
+                {errorMessage && <p className='error-message'>{errorMessage}</p>}
+                {userData ? (
+                  <>
+                    <h2>Customize User Experience</h2>
+                    <h5 style={{ marginTop: '5%' }}>
+                      <strong>Banners Available to {userData.username}</strong>
+                    </h5>
+                    {/* ---- Banners Section ---- */}
+                    {
+                      <div style={{ margin: '1rem 0' }}>
+                        <p>
+                          {userData.banners?.map(img => (
+                            <div key={img} style={{ display: 'inline-block', marginRight: '1rem' }}>
+                              <button
+                                className='login-button'
+                                style={{
+                                  display: 'block',
+                                  marginTop: '0.5rem',
+                                  marginLeft: '10px',
+                                  backgroundColor: img,
+                                  width: '60px',
+                                  height: '30px',
+                                }}
+                                onClick={() => {
+                                  handleNewSelectedBanner(img);
+                                  setHeaderBackground(img);
+                                }}></button>
+                            </div>
+                          ))}
+                        </p>
+                      </div>
+                    }
+                    {
+                      <div style={{ margin: '5% 0' }}>
+                        <h5>
+                          <strong>Banner Store</strong>
+                        </h5>
+                        <p>
+                          {['red', 'orange', 'yellow', 'purple'].map(color => (
+                            <div
+                              key={color}
+                              style={{
+                                display: 'inline-block',
+                                marginRight: '1rem',
+                                textAlign: 'center',
+                              }}>
+                              <div>
+                                <div
+                                  className='user-badge'
+                                  style={{
+                                    backgroundColor: color,
+                                    width: '60px',
+                                    height: '30px',
+                                    margin: '0 auto',
+                                  }}></div>
+                                {userData.badges.length > 0 && (
+                                  <button
+                                    className='login-button'
+                                    style={{
+                                      width: '60px',
+                                      height: '30px',
+                                      marginTop: '1rem',
+                                      marginLeft: '10px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                    onClick={() => {
+                                      handleAddNewBanner(color);
+                                    }}>
+                                    Buy
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </p>
+                      </div>
+                    }
                   </>
                 ) : (
                   <p>No user data found. Make sure the username parameter is correct.</p>

@@ -36,24 +36,9 @@
     color: #333;
     text-align: left;        /* left-align the headings */
   }
-  
-  /* Subheadings for each section (General Info, Reset Password, Danger Zone) */
-  .profile-card h4 {
-    margin-top: 24px;
-    margin-bottom: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #555;
-    text-align: left;
-  }
-  
-  /* Basic paragraph styling */
-  .profile-card p {
-    margin-bottom: 10px;
-    font-size: 15px;
-    line-height: 1.4;
-    color: #666;
-    text-align: left;
+
+  .notification-display {
+    margin-top: 3%;
   }
   
   /* The input styles remain similar to your existing design; 
