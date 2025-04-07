@@ -65,6 +65,17 @@ export interface ForumMembershipRequest extends Request {
 }
 
 /**
+ * Express request for forum type update
+ */
+export interface ForumTypeUpdateRequest extends Request {
+  body: {
+    fid: string;
+    forumCreator: string;
+    type: 'private' | 'public';
+  };
+}
+
+/**
  * Express request for forum banning and approve operations.
  */
 export interface ForumModerateRequest extends Request {
