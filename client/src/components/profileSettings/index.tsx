@@ -49,7 +49,6 @@ const ProfileSettings: React.FC = () => {
     handleMuteNotifications,
     handleAddPinnedBadge,
     handleDeleteEmail,
-    setEmailToDelete,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -259,24 +258,20 @@ const ProfileSettings: React.FC = () => {
                 {userData ? (
                   <>
                     <h4>Email and Notification Settings</h4>
+                    <h6>
+                      <strong>Emails</strong>
+                    </h6>
                     {/* ---- Email Section ---- */}
                     {!addEmailMode && !replaceEmailMode && (
                       <div>
-                        <h6>
-                          <strong>Emails</strong>
-                        </h6>
                         {userData.emails.map(email => (
                           <div key={email}>
                             <EmailDisplayItem
-                              key={email}
                               email={email}
                               selectReplaceEmail={setEmailToReplace}
                               currEditMode={replaceEmailMode}
-                              toggleReplace={() => {
-                                setReplaceEmailMode(true);
-                              }}
+                              toggleReplace={() => setReplaceEmailMode(true)}
                               handleDeleteEmail={handleDeleteEmail}
-                              setDeleteEmail={setEmailToDelete}
                             />
                           </div>
                         ))}
@@ -344,11 +339,8 @@ const ProfileSettings: React.FC = () => {
                               email={email}
                               selectReplaceEmail={setEmailToReplace}
                               currEditMode={replaceEmailMode}
-                              toggleReplace={() => {
-                                setReplaceEmailMode(true);
-                              }}
+                              toggleReplace={() => setReplaceEmailMode(true)}
                               handleDeleteEmail={handleDeleteEmail}
-                              setDeleteEmail={setEmailToDelete}
                             />
                           ),
                         )}
