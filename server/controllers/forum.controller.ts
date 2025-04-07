@@ -101,7 +101,7 @@ const forumController = (socket: FakeSOSocket) => {
         throw new Error(result.error);
       }
 
-      socket.emit('forumUpdate', {
+      socket.to(String(result._id)).emit('forumUpdate', {
         forum: result,
         type: 'created',
       });
@@ -221,7 +221,7 @@ const forumController = (socket: FakeSOSocket) => {
         throw new Error(updatedForum.error);
       }
 
-      socket.emit('forumUpdate', {
+      socket.to(fid).emit('forumUpdate', {
         forum: {
           ...updatedForum,
           questions: updatedForum.questions.map(question => question._id),
@@ -266,7 +266,7 @@ const forumController = (socket: FakeSOSocket) => {
         throw new Error(updatedForum.error);
       }
 
-      socket.emit('forumUpdate', {
+      socket.to(fid).emit('forumUpdate', {
         forum: {
           ...updatedForum,
           questions: updatedForum.questions.map(question => question._id),
@@ -370,7 +370,7 @@ const forumController = (socket: FakeSOSocket) => {
         });
       });
 
-      socket.emit('forumUpdate', {
+      socket.to(fid).emit('forumUpdate', {
         forum: result,
         type: 'updated',
       });
@@ -379,6 +379,16 @@ const forumController = (socket: FakeSOSocket) => {
       res.status(500).send(`Error when adding question: ${(err as Error).message}`);
     }
   };
+
+  socket.on('connection', conn => {
+    conn.on('joinForum', (forumID: string) => {
+      conn.join(forumID);
+    });
+
+    conn.on('leaveForum', (forumID: string) => {
+      conn.leave(forumID);
+    });
+  });
 
   // Define routes for the forum-related operations
   router.post('/create', createForum);

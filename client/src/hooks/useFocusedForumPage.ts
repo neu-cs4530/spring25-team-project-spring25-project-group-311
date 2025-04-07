@@ -8,7 +8,13 @@ import {
   PopulatedDatabaseQuestion,
 } from '../types/types';
 import useUserContext from './useUserContext';
-import { getForumById, getQuestionsByOrder } from '../services/forumService';
+import {
+  approveUser,
+  banUser,
+  getForumById,
+  getQuestionsByOrder,
+  unbanUser,
+} from '../services/forumService';
 
 /**
  * Custom hook for managing the focused forum page's state, navigation, and real-time updates.
@@ -20,7 +26,7 @@ const useFocusedForumPage = () => {
   const { fid } = useParams();
   const navigate = useNavigate();
 
-  const { socket } = useUserContext();
+  const { user, socket } = useUserContext();
   const [questionOrder, setQuestionOrder] = useState<OrderType>('newest');
   const [sortedQuestions, setSortedQuestions] = useState<PopulatedDatabaseQuestion[]>([]);
   const [forumID, setForumID] = useState<string>(fid || '');
@@ -28,6 +34,48 @@ const useFocusedForumPage = () => {
 
   const updateForum = (updatedForum: DatabaseForum) => {
     setForum(updatedForum);
+  };
+
+  /**
+   * Handling approving a user join request
+   * @param forumId - Forum that the user is joining
+   * @param member - member to approve
+   */
+  const handleApproveUser = async (member: string) => {
+    try {
+      const updatedForum = await approveUser(forumID, member, user.username);
+      setForum(updatedForum);
+    } catch (error) {
+      // console.error('Error approving user:', error);
+    }
+  };
+
+  /**
+   * Handling banning a user from a forum
+   * @param forumId - Forum where user will be banned
+   * @param member - user to ban
+   */
+  const handleBanUser = async (member: string) => {
+    try {
+      const updatedForum = await banUser(forumID, member, user.username);
+      setForum(updatedForum);
+    } catch (error) {
+      // console.error('Error banning user:', error);
+    }
+  };
+
+  /**
+   * Handling unbanning a user from a forum
+   * @param forumId - Forum where a user will be unbanned
+   * @param member - user to unban
+   */
+  const handleUnbanUser = async (member: string) => {
+    try {
+      const updatedForum = await unbanUser(forumID, member, user.username);
+      setForum(updatedForum);
+    } catch (error) {
+      // console.error('Error banning user:', error);
+    }
   };
 
   useEffect(() => {
@@ -148,6 +196,9 @@ const useFocusedForumPage = () => {
     forum,
     setForum,
     updateForum,
+    handleApproveUser,
+    handleBanUser,
+    handleUnbanUser,
     setQuestionOrder,
     sortedQuestions,
   };

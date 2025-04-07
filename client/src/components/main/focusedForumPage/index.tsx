@@ -8,57 +8,25 @@ import { orderTypeDisplayName } from '../../../types/constants';
 import OrderButton from '../questionPage/header/orderButton';
 import QuestionView from '../questionPage/question';
 import useUserContext from '../../../hooks/useUserContext';
-import { approveUser, banUser, unbanUser } from '../../../services/forumService';
 
 /**
  * FocusedForumPage component that displays the full content of a forum.
  */
 const FocusedForumPage = () => {
   const { user } = useUserContext();
-  const { forum, updateForum, setQuestionOrder, sortedQuestions } = useFocusedForumPage();
+  const {
+    forum,
+    updateForum,
+    handleApproveUser,
+    handleBanUser,
+    handleUnbanUser,
+    setQuestionOrder,
+    sortedQuestions,
+  } = useFocusedForumPage();
   const [showAwaitingMembers, setShowAwaitingMembers] = useState<boolean>(false);
   const [showAskQuestionButton, setShowAskQuestionButton] = useState<boolean>(true);
   const [showMembershipButton, setShowMembershipButton] = useState<boolean>(true);
   const [showModOptions, setShowModOptions] = useState<boolean>(false);
-
-  /**
-   * Handling approving a user join request
-   * @param forumId - Forum that the user is joining
-   * @param member - member to approve
-   */
-  const handleApproveUser = async (forumId: string, member: string) => {
-    try {
-      await approveUser(forumId, member, user.username);
-    } catch (error) {
-      // console.error('Error approving user:', error);
-    }
-  };
-
-  /**
-   * Handling banning a user from a forum
-   * @param forumId - Forum where user will be banned
-   * @param member - user to ban
-   */
-  const handleBanUser = async (forumId: string, member: string) => {
-    try {
-      await banUser(forumId, member, user.username);
-    } catch (error) {
-      // console.error('Error banning user:', error);
-    }
-  };
-
-  /**
-   * Handling unbanning a user from a forum
-   * @param forumId - Forum where a user will be unbanned
-   * @param member - user to unban
-   */
-  const handleUnbanUser = async (forumId: string, member: string) => {
-    try {
-      await unbanUser(forumId, member, user.username);
-    } catch (error) {
-      // console.error('Error banning user:', error);
-    }
-  };
 
   // figuring out button display logic on frontend
   useEffect(() => {
@@ -149,9 +117,7 @@ const FocusedForumPage = () => {
                 )}
                 {showModOptions && member !== user.username && (
                   <div className='member-buttons'>
-                    <button
-                      className='ban-btn'
-                      onClick={() => handleBanUser(String(forum._id), member)}>
+                    <button className='ban-btn' onClick={() => handleBanUser(member)}>
                       Ban
                     </button>
                   </div>
@@ -175,9 +141,7 @@ const FocusedForumPage = () => {
                     )}
                     {showModOptions && (
                       <div className='member-buttons'>
-                        <button
-                          className='approve-btn'
-                          onClick={() => handleApproveUser(String(forum._id), member)}>
+                        <button className='approve-btn' onClick={() => handleApproveUser(member)}>
                           Approve
                         </button>
                       </div>
@@ -203,9 +167,7 @@ const FocusedForumPage = () => {
                     )}
                     {showModOptions && member !== user.username && (
                       <div className='member-buttons'>
-                        <button
-                          className='unban-btn'
-                          onClick={() => handleUnbanUser(String(forum._id), member)}>
+                        <button className='unban-btn' onClick={() => handleUnbanUser(member)}>
                           Unban
                         </button>
                       </div>
