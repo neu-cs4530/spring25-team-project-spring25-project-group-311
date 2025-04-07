@@ -208,15 +208,11 @@ const ProfileSettings: React.FC = () => {
             {dailyChallenge && (
               <div>
                 <h4>Daily Challenge</h4>
-                <p>{dailyChallenge.description}</p>
-                {!challengeCompleted && (
-                  <button onClick={handleCompleteChallenge}>Complete Challenge</button>
-                )}
-                {!challengeCompleted ? (
-                  <button onClick={handleCompleteChallenge}>Complete Challenge</button>
-                ) : (
-                  <p>Challenge Completed!</p>
-                )}
+                <span>{dailyChallenge.description}</span>
+                <span
+                  className={`challenge-status ${challengeCompleted ? 'challenge-completed' : 'challenge-pending'}`}>
+                  {challengeCompleted ? 'Completed' : 'Not Completed'}
+                </span>
               </div>
             )}
 
