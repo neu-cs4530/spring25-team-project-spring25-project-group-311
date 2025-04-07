@@ -107,7 +107,7 @@ const ProfileSettings: React.FC = () => {
               <div onMouseMove={handleMouseMove} style={{ position: 'relative' }}>
                 <CalendarHeatmap
                   startDate={new Date('2025-01-01')}
-                  endDate={new Date('2025-12-01')}
+                  endDate={new Date('2025-12-31')}
                   values={convertActivityToValues() || []}
                   classForValue={value => {
                     if (!value || !value.count) return 'color-empty';

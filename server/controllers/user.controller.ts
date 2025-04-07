@@ -778,7 +778,6 @@ const userController = (socket: FakeSOSocket) => {
 
       // if the user doesnt have a streak update the streak with the date
       if (!foundUser.streak || foundUser.streak.length === 0) {
-        // if the user doesnt already have this date in its activity log add it to its activity log
         foundUser.streak = [date];
       }
       // if the user does have a streak
