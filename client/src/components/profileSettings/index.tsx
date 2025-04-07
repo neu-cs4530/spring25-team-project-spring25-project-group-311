@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import './index.css';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
@@ -6,6 +7,9 @@ import CalendarHeatmap from 'react-calendar-heatmap';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
+import { Challenge } from '../../types/types';
+
+const PROFILE_API_URL = `${process.env.REACT_APP_SERVER_URL}/challenges`;
 
 const ProfileSettings: React.FC = () => {
   const {
@@ -56,11 +60,6 @@ const ProfileSettings: React.FC = () => {
     handleDeleteEmail,
     handleRemovePinnedBadge,
   } = useProfileSettings();
-  interface Challenge {
-    _id: string;
-    description: string;
-    completed: boolean;
-  }
   const { setHeaderBackground } = useHeaderContext();
 
   const [dailyChallenge, setDailyChallenge] = useState<Challenge | null>(null);
@@ -68,13 +67,9 @@ const ProfileSettings: React.FC = () => {
   useEffect(() => {
     const fetchDailyChallenge = async () => {
       try {
-        const response = await fetch('/api/challenges/daily');
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        setDailyChallenge(data);
-        setChallengeCompleted(data.completed);
+        const response = await axios.get(`${PROFILE_API_URL}/daily`);
+        setDailyChallenge(response.data);
+        setChallengeCompleted(response.data.completed);
       } catch (error) {
         console.error('Error fetching daily challenge:', error);
       }
@@ -84,21 +79,22 @@ const ProfileSettings: React.FC = () => {
   }, []);
 
   const handleCompleteChallenge = async () => {
-    if (!dailyChallenge) return;
+    if (!dailyChallenge || !dailyChallenge._id) return;
 
     try {
-      const response = await fetch(`/api/challenges/complete/${dailyChallenge._id}`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      const url = `${PROFILE_API_URL}/complete/${dailyChallenge._id}`;
+      const response = await axios.post(url);
+      if (response.status === 200) {
+        setChallengeCompleted(true);
+        handleRefresh();
+      } else {
+        throw new Error(`Failed to complete challenge with status: ${response.status}`);
       }
-      setChallengeCompleted(true);
-      handleRefresh(); // Optionally refresh user data if challenges affect profiles
     } catch (error) {
       console.error('Failed to complete challenge:', error);
     }
   };
+
   if (loading) {
     return (
       <div className='page-container'>

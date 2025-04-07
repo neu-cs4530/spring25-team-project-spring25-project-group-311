@@ -5,5 +5,11 @@ import {
 } from '@fake-stack-overflow/shared/types/types';
 
 export * from '@fake-stack-overflow/shared/types/types';
-
+export interface Challenge {
+  _id: ObjectId;
+  title: string;
+  description: string;
+  date: string;
+  isActive: boolean;
+}
 export type FakeSOSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

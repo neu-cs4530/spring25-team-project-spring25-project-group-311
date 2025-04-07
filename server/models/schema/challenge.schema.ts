@@ -32,6 +32,4 @@ const challengeSchema = new Schema({
   },
 });
 
-const challenge = model('Challenge', challengeSchema);
-
-export default challenge;
+export default challengeSchema;

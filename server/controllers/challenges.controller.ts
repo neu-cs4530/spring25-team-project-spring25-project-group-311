@@ -1,7 +1,7 @@
-import express, { Request, Response, Router } from 'express';
-import challenge from '../models/schema/challenge.schema';
+import express, { Request, Response } from 'express';
 import ChallengeCompletion from '../models/schema/challengeCompletion.schema';
 import { FakeSOSocket } from '../types/types';
+import ChallengeModel from '../models/challenge.model';
 
 const challengeController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -9,18 +9,22 @@ const challengeController = (socket: FakeSOSocket) => {
   /**
    * Fetch the daily challenge for the current day.
    */
-  router.get('/challenges/daily', async (req: Request, res: Response) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+  router.get('/daily', async (req: Request, res: Response) => {
+    // get the current date in UTC
+    const utcToday = new Date(new Date().toISOString().substring(0, 10));
+    const utcTomorrow = new Date(utcToday);
+    utcTomorrow.setDate(utcToday.getDate() + 1);
 
     try {
-      const dailyChallenge = await challenge
-        .findOne({
-          date: { $gte: today, $lt: tomorrow },
-        })
-        .exec();
+      console.log(`Looking for challenges between ${utcToday} and ${utcTomorrow}`);
+
+      const dailyChallenge = await ChallengeModel.findOne({
+        date: {
+          $gte: utcToday.toISOString(),
+          $lt: utcTomorrow.toISOString(),
+        },
+        isActive: true,
+      });
 
       if (!dailyChallenge) {
         res.status(404).json({ message: 'No challenge available for today' });
@@ -35,7 +39,7 @@ const challengeController = (socket: FakeSOSocket) => {
   /**
    * Fetch all challenges.
    */
-  router.post('/challenges/complete/:challengeId', async (req: Request, res: Response) => {
+  router.post('/complete/:challengeId', async (req: Request, res: Response) => {
     const { userId } = req.body;
     const { challengeId } = req.params;
 
