@@ -23,6 +23,10 @@
     margin-left: 10px;
   }
 
+  .dropdown-button:hover {
+    background-color: #0056b3;
+  }
+
   .notif-section {
     display: grid;
   }

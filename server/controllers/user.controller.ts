@@ -11,7 +11,7 @@ import {
   UpdateEmailRequest,
   AddOrDeleteEmailRequest,
   AddBadgesRequest,
-  AddBadgeRequest,
+  AddOrRemoveBadgeRequest,
   AddBannerRequest,
   AddSelectedBannerRequest,
   SubscribeToNotification,
@@ -114,7 +114,7 @@ const userController = (socket: FakeSOSocket) => {
     req.body.username.trim() !== '' &&
     req.body.emailFreq !== undefined;
 
-  const isAddPinnedBadgeRequestValid = (req: AddBadgeRequest): boolean =>
+  const isAddOrRemovePinnedBadgeRequestValid = (req: AddOrRemoveBadgeRequest): boolean =>
     req.body !== undefined && req.body.username !== undefined && req.body.pinnedBadge !== undefined;
 
   const areDatesSequential = (dates: Date[]): boolean => {
@@ -525,11 +525,11 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response containing either the user or an error
    * @returns A promise resolving to void.
    */
-  const addPinnedBadge = async (req: AddBadgeRequest, res: Response): Promise<void> => {
+  const addPinnedBadge = async (req: AddOrRemoveBadgeRequest, res: Response): Promise<void> => {
     try {
       const { username, pinnedBadge } = req.body;
 
-      if (!isAddPinnedBadgeRequestValid(req)) {
+      if (!isAddOrRemovePinnedBadgeRequestValid(req)) {
         res.status(400).send(`invalid body`);
       }
 
@@ -542,7 +542,18 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(foundUser.error);
       }
 
-      const updatedUser = await updateUser(username, { pinnedBadge });
+      const userPinnedBadges = foundUser.pinnedBadge ? foundUser.pinnedBadge : [];
+      if (userPinnedBadges.length < 3) {
+        if (!userPinnedBadges.includes(pinnedBadge)) {
+          userPinnedBadges.push(pinnedBadge);
+        } else {
+          throw Error('Badge is already pinned');
+        }
+      } else {
+        throw Error('There are already 3 badges pinned');
+      }
+
+      const updatedUser = await updateUser(username, { pinnedBadge: userPinnedBadges });
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
       }
@@ -555,6 +566,56 @@ const userController = (socket: FakeSOSocket) => {
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when adding a pinned badge: ${error}`);
+    }
+  };
+
+  /**
+   * Removes a pinned badge from a user
+   * @param req The request containing the username and the badge the user would like unpinned
+   * @param res The response containing either the user or an error
+   * @returns A promise resolving to void.
+   */
+  const removePinnedBadge = async (req: AddOrRemoveBadgeRequest, res: Response): Promise<void> => {
+    try {
+      const { username, pinnedBadge } = req.body;
+
+      if (!isAddOrRemovePinnedBadgeRequestValid(req)) {
+        res.status(400).send(`invalid body`);
+      }
+
+      if (!pinnedBadge) {
+        res.status(400).send(`Error when removing a pinned badge: ${pinnedBadge}`);
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let userPinnedBadges = foundUser.pinnedBadge ? foundUser.pinnedBadge : [];
+      if (userPinnedBadges.length > 0) {
+        if (userPinnedBadges.includes(pinnedBadge)) {
+          userPinnedBadges = userPinnedBadges.filter(pb => pb !== pinnedBadge);
+        } else {
+          throw Error('Badge is already not pinned');
+        }
+      } else {
+        throw Error('There are already no badges pinned');
+      }
+
+      const updatedUser = await updateUser(username, { pinnedBadge: userPinnedBadges });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when removing a pinned badge: ${error}`);
     }
   };
 
@@ -956,6 +1017,7 @@ const userController = (socket: FakeSOSocket) => {
   router.post('/addEmail', addEmail);
   router.post('/addBadges', addBadges);
   router.post('/addPinnedBadge', addPinnedBadge);
+  router.patch('/removePinnedBadge', removePinnedBadge);
   router.post('/addBanners', addBanners);
   router.post('/addSelectedBanner', addSelectedBanner);
   router.patch('/changeSubscription', changeNotifSubscription);

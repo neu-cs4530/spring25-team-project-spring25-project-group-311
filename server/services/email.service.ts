@@ -32,14 +32,14 @@ const sendEmail = async (username: string) => {
       },
     });
 
-    let forumItems = `Hi ${username} here is your digest`;
+    let forumItems = `Hi ${username} here is your digest\n\n`;
     topFivePostsPerForum.forEach(forum => {
-      forum.forEach(post => {
-        forumItems += `<li>${post.title}</li><ul>`;
+      forum.forEach((post, indx) => {
+        forumItems += `\t${indx + 1}) ${post.title}\n`;
         post.answers.forEach(answer => {
-          forumItems += `<li>${answer.text}</li>`;
+          forumItems += `\t\t${answer.text}\n`;
         });
-        forumItems += `</ul>`;
+        forumItems += `\n`;
       });
     });
 
