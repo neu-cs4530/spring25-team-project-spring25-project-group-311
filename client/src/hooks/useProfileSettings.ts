@@ -16,6 +16,7 @@ import {
   changeFreq,
   deleteEmail,
   muteNotifictions,
+  removePinnedBadge,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -423,6 +424,24 @@ const useProfileSettings = () => {
   };
 
   /**
+   * handles the on click for pinning a badge to a user
+   * @param badge string representing the location of the image
+   * @returns an updated user with the pinned badge
+   */
+  const handleRemovePinnedBadge = async (badge: string) => {
+    if (!username) return;
+    try {
+      const updatedUser = await removePinnedBadge(username, badge);
+      await new Promise(resolve => {
+        setUserData(updatedUser);
+        resolve(null);
+      });
+    } catch (error) {
+      setErrorMessage('Failed to unpin badge');
+    }
+  };
+
+  /**
    * Converts a users activity log to readable values for Heatmap Calendar
    * @param log the activity log of the user
    * @returns an array of objects with date and count
@@ -564,6 +583,7 @@ const useProfileSettings = () => {
     floatingContent,
     handleDeleteEmail,
     handleMuteNotifications,
+    handleRemovePinnedBadge,
   };
 };
 

@@ -19,14 +19,11 @@ const ProfileSettings: React.FC = () => {
     newEmail,
     newPassword,
     confirmNewPassword,
-    successMessage,
     errorMessage,
     emailToReplace,
     showConfirmation,
     pendingAction,
     canEditProfile,
-    showPassword,
-    togglePasswordVisibility,
     convertActivityToValues,
     getColorClass,
     floatingContent,
@@ -48,7 +45,6 @@ const ProfileSettings: React.FC = () => {
     handleUpdateBiography,
     handleDeleteUser,
     handleSubscription,
-    handleRefresh,
     handleAddNewBanner,
     handleNewSelectedBanner,
     handleChangeFrequency,
@@ -58,6 +54,7 @@ const ProfileSettings: React.FC = () => {
     handleMouseLeave,
     handleMouseMove,
     handleDeleteEmail,
+    handleRemovePinnedBadge,
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
@@ -208,13 +205,18 @@ const ProfileSettings: React.FC = () => {
                   <h2>Statistical Information: {userData.username}</h2>
                   <h6 style={{ marginTop: '5%' }}>
                     <strong>Pinned Badges:</strong>
-                    {userData.pinnedBadge && userData.pinnedBadge !== '' && (
-                      <img
-                        src={userData.pinnedBadge}
-                        alt='No image found'
-                        style={{ marginLeft: '1rem', height: '75px', width: '75px' }}
-                      />
-                    )}
+                    {userData.pinnedBadge &&
+                      userData.pinnedBadge.length > 0 &&
+                      userData.pinnedBadge.map(pb => (
+                        <img
+                          className='badge-image'
+                          key={pb}
+                          src={pb}
+                          alt='No image found'
+                          style={{ marginLeft: '1rem', height: '75px', width: '75px' }}
+                          onClick={() => handleRemovePinnedBadge(pb)}
+                        />
+                      ))}
                   </h6>
                   {/* ---- Badges Section ---- */}
                   {userData.badges.length > 0 && (

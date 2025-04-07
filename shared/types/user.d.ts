@@ -42,7 +42,7 @@ export interface User extends UserCredentials {
   selectedBanner?: string;
   streak?: Date[];
   activityLog?: { [date: string]: { votes: number; questions: number; answers: number } };
-  pinnedBadge?: string;
+  pinnedBadge?: string[];
   browserNotif: boolean;
   emailNotif: boolean;
   emailFrequency?: string;
@@ -165,7 +165,12 @@ export interface AddBadgesRequest extends Request {
   };
 }
 
-export interface AddBadgeRequest extends Request {
+/**
+ * Express interface for pinning/unpinning a badge to a user.
+ * - `username`: The username of the user to pin/unpin the badge to (body).
+ * - `pinnedBadge`: The badge to pin/unpin to the user.
+ */
+export interface AddOrRemoveBadgeRequest extends Request {
   body: {
     username: string;
     pinnedBadge: string;

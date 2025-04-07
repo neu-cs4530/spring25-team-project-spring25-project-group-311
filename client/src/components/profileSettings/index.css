@@ -40,7 +40,11 @@
   .notification-display {
     margin-top: 3%;
   }
-  
+
+  .badge-image:hover {
+    cursor: pointer;
+  }
+
   /* The input styles remain similar to your existing design; 
      just ensure they're sized well within the card */
   .input-text {
