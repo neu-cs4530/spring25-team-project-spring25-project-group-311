@@ -9,6 +9,7 @@ import {
   User,
   PopulatedDatabaseForum,
   DatabaseForum,
+  Forum,
 } from '../types/types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 
@@ -212,30 +213,114 @@ export const safeUser: SafeDatabaseUser = {
   numUpvotesDownvotes: 0,
 };
 
-export const databaseForum: DatabaseForum = {
-  _id: new ObjectId('67e9aed01b2ac4c63eb92ab0'),
-  name: 'forum1',
-  description: 'this is a forum',
-  createDateTime: new Date('2024-12-03'),
-  createdBy: 'user1',
-  moderators: ['user1'],
-  members: ['user1'],
+// FORUM MOCK DATA
+
+export const forum: Forum = {
+  name: 'Forum',
+  description: 'This is a forum',
+  createdBy: 'user123',
+  createDateTime: new Date(),
+  moderators: ['user123'],
+  members: ['user123'],
   awaitingMembers: [],
   bannedMembers: [],
-  questions: [POPULATED_QUESTIONS[0]._id],
-  type: 'private',
+  questions: [],
+  type: 'public',
 };
 
-export const populatedDatabaseForum: PopulatedDatabaseForum = {
-  _id: new ObjectId('67e9aed01b2ac4c63eb92ab0'),
-  name: 'forum1',
-  description: 'this is a forum',
-  createDateTime: new Date('2024-12-03'),
-  createdBy: 'user1',
-  moderators: ['user1'],
-  members: ['user1'],
+export const forum2: Forum = {
+  name: 'Second forum',
+  description: 'we love cats',
+  createdBy: 'user123',
+  createDateTime: new Date(),
+  moderators: ['user123'],
+  members: ['user123'],
   awaitingMembers: [],
   bannedMembers: [],
-  questions: [POPULATED_QUESTIONS[0]],
-  type: 'private',
+  questions: [],
+  type: 'public',
 };
+
+export const FORUMS: DatabaseForum[] = [
+  {
+    _id: new ObjectId('67f5505718865f92b7bcd0a0'),
+    name: 'Apple users',
+    description: 'A forum for macbook enjoyers',
+    createdBy: 'fby1',
+    createDateTime: new Date('2024-12-03'),
+    moderators: ['fby1'],
+    members: ['fby1', 'user1'],
+    awaitingMembers: [],
+    bannedMembers: [],
+    questions: [QUESTIONS[0]._id],
+    type: 'public',
+  },
+  {
+    _id: new ObjectId('67f550fb443cc714d61b7c66'),
+    name: 'Windows users',
+    description: 'A forum for PC enjoyers',
+    createdBy: 'fby2',
+    createDateTime: new Date('2024-12-03'),
+    moderators: ['fby2'],
+    members: ['fby2', 'user2'],
+    awaitingMembers: ['user3'],
+    bannedMembers: [],
+    questions: [QUESTIONS[1]._id],
+    type: 'private',
+  },
+  {
+    _id: new ObjectId('67f55100a3e3397af21a72e9'),
+    name: 'Andriod users',
+    description: 'A forum for andriod enjoyers',
+    createdBy: 'fby3',
+    createDateTime: new Date('2024-12-03'),
+    moderators: ['fby3'],
+    members: ['fby3', 'user3'],
+    awaitingMembers: [],
+    bannedMembers: ['user4'],
+    questions: [QUESTIONS[2]._id, QUESTIONS[3]._id],
+    type: 'public',
+  },
+];
+
+export const POPULATED_FORUMS: PopulatedDatabaseForum[] = [
+  {
+    _id: new ObjectId('67f5505718865f92b7bcd0a0'),
+    name: 'Apple users',
+    description: 'A forum for macbook enjoyers',
+    createdBy: 'fby1',
+    createDateTime: new Date('2024-12-03'),
+    moderators: ['fby1'],
+    members: ['fby1', 'user1'],
+    awaitingMembers: [],
+    bannedMembers: [],
+    questions: [POPULATED_QUESTIONS[0]],
+    type: 'public',
+  },
+  {
+    _id: new ObjectId('67f550fb443cc714d61b7c66'),
+    name: 'Windows users',
+    description: 'A forum for PC enjoyers',
+    createdBy: 'fby2',
+    createDateTime: new Date('2024-12-03'),
+    moderators: ['fby2'],
+    members: ['fby2', 'user2'],
+    awaitingMembers: [],
+    bannedMembers: [],
+    questions: [POPULATED_QUESTIONS[1]],
+    type: 'private',
+  },
+  {
+    _id: new ObjectId('67f55100a3e3397af21a72e9'),
+    name: 'Andriod users',
+    description: 'A forum for andriod enjoyers',
+    createdBy: 'fby3',
+    createDateTime: new Date('2024-12-03'),
+    moderators: ['fby3'],
+    members: ['fby3', 'user3'],
+    awaitingMembers: [],
+    bannedMembers: [],
+    questions: [POPULATED_QUESTIONS[2], POPULATED_QUESTIONS[3]],
+    type: 'public',
+  },
+];
