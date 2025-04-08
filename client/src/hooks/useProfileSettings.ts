@@ -318,7 +318,7 @@ const useProfileSettings = () => {
       }
       if (
         userData &&
-        userData.badges.includes('/badge_images/One_Hundred_Comments_Badge.png') &&
+        userData.badges.includes('/badge_images/Five_Votes_Badge.png') &&
         !userData.banners?.includes('lightgreen')
       ) {
         banners.push('lightgreen');
@@ -394,8 +394,7 @@ const useProfileSettings = () => {
 
     if (hasCommentedToday && !hasCompleted) {
       await updateChallengeStatus(userData.username, { commentPosted: true });
-    } else {
-      // console.log('Challenge Error');
+      await awardBadges(userData.username, ['/badge_images/Daily_Challenge_Badge.png']);
     }
   };
 
@@ -410,9 +409,9 @@ const useProfileSettings = () => {
     try {
       const badges = [];
       const hasThreeUpvotes = userData.numUpvotesDownvotes >= 3;
-      const alreadyAwarded = userData.badges.includes('/badge_images/Three_Upvotes_Badge.png');
+      const alreadyAwarded = userData.badges.includes('/badge_images/Daily_Challenge_Badge.png');
       if (hasThreeUpvotes && !alreadyAwarded) {
-        badges.push('/badge_images/Three_Upvotes_Badge.png');
+        badges.push('/badge_images/Daily_Challenge_Badge.png');
       }
       if (badges.length > 0) {
         const updatedUser = await awardBadges(username, badges);
