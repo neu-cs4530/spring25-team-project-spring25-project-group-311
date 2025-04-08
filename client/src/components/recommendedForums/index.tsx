@@ -9,18 +9,28 @@ const RecommendedForums: React.FC = () => {
   return (
     <div className='recommended-forums-container'>
       <h2>Recommended Forums</h2>
-      <p>Select an interest:</p>
-      {tags.map(tag => (
-        <div key={tag.name} style={{ margin: '1rem 0' }}>
-          <button
-            className='login-button'
-            onClick={() => handleUpdateTagsAndForums(tag)}
-            style={{ display: 'grid' }}>
-            {tag.name}
-          </button>
-        </div>
-      ))}
-      <p>Here are some forums you might be interested in:</p>
+      <div>
+        <p>Select an interest:</p>
+      </div>
+      <div className='tags-container'>
+        {tags.map(tag => (
+          <div key={tag.name} className='tags' style={{ width: 'auto', height: 'auto' }}>
+            <button
+              className='login-button'
+              onClick={() => handleUpdateTagsAndForums(tag)}
+              style={{
+                display: 'grid',
+                height: 'auto',
+                justifyContent: 'center',
+                backgroundColor: 'lightblue',
+                color: 'purple',
+              }}>
+              {tag.name}
+            </button>
+          </div>
+        ))}
+      </div>
+      <p style={{ marginTop: 'revert' }}>Here are some forums you might be interested in:</p>
       {forums.map(forum => (
         <div key={forum.name} style={{ display: 'inline-block', marginRight: '1rem' }}>
           <button className='login-button' onClick={() => navigateForum(forum._id.toString())}>

@@ -1,4 +1,16 @@
 .recommended-forums-container {
-    width: 100%;
-    padding: 2%;
+    padding: 20px;
+}
+
+.tags-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-gap: 0px 0px;
+    align-self: center;
+}
+
+.tags {
+    padding: auto;
+    margin: auto;
+    display: contents
 }

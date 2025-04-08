@@ -137,6 +137,11 @@ const useNewQuestion = () => {
       user.badges = updatedUser.badges;
     }
 
+    if (questionRes.length >= 10 && !user.badges.includes('/badge_images/Ten_Posts_Badge.png')) {
+      const updatedUser = await awardBadges(user.username, ['/badge_images/Ten_Posts_Badge.png']);
+      user.badges = updatedUser.badges;
+    }
+
     if (res && res._id && !fid) {
       navigate('/home');
     } else if (res && res._id && fid) {
