@@ -62,7 +62,7 @@ async function scheduleHourlyEmails() {
       throw Error('error getting users');
     }
     allUsers.forEach(user => {
-      // Sends every half an hour.
+      // Sends email at half past an hour.
       if (user.emailNotif && user.emailFrequency == 'hourly') {
         schedule.scheduleJob('30 * * * *', async () => {
           console.log('Hourly email sending scheduled.');
