@@ -189,6 +189,29 @@ async function questionCreate(
   });
 }
 
+/**
+ * Creates a new Challenge document in the database.
+ *
+ * @param title The title of the challenge.
+ * @param description The description of the challenge.
+ * @param isActive Whether the challenge is active.
+ * @param requirement The requirement object containing actionType, count, and timeframe.
+ * @returns A Promise that resolves to the created Challenge document.
+ */
+async function challengeCreate(
+  title: string,
+  description: string,
+  isActive: boolean,
+  date: string,
+): Promise<DatabaseChallenge> {
+  return await ChallengeModel.create({
+    title: title,
+    description: description,
+    isActive: isActive,
+    date: date,
+  });
+}
+
 async function userCreate(
   username: string,
   password: string,
@@ -509,54 +532,23 @@ const populate = async () => {
       [c12],
     );
 
+    await challengeCreate(
+      'New Horizons', 'Asked a question', true, "2025-04-08T00:00:00.000Z",
+    );
+    await challengeCreate(
+      'Conversationalist', 'Comment on a post', true, "2025-04-09T00:00:00.000Z",
+    );
+    await challengeCreate(
+      'Community Engager', 'Upvote 3 posts today', true, "2025-04-10T00:00:00.000Z",
+    );
+
+
     console.log('Database populated');
   } catch (err) {
     console.log('ERROR: ' + err);
   } finally {
     if (db) db.close();
     console.log('done');
-  }
-};
-
-const populateChallenges = async () => {
-  const challenges = [
-    {
-      title: 'Community Engager',
-      description: 'Upvote 3 posts in one day',
-      isActive: true,
-      requirement: {
-        actionType: 'upvote',
-        count: 3,
-        timeframe: 'daily',
-      },
-    },
-    {
-      title: 'Conversationalist',
-      description: 'Comment on a post',
-      isActive: true,
-      requirement: {
-        actionType: 'comment',
-        count: 1,
-        timeframe: 'once',
-      },
-    },
-    {
-      title: 'New Horizons',
-      description: 'Join a new server',
-      isActive: true,
-      requirement: {
-        actionType: 'joinServer',
-        count: 1,
-        timeframe: 'once',
-      },
-    },
-  ];
-
-  try {
-    await ChallengeModel.insertMany(challenges);
-    console.log('Challenges populated successfully');
-  } catch (error) {
-    console.error('Error populating challenges:', error);
   }
 };
 

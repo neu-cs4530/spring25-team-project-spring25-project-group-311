@@ -38,6 +38,7 @@ export interface Challenge {
   title: string;
   description: string;
   isActive: boolean;
+  date: Date;
 }
 
 export type DatabaseReadStatusResponse = DatabaseReadStatus | { error: string };
