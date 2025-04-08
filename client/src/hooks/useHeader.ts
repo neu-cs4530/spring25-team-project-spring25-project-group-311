@@ -18,14 +18,8 @@ import useNotification from './useNotification';
 const useHeader = () => {
   const navigate = useNavigate();
   const { setUser } = useLoginContext();
-  const { unreadBrowserNotifs } = useNotification();
 
   const [val, setVal] = useState<string>('');
-  const [notifCount, setNotifCount] = useState(0);
-
-  useEffect(() => {
-    setNotifCount(unreadBrowserNotifs.length);
-  }, [unreadBrowserNotifs.length]);
 
   /**
    * Updates the state value when the input field value changes.
@@ -62,7 +56,6 @@ const useHeader = () => {
   };
 
   return {
-    notifCount,
     val,
     setVal,
     handleInputChange,

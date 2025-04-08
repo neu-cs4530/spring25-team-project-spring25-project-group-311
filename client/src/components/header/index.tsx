@@ -4,7 +4,7 @@ import useHeader from '../../hooks/useHeader';
 import './index.css';
 import useUserContext from '../../hooks/useUserContext';
 import NotificationButton from './notificationButton';
-import { useHeaderContext } from '../../contexts/HeaderContext';
+import { HeaderContext, useHeaderContext } from '../../contexts/HeaderContext';
 
 /**
  * Header component that renders the main title and a search bar.
@@ -13,11 +13,12 @@ import { useHeaderContext } from '../../contexts/HeaderContext';
  * @param userBanner - The banner color of the current user.
  */
 const Header = () => {
-  const { val, handleInputChange, handleKeyDown, handleSignOut, notifCount } = useHeader();
+  const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
   const { user: currentUser } = useUserContext();
-  const { headerBackground } = useHeaderContext();
+  const { headerBackground, unreadBrowserNotifs } = useHeaderContext();
 
   const navigate = useNavigate();
+  console.log(unreadBrowserNotifs);
   return (
     <div
       id='header'
@@ -36,7 +37,7 @@ const Header = () => {
       <button onClick={handleSignOut} className='logout-button'>
         Log out
       </button>
-      <NotificationButton count={notifCount} />
+      <NotificationButton count={unreadBrowserNotifs.length} />
       <button
         className='view-profile-button'
         onClick={() => navigate(`/user/${currentUser.username}`)}>
