@@ -13,6 +13,10 @@
     margin-top: 15px;
   }
 
+  .notification-card:hover {
+    cursor: pointer;
+   }
+
   .dropdown-button {
     background-color: #007bff;
     color: white;

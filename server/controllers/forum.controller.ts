@@ -240,6 +240,11 @@ const forumController = (socket: FakeSOSocket) => {
     const { fid, username, moderator, type } = req.body;
 
     try {
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw new Error(foundUser.error);
+      }
+
       const forum = await getForumById(fid);
       if ('error' in forum) {
         throw new Error(forum.error);
@@ -269,6 +274,43 @@ const forumController = (socket: FakeSOSocket) => {
           questions: updatedForum.questions.map(question => question._id),
         } as DatabaseForum,
         type: 'updated',
+      });
+
+      const newNotif: Notification = {
+        title: 'Forum Permission Update',
+        text: ``,
+        type: 'browser',
+        user: foundUser,
+        read: false,
+      };
+
+      if (type === 'approve') {
+        newNotif.text = `You have been approved to join forum ${updatedForum.name}`;
+      } else if (type === 'ban') {
+        newNotif.text = `You have been banned from forum ${updatedForum.name}`;
+      } else if (type === 'unban') {
+        newNotif.text = `You have been unbanned from forum ${updatedForum.name}. You can rejoin the forum should you choose to`;
+      } else {
+        throw new Error('Invalid type');
+      }
+
+      const createdNotif = await saveNotification(newNotif);
+      if ('error' in createdNotif) {
+        throw new Error(createdNotif.error);
+      }
+
+      const populatedNotification = await populateDocument(
+        createdNotif._id.toString(),
+        'notification',
+      );
+
+      if ('error' in populatedNotification) {
+        throw new Error(populatedNotification.error);
+      }
+
+      socket.emit('notificationUpdate', {
+        notification: populatedNotification as PopulatedDatabaseNotification,
+        type: 'created',
       });
       res.json(updatedForum);
     } catch (err) {

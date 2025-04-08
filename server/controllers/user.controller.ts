@@ -531,10 +531,12 @@ const userController = (socket: FakeSOSocket) => {
 
       if (!isAddOrRemovePinnedBadgeRequestValid(req)) {
         res.status(400).send(`invalid body`);
+        return;
       }
 
       if (!pinnedBadge) {
         res.status(400).send(`Error when adding a pinned badge: ${pinnedBadge}`);
+        return;
       }
 
       const foundUser = await getUserByUsername(username);
@@ -581,10 +583,12 @@ const userController = (socket: FakeSOSocket) => {
 
       if (!isAddOrRemovePinnedBadgeRequestValid(req)) {
         res.status(400).send(`invalid body`);
+        return;
       }
 
       if (!pinnedBadge) {
         res.status(400).send(`Error when removing a pinned badge: ${pinnedBadge}`);
+        return;
       }
 
       const foundUser = await getUserByUsername(username);

@@ -28,6 +28,7 @@ const useNotification = () => {
     }
 
     await readNotif(notifId);
+    setUnreadBrowserNotifs(prev => prev.filter(notif => notif._id !== notifId));
   };
 
   useEffect(() => {
@@ -73,7 +74,7 @@ const useNotification = () => {
     return () => {
       socket.off('notificationUpdate', handleNotificationUpdate);
     };
-  }, [user, socket]);
+  }, [user, socket, unreadBrowserNotifs]);
 
   return {
     unreadBrowserNotifs,
