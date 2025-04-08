@@ -1,5 +1,4 @@
 import express, { Request, Response, Router } from 'express';
-import validate from 'deep-email-validator';
 import { ActivityType } from '@fake-stack-overflow/shared/types/activity';
 import {
   UserRequest,
@@ -458,9 +457,9 @@ const userController = (socket: FakeSOSocket) => {
       const { username, email } = req.body;
       const { currEmail } = req.params;
 
-      const validateEmail = await validate(email);
+      const validateEmail = await isEmailValid(email);
 
-      if (!validateEmail.valid) {
+      if (!validateEmail) {
         res.status(400).send('Invalid email');
         return;
       }

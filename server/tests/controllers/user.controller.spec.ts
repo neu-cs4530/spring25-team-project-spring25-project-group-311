@@ -51,19 +51,19 @@ const getUsersListSpy = jest.spyOn(util, 'getUsersList');
 const deleteUserByUsernameSpy = jest.spyOn(util, 'deleteUserByUsername');
 
 // Additional Challenge Completions Tests
-const TODAY = new Date().toISOString().split('T')[0];
+// const TODAY = new Date().toISOString().split('T')[0];
 
-const baseUser = {
-  ...mockSafeUser,
-  activityLog: {
-    [TODAY]: {
-      questions: 1,
-      answers: 1,
-      votes: 3,
-    },
-  },
-  challengeCompletions: [],
-};
+// const baseUser = {
+//   ...mockSafeUser,
+//   activityLog: {
+//     [TODAY]: {
+//       questions: 1,
+//       answers: 1,
+//       votes: 3,
+//     },
+//   },
+//   challengeCompletions: [],
+// };
 
 describe('Test userController', () => {
   describe('POST /signup', () => {

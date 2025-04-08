@@ -335,13 +335,7 @@ const populate = async () => {
       ['/badge_images/First_Post_Badge.png'],
       ['red', 'lightblue'],
       [new Date('2025-04-07T18:32:05.527Z')],
-      {
-        '2025-04-07': {
-          votes: 0,
-          questions: 2,
-          answers: 0,
-        },
-      },
+      {},
       true,
       false,
     );
