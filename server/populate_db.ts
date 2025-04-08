@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import AnswerModel from './models/answers.model';
 import QuestionModel from './models/questions.model';
 import TagModel from './models/tags.model';
+import ChallengeModel from './models/challenge.model';
 import {
   Answer,
   Comment,
@@ -13,6 +14,8 @@ import {
   Question,
   Tag,
   User,
+  Challenge,
+  DatabaseChallenge,
 } from './types/types';
 import {
   Q1_DESC,
@@ -356,6 +359,48 @@ const populate = async () => {
   } finally {
     if (db) db.close();
     console.log('done');
+  }
+};
+
+const populateChallenges = async () => {
+  const challenges = [
+    {
+      title: 'Community Engager',
+      description: 'Upvote 3 posts in one day',
+      isActive: true,
+      requirement: {
+        actionType: 'upvote',
+        count: 3,
+        timeframe: 'daily',
+      },
+    },
+    {
+      title: 'Conversationalist',
+      description: 'Comment on a post',
+      isActive: true,
+      requirement: {
+        actionType: 'comment',
+        count: 1,
+        timeframe: 'once',
+      },
+    },
+    {
+      title: 'New Horizons',
+      description: 'Join a new server',
+      isActive: true,
+      requirement: {
+        actionType: 'joinServer',
+        count: 1,
+        timeframe: 'once',
+      },
+    },
+  ];
+
+  try {
+    await ChallengeModel.insertMany(challenges);
+    console.log('Challenges populated successfully');
+  } catch (error) {
+    console.error('Error populating challenges:', error);
   }
 };
 

@@ -8,6 +8,7 @@ import QuestionBody from './questionBody';
 import VoteComponent from '../voteComponent';
 import CommentSection from '../commentSection';
 import useAnswerPage from '../../../hooks/useAnswerPage';
+import useProfileSettings from '../../../hooks/useProfileSettings';
 
 /**
  * AnswerPage component that displays the full content of a question along with its answers.
@@ -23,6 +24,8 @@ const AnswerPage = () => {
     forum,
     forumTitle,
   } = useAnswerPage();
+
+  const { verifyCommentChallenge } = useProfileSettings();
 
   if (!question) {
     return null;
@@ -55,9 +58,10 @@ const AnswerPage = () => {
           meta={getMetaData(new Date(a.ansDateTime))}
           forum={isForumQuestion && forum ? forum : undefined}
           comments={a.comments}
-          handleAddComment={(comment: Comment) =>
-            handleNewComment(comment, 'answer', String(a._id))
-          }
+          handleAddComment={async (comment: Comment) => {
+            handleNewComment(comment, 'answer', String(a._id));
+            await verifyCommentChallenge?.();
+          }}
         />
       ))}
       <button

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import './index.css';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
@@ -6,6 +7,9 @@ import CalendarHeatmap from 'react-calendar-heatmap';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
+import { Challenge } from '../../types/types';
+
+const PROFILE_API_URL = `${process.env.REACT_APP_SERVER_URL}/challenges`;
 
 const ProfileSettings: React.FC = () => {
   const {
@@ -58,7 +62,35 @@ const ProfileSettings: React.FC = () => {
   } = useProfileSettings();
 
   const { setHeaderBackground } = useHeaderContext();
+  const [dailyChallenge, setDailyChallenge] = useState<Challenge | null>(null);
+  // const today = new Date().toISOString().split('T')[0];
+  const [challengeCompleted, setChallengeCompleted] = useState(false);
 
+  useEffect(() => {
+    const fetchDailyChallenge = async () => {
+      try {
+        const response = await axios.get(`${PROFILE_API_URL}/daily`);
+        setDailyChallenge(response.data);
+        setChallengeCompleted(response.data.completed);
+      } catch (error) {
+        // console.error('Error fetching daily challenge:', error);
+      }
+    };
+
+    fetchDailyChallenge();
+  }, []);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+
+    if (userData?.challengeCompletions && userData.challengeCompletions.length > 0) {
+      const completedToday = userData.challengeCompletions.some(
+        (entry: { challenge: string; date: string }) => entry.date === today,
+      );
+
+      setChallengeCompleted(completedToday);
+    }
+  }, [userData]);
   if (loading) {
     return (
       <div className='page-container'>
@@ -255,6 +287,23 @@ const ProfileSettings: React.FC = () => {
                       {userData.streak ? userData.streak.length : 0} day(s)
                     </h6>
                   }
+
+                  {/* ---- Daily Challenge Section ---- */}
+                  <div style={{ margin: '1rem 0' }}>
+                    {dailyChallenge && (
+                      <div>
+                        <h6 style={{ paddingTop: '20px' }}>
+                          <strong>Daily Challenge </strong>
+                        </h6>
+                        <span>{dailyChallenge.description}</span>
+                        <span
+                          className={`challenge-status ${challengeCompleted ? 'challenge-completed' : 'challenge-pending'}`}>
+                          {challengeCompleted ? 'Completed' : 'Not Completed'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                   {/* ---- Daily Streak Tracker Section ---- */}
                   {
                     <h6 style={{ paddingTop: '20px' }}>

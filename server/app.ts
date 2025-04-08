@@ -23,6 +23,7 @@ import readStatusController from './controllers/readStatus.controller';
 import notificationController from './controllers/notification.controller';
 import { getUsersList } from './services/user.service';
 import sendEmail from './services/email.service';
+import challengeController from './controllers/challenges.controller';
 
 dotenv.config();
 
@@ -162,6 +163,7 @@ app.use('/chat', chatController(socket));
 app.use('/games', gameController(socket));
 app.use('/read-status', readStatusController());
 app.use('/notification', notificationController(socket));
+app.use('/challenges', challengeController(socket));
 
 // Export the app instance
 export {

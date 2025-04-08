@@ -157,3 +157,21 @@
   .react-calendar-heatmap .color-scale-2 { fill: #8cc665; }
   .react-calendar-heatmap .color-scale-3 { fill: #44a340; }
   .react-calendar-heatmap .color-scale-4 { fill: #1e6823; }
+
+  .challenge-status {
+    display: inline-block;
+    margin-left: 20px;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .challenge-completed {
+    background-color: green;
+  }
+  
+  .challenge-pending {
+    background-color: gray;
+  }
+  

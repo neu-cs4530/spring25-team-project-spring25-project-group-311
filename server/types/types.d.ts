@@ -14,11 +14,30 @@ export * from '@fake-stack-overflow/shared/types/types';
  */
 export type FakeSOSocket = Server<ClientToServerEvents, ServerToClientEvents>;
 
+export interface DailyChallenge {
+  _id: string;
+  description: string;
+  completed: boolean;
+}
+
 export interface DatabaseReadStatus {
   _id: ObjectId;
   userId: ObjectId;
   postId: ObjectId;
   read: boolean;
+}
+
+export interface DatabaseChallenge {
+  _id: mongoose.Schema.Types.ObjectId;
+  title: string;
+  description: string;
+  isActive: boolean;
+}
+
+export interface Challenge {
+  title: string;
+  description: string;
+  isActive: boolean;
 }
 
 export type DatabaseReadStatusResponse = DatabaseReadStatus | { error: string };
