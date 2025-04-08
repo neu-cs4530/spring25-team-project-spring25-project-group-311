@@ -7,7 +7,7 @@ import CalendarHeatmap from 'react-calendar-heatmap';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
-import { Challenge } from '../../types/types';
+import { Challenge, ChallengeCompletionEntry } from '../../types/types';
 
 const PROFILE_API_URL = `${process.env.REACT_APP_SERVER_URL}/challenges`;
 
@@ -61,9 +61,10 @@ const ProfileSettings: React.FC = () => {
     handleRemovePinnedBadge,
   } = useProfileSettings();
   const { setHeaderBackground } = useHeaderContext();
-
   const [dailyChallenge, setDailyChallenge] = useState<Challenge | null>(null);
+  // const today = new Date().toISOString().split('T')[0];
   const [challengeCompleted, setChallengeCompleted] = useState(false);
+
   useEffect(() => {
     const fetchDailyChallenge = async () => {
       try {
@@ -78,22 +79,17 @@ const ProfileSettings: React.FC = () => {
     fetchDailyChallenge();
   }, []);
 
-  const handleCompleteChallenge = async () => {
-    if (!dailyChallenge || !dailyChallenge._id) return;
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
 
-    try {
-      const url = `${PROFILE_API_URL}/complete/${dailyChallenge._id}`;
-      const response = await axios.post(url);
-      if (response.status === 200) {
-        setChallengeCompleted(true);
-        handleRefresh();
-      } else {
-        throw new Error(`Failed to complete challenge with status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error('Failed to complete challenge:', error);
+    if (userData?.challengeCompletions && userData.challengeCompletions.length > 0) {
+      const completedToday = userData.challengeCompletions.some(
+        (entry: { challenge: string; date: string }) => entry.date === today,
+      );
+
+      setChallengeCompleted(completedToday);
     }
-  };
+  }, [userData]);
 
   if (loading) {
     return (

@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express';
-import ChallengeCompletion from '../models/schema/challengeCompletion.schema';
+import ChallengeCompletion from '../models/schema/user.schema';
 import { FakeSOSocket } from '../types/types';
 import ChallengeModel from '../models/challenge.model';
+import { getUserByUsername, updateUser } from '../services/user.service';
 
 const challengeController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -42,28 +43,37 @@ const challengeController = (socket: FakeSOSocket) => {
   router.post('/complete/:challengeId', async (req: Request, res: Response) => {
     const { userId } = req.body;
     const { challengeId } = req.params;
+    const today = new Date().toISOString().split('T')[0];
 
     try {
-      const existingCompletion = await ChallengeCompletion.findOne({
-        userId,
-        challengeId,
-      }).exec();
+      const user = await getUserByUsername(userId); // You may need to adjust this depending on your identifier
+      if ('error' in user) throw new Error(user.error);
 
-      if (existingCompletion) {
-        res.status(409).json({ message: 'Challenge already completed by this user' });
-        return; // return after sending response
+      const alreadyCompleted = user.challengeCompletions?.some(
+        (entry: { challenge: string; date: string }) =>
+          entry.challenge === challengeId && entry.date === today,
+      );
+
+      if (alreadyCompleted) {
+        return res.status(409).json({ message: 'Challenge already completed today' });
       }
 
-      const completion = new ChallengeCompletion({
-        userId,
-        challengeId,
-        completionDate: new Date(),
+      const updatedCompletions = [
+        ...(user.challengeCompletions || []),
+        { challenge: challengeId, date: today },
+      ];
+
+      const updatedUser = await updateUser(user.username, {
+        challengeCompletions: updatedCompletions,
       });
-      await completion.save();
-      socket.emit('challengeCompleted', { userId, challengeId });
-      res.status(201).json({ message: 'Challenge completed successfully', completion });
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      res.status(201).json({ message: 'Challenge completed successfully', user: updatedUser });
     } catch (error) {
-      res.status(500).json({ message: error });
+      res.status(500).json({ message: `Error completing challenge: ${error}` });
     }
   });
 

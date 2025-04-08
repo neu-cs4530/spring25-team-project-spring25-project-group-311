@@ -222,9 +222,58 @@ const userController = (socket: FakeSOSocket) => {
       const { username } = req.params;
 
       const user = await getUserByUsername(username);
-
       if ('error' in user) {
         throw Error(user.error);
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const activity = user.activityLog?.[today];
+      const updatedChallenges: { challenge: string; date: string }[] = Array.isArray(
+        user.challengeCompletions,
+      )
+        ? user.challengeCompletions.map(entry =>
+            typeof entry === 'string' ? { challenge: entry, date: today } : entry,
+          )
+        : [];
+
+      const hasCommented = (activity?.answers ?? 0) > 0 || (activity?.questions ?? 0) > 0;
+      const hasUpvotes = activity?.votes ?? 0;
+      const hasAskedQuestion = (activity?.questions ?? 0) > 0;
+
+      let modified = false;
+
+      // Check if the user has commented today
+      if (
+        hasCommented &&
+        !updatedChallenges.some(c => c.challenge === 'commentPosted' && c.date === today)
+      ) {
+        updatedChallenges.push({ challenge: 'commentPosted', date: today });
+        modified = true;
+      }
+
+      // Check if the user has 3 or more upvotes today
+      if (
+        hasUpvotes &&
+        !updatedChallenges.some(c => c.challenge === 'threeUpvotes' && c.date === today)
+      ) {
+        updatedChallenges.push({ challenge: 'threeUpvotes', date: today });
+        modified = true;
+      }
+
+      // Check if the user has asked a question today
+      if (
+        hasAskedQuestion &&
+        !updatedChallenges.some(c => c.challenge === 'questionPosted' && c.date === today)
+      ) {
+        updatedChallenges.push({ challenge: 'questionPosted', date: today });
+        modified = true;
+      }
+
+      if (modified) {
+        const updatedUser = await updateUser(username, { challengeCompletions: updatedChallenges });
+        if ('error' in updatedUser) throw Error(updatedUser.error);
+        res.status(200).json(updatedUser);
+        return;
       }
 
       res.status(200).json(user);

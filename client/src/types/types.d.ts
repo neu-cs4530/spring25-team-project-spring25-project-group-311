@@ -12,4 +12,9 @@ export interface Challenge {
   date: string;
   isActive: boolean;
 }
+export interface ChallengeCompletionEntry {
+  challenge: string;
+  date: string;
+}
+
 export type FakeSOSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

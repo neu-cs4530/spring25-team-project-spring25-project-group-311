@@ -32,6 +32,7 @@ export interface UserCredentials {
  * - `answersGiven`: A list of answers given by the user
  * - `numUpvotesDownvotes`: The number of upvotes/downvotes given by the user
  * - `mutedTime`: The time when notifications should be unmuted.
+ * - `challenges`: A list of challenges completed by the user (optional).
  */
 export interface User extends UserCredentials {
   dateJoined: Date;
@@ -50,6 +51,12 @@ export interface User extends UserCredentials {
   answersGiven: Answer[];
   numUpvotesDownvotes: number;
   mutedTime?: Date;
+  challenges?: {
+    commentPosted?: boolean;
+    threeUpvotes?: boolean;
+    [key: string]: boolean | undefined;
+  };
+  challengeCompletions?: ChallengeCompletionEntry[];
 }
 
 /**
@@ -101,7 +108,14 @@ export interface UserByUsernameRequest extends Request {
 /**
  * Represents a "safe" user object that excludes sensitive information like the password.
  */
-export type SafeDatabaseUser = Omit<DatabaseUser, 'password'>;
+export type SafeDatabaseUser = Omit<DatabaseUser, 'password'> & {
+  challenges?: {
+    commentPosted?: boolean;
+    threeUpvotes?: boolean;
+    [key: string]: boolean | undefined;
+  };
+  challengeCompletions?: ChallengeCompletionEntry[];
+};
 
 /**
  * Represents the response for user-related operations.

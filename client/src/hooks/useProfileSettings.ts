@@ -349,9 +349,77 @@ const useProfileSettings = () => {
     }
   };
 
+  const updateChallengeStatus = async (userToUpdate: string, updates: Record<string, boolean>) => {
+    try {
+      const response = await fetch(`/user/${userToUpdate}/challenges/update`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update challenge status');
+      }
+
+      const updatedUserData = await response.json();
+      setUserData(updatedUserData); // Update local state
+    } catch (error) {
+      console.error('Error updating challenge status:', error);
+    }
+  };
+
+  const verifyCommentChallenge = async () => {
+    console.log('Running verifyCommentChallenge');
+    console.log('userData', userData?.username);
+    console.log('userData.activityLog', userData?.activityLog);
+    if (!userData?.username || !userData.activityLog) return;
+
+    const today = new Date().toISOString().split('T')[0]; // match db
+    console.log('userData.activityLog', userData.activityLog);
+    console.log('today', today);
+
+    const activity = userData.activityLog?.[today];
+    console.log('Activity today:', activity);
+    const hasCommentedToday = (activity?.answers ?? 0) > 0 || (activity?.questions ?? 0) > 0;
+
+    const hasCompleted = userData.challenges?.commentPosted ?? false;
+
+    if (hasCommentedToday && !hasCompleted) {
+      await updateChallengeStatus(userData.username, { commentPosted: true });
+      console.log('Challenge completed: Posted a comment');
+    } else {
+      console.log('Challenge Error');
+    }
+  };
+
+  const verifyUpvoteChallenge = async () => {
+    if (!username || !userData) return;
+    try {
+      const badges = [];
+      const hasThreeUpvotes = userData.numUpvotesDownvotes >= 3;
+      const alreadyAwarded = userData.badges.includes('/badge_images/Three_Upvotes_Badge.png');
+      if (hasThreeUpvotes && !alreadyAwarded) {
+        badges.push('/badge_images/Three_Upvotes_Badge.png');
+      }
+      if (badges.length > 0) {
+        const updatedUser = await awardBadges(username, badges);
+        setUserData(updatedUser);
+        setSuccessMessage('Upvote challenge completed!');
+        setErrorMessage(null);
+      }
+    } catch (error) {
+      setErrorMessage(`Failed to complete upvote challenge: ${error}`);
+      setSuccessMessage(null);
+    }
+  };
+
   const handleRefresh = async () => {
     handleAwardBadges();
     handleAwardBanners();
+    verifyCommentChallenge();
+    verifyUpvoteChallenge();
   };
 
   const handleAddNewBanner = async (banner: string) => {
@@ -583,6 +651,9 @@ const useProfileSettings = () => {
     floatingContent,
     handleDeleteEmail,
     handleMuteNotifications,
+    verifyCommentChallenge,
+    verifyUpvoteChallenge,
+    updateChallengeStatus,
     handleRemovePinnedBadge,
   };
 };
