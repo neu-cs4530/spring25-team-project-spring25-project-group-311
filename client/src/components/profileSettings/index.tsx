@@ -7,7 +7,7 @@ import CalendarHeatmap from 'react-calendar-heatmap';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
-import { Challenge, ChallengeCompletionEntry } from '../../types/types';
+import { Challenge } from '../../types/types';
 
 const PROFILE_API_URL = `${process.env.REACT_APP_SERVER_URL}/challenges`;
 

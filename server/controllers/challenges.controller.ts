@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import ChallengeCompletion from '../models/schema/user.schema';
 import { FakeSOSocket } from '../types/types';
 import ChallengeModel from '../models/challenge.model';
 import { getUserByUsername, updateUser } from '../services/user.service';
@@ -17,7 +16,7 @@ const challengeController = (socket: FakeSOSocket) => {
     utcTomorrow.setDate(utcToday.getDate() + 1);
 
     try {
-      console.log(`Looking for challenges between ${utcToday} and ${utcTomorrow}`);
+      // console.log(`Looking for challenges between ${utcToday} and ${utcTomorrow}`);
 
       const dailyChallenge = await ChallengeModel.findOne({
         date: {
@@ -71,9 +70,11 @@ const challengeController = (socket: FakeSOSocket) => {
         throw new Error(updatedUser.error);
       }
 
-      res.status(201).json({ message: 'Challenge completed successfully', user: updatedUser });
+      return res
+        .status(201)
+        .json({ message: 'Challenge completed successfully', user: updatedUser });
     } catch (error) {
-      res.status(500).json({ message: `Error completing challenge: ${error}` });
+      return res.status(500).json({ message: `Error completing challenge: ${error}` });
     }
   });
 
