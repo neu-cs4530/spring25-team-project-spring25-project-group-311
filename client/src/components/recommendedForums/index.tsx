@@ -8,7 +8,7 @@ const RecommendedForums: React.FC = () => {
 
   return (
     <div className='recommended-forums-container'>
-      <h2>Recommended Forums</h2>
+      <h2>Recommended Forums For You</h2>
       <div>
         <p>Select an interest:</p>
       </div>
