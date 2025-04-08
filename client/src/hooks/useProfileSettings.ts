@@ -349,6 +349,13 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Updates the challenge status for a user by sending a PATCH request
+   * to the server to update the user's challenge status.
+   *
+   * @param userToUpdate The username of the user to update.
+   * @param updates The updates to apply to the user's challenge status.
+   */
   const updateChallengeStatus = async (userToUpdate: string, updates: Record<string, boolean>) => {
     try {
       const response = await fetch(`/user/${userToUpdate}/challenges/update`, {
@@ -370,6 +377,11 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Verifies if the user has completed the comment challenge and updates the challenge status if necessary
+   * @returns {Promise<void>}
+   * @throws {Error} If the user data is not available or if the challenge status update fails.
+   */
   const verifyCommentChallenge = async () => {
     if (!userData?.username || !userData.activityLog) return;
 
@@ -387,6 +399,12 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Verifies if the user has completed the upvote challenge and updates the challenge status if necessary
+   *
+   * @returns {Promise<void>}
+   * @throws {Error} If the user data is not available or if the challenge status update fails.
+   */
   const verifyUpvoteChallenge = async () => {
     if (!username || !userData) return;
     try {
@@ -408,6 +426,9 @@ const useProfileSettings = () => {
     }
   };
 
+  /**
+   * Handler for refreshing the profile settings
+   */
   const handleRefresh = async () => {
     handleAwardBadges();
     handleAwardBanners();

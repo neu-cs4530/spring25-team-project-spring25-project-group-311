@@ -16,8 +16,6 @@ const challengeController = (socket: FakeSOSocket) => {
     utcTomorrow.setDate(utcToday.getDate() + 1);
 
     try {
-      // console.log(`Looking for challenges between ${utcToday} and ${utcTomorrow}`);
-
       const dailyChallenge = await ChallengeModel.findOne({
         date: {
           $gte: utcToday.toISOString(),
@@ -45,7 +43,7 @@ const challengeController = (socket: FakeSOSocket) => {
     const today = new Date().toISOString().split('T')[0];
 
     try {
-      const user = await getUserByUsername(userId); // You may need to adjust this depending on your identifier
+      const user = await getUserByUsername(userId);
       if ('error' in user) throw new Error(user.error);
 
       const alreadyCompleted = user.challengeCompletions?.some(
