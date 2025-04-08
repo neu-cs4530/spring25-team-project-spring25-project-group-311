@@ -307,7 +307,7 @@ const populate = async () => {
       new Date('2023-12-11T03:30:00'),
       'I am a software engineer.',
       ['raisa16h21@gmail.com', 'baig.ar@northeastern.edu'],
-      ['/badge_images/First_Post_Badge.png'],
+      [],
       ['red', 'lightblue', 'lightgreen', 'yellow', 'orange', 'purple'],
       undefined,
       undefined,
@@ -325,6 +325,8 @@ const populate = async () => {
       'VeryStrongPassword#!@',
       new Date('2023-12-11T03:30:00'),
       'I am a chef.',
+      undefined,
+      ['/badge_images/First_Post_Badge.png'],
     );
     await userCreate(
       'monkeyABC',
@@ -357,6 +359,8 @@ const populate = async () => {
       'jurassicPark#12',
       new Date('2023-10-11T03:30:00'),
       'I like Jurassic Park.',
+      undefined,
+      ['/badge_images/First_Post_Badge.png'],
     );
     await userCreate(
       'abaya',
@@ -381,6 +385,8 @@ const populate = async () => {
       'ElephantPass123',
       new Date('2023-05-10T14:28:01'),
       'I am an elephant lover.',
+      undefined,
+      ['/badge_images/First_Post_Badge.png'],
     );
     await userCreate('asdf', 'asdf', new Date('2025-03-14T21:42:53.585Z'));
     await userCreate(
