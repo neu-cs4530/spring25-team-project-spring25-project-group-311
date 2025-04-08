@@ -50,6 +50,21 @@ const getUserByUsernameSpy = jest.spyOn(util, 'getUserByUsername');
 const getUsersListSpy = jest.spyOn(util, 'getUsersList');
 const deleteUserByUsernameSpy = jest.spyOn(util, 'deleteUserByUsername');
 
+// Additional Challenge Completions Tests
+const TODAY = new Date().toISOString().split('T')[0];
+
+const baseUser = {
+  ...mockSafeUser,
+  activityLog: {
+    [TODAY]: {
+      questions: 1,
+      answers: 1,
+      votes: 3,
+    },
+  },
+  challengeCompletions: [],
+};
+
 describe('Test userController', () => {
   describe('POST /signup', () => {
     it('should create a new user given correct arguments', async () => {
@@ -1204,3 +1219,76 @@ describe('Test userController', () => {
     });
   });
 });
+
+// describe('Challenge Completion Logic in GET /getUser', () => {
+//   afterEach(() => jest.clearAllMocks());
+
+//   it('should mark all applicable challenges as completed based on activity', async () => {
+//     getUserByUsernameSpy.mockResolvedValueOnce(baseUser);
+//     updatedUserSpy.mockResolvedValueOnce({
+//       ...baseUser,
+//       challengeCompletions: [
+//         { challenge: 'commentPosted', date: TODAY },
+//         { challenge: 'threeUpvotes', date: TODAY },
+//         { challenge: 'questionPosted', date: TODAY },
+//       ],
+//     });
+
+//     const response = await supertest(app).get(`/user/getUser/${mockUser.username}`);
+
+//     expect(response.status).toBe(200);
+//     expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, {
+//       challengeCompletions: expect.arrayContaining([
+//         { challenge: 'commentPosted', date: TODAY },
+//         { challenge: 'threeUpvotes', date: TODAY },
+//         { challenge: 'questionPosted', date: TODAY },
+//       ]),
+//     });
+//   });
+
+//   it('should not re-add already completed challenges', async () => {
+//     const completedUser = {
+//       ...baseUser,
+//       challengeCompletions: [
+//         { challenge: 'commentPosted', date: TODAY },
+//         { challenge: 'threeUpvotes', date: TODAY },
+//         { challenge: 'questionPosted', date: TODAY },
+//       ],
+//     };
+
+//     getUserByUsernameSpy.mockResolvedValueOnce(completedUser);
+
+//     const response = await supertest(app).get(`/user/getUser/${mockUser.username}`);
+
+//     expect(response.status).toBe(200);
+//     expect(updatedUserSpy).not.toHaveBeenCalled();
+//   });
+
+//   it('should only add missing challenges', async () => {
+//     const partialUser = {
+//       ...baseUser,
+//       challengeCompletions: [{ challenge: 'commentPosted', date: TODAY }],
+//     };
+
+//     getUserByUsernameSpy.mockResolvedValueOnce(partialUser);
+//     updatedUserSpy.mockResolvedValueOnce({
+//       ...partialUser,
+//       challengeCompletions: [
+//         { challenge: 'commentPosted', date: TODAY },
+//         { challenge: 'threeUpvotes', date: TODAY },
+//         { challenge: 'questionPosted', date: TODAY },
+//       ],
+//     });
+
+//     const response = await supertest(app).get(`/user/getUser/${mockUser.username}`);
+
+//     expect(response.status).toBe(200);
+//     expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, {
+//       challengeCompletions: expect.arrayContaining([
+//         { challenge: 'commentPosted', date: TODAY },
+//         { challenge: 'threeUpvotes', date: TODAY },
+//         { challenge: 'questionPosted', date: TODAY },
+//       ]),
+//     });
+//   });
+// });
