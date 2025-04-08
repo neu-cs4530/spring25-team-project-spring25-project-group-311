@@ -63,7 +63,7 @@ const SideBarNav = () => {
         to='/recommendedForums'
         id='menu_recommended_forums'
         className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
-        Recommended Forums
+        Forums For You
       </NavLink>
       <NavLink
         to='/forums'
