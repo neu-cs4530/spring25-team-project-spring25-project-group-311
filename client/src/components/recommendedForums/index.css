@@ -1,6 +1,4 @@
 .recommended-forums-container {
-    display: flex;
-    flex-direction: column;
     width: 100%;
     padding: 2%;
 }

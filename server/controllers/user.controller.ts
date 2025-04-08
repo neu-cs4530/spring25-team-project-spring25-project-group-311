@@ -799,7 +799,7 @@ const userController = (socket: FakeSOSocket) => {
       }
 
       const upAndDownVoteCount = await getUpvotesAndDownVotesBy(username);
-      res.status(200).send(upAndDownVoteCount);
+      res.status(200).send(`${upAndDownVoteCount}`);
     } catch (error) {
       res.status(500).send(`Error when getting number of up and down votes: ${error}`);
     }
@@ -1021,9 +1021,9 @@ const userController = (socket: FakeSOSocket) => {
   router.post('/addBanners', addBanners);
   router.post('/addSelectedBanner', addSelectedBanner);
   router.patch('/changeSubscription', changeNotifSubscription);
-  router.get('/getQuestionsAsked', getQuestionsAsked);
-  router.get('/getAnswersGiven', getAnswersGiven);
-  router.get('/getVoteCount', getUpvotesAndDownVotes);
+  router.get('/getQuestionsAsked/:username', getQuestionsAsked);
+  router.get('/getAnswersGiven/:username', getAnswersGiven);
+  router.get('/getVoteCount/:username', getUpvotesAndDownVotes);
   router.patch('/changeFrequency', changeFrequency);
   router.patch('/updateStreak', updateUserStreak);
   router.patch('/deleteEmail', deleteEmail);

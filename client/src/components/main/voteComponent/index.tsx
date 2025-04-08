@@ -3,8 +3,7 @@ import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
 import { PopulatedDatabaseQuestion } from '../../../types/types';
 import useVoteStatus from '../../../hooks/useVoteStatus';
-import { updateStreak } from '../../../services/userService';
-import { awardBadges } from '../../../services/userService';
+import { getUpvoteDownvote, updateStreak, awardBadges } from '../../../services/userService';
 
 /**
  * Interface represents the props for the VoteComponent.
@@ -40,15 +39,29 @@ const VoteComponent = ({ question }: VoteComponentProps) => {
 
         // Update streak and activity log
         const userRes = await updateStreak(user.username, new Date(), 'votes');
+        const voteRes = await getUpvoteDownvote(user.username);
 
         // awarding badges if the user has 5 upvotes
-        if (userRes.upvotes >= 5 && !user.badges.includes('/badge_images/Five_Upvotes_Badge.png')) {
-          const updatedUser = await awardBadges(user.username, ['/badge_images/Five_Upvotes_Badge.png']);
+        if (voteRes >= 5 && !user.badges.includes('/badge_images/Five_Votes_Badge.png')) {
+          const updatedUser = await awardBadges(user.username, [
+            '/badge_images/Five_Votes_Badge.png',
+          ]);
           user.badges = updatedUser.badges;
         }
 
         user.streak = userRes.streak;
         user.activityLog = userRes.activityLog;
+
+        if (
+          user.streak &&
+          user.streak.length >= 5 &&
+          !user.badges.includes('/badge_images/Five_Day_Streak_Badge.png')
+        ) {
+          const updatedUser = await awardBadges(user.username, [
+            '/badge_images/Five_Day_Streak_Badge.png',
+          ]);
+          user.badges = updatedUser.badges;
+        }
       }
     } catch (error) {
       // Handle error

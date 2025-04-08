@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChangeEvent, useState } from 'react';
 import useLoginContext from './useLoginContext';
-import { createUser, loginUser } from '../services/userService';
-import { awardBadges } from '../services/userService';
+import { createUser, loginUser, awardBadges } from '../services/userService';
 
 /**
  * Custom hook to manage authentication logic, including handling input changes,
