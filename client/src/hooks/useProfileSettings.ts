@@ -366,31 +366,24 @@ const useProfileSettings = () => {
       const updatedUserData = await response.json();
       setUserData(updatedUserData); // Update local state
     } catch (error) {
-      console.error('Error updating challenge status:', error);
+      // console.error('Error updating challenge status:', error);
     }
   };
 
   const verifyCommentChallenge = async () => {
-    console.log('Running verifyCommentChallenge');
-    console.log('userData', userData?.username);
-    console.log('userData.activityLog', userData?.activityLog);
     if (!userData?.username || !userData.activityLog) return;
 
     const today = new Date().toISOString().split('T')[0]; // match db
-    console.log('userData.activityLog', userData.activityLog);
-    console.log('today', today);
 
     const activity = userData.activityLog?.[today];
-    console.log('Activity today:', activity);
     const hasCommentedToday = (activity?.answers ?? 0) > 0 || (activity?.questions ?? 0) > 0;
 
     const hasCompleted = userData.challenges?.commentPosted ?? false;
 
     if (hasCommentedToday && !hasCompleted) {
       await updateChallengeStatus(userData.username, { commentPosted: true });
-      console.log('Challenge completed: Posted a comment');
     } else {
-      console.log('Challenge Error');
+      // console.log('Challenge Error');
     }
   };
 

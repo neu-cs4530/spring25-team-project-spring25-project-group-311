@@ -73,7 +73,7 @@ const ProfileSettings: React.FC = () => {
         setDailyChallenge(response.data);
         setChallengeCompleted(response.data.completed);
       } catch (error) {
-        console.error('Error fetching daily challenge:', error);
+        // console.error('Error fetching daily challenge:', error);
       }
     };
 
