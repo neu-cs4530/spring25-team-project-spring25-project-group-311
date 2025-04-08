@@ -141,10 +141,10 @@ const updateBiography = async (
  * @returns A promise resolving to the updated user
  * @throws Error if the request fails
  */
-const addEmail = async (username: string, newEmail: string): Promise<SafeDatabaseUser> => {
+const addEmail = async (username: string, email: string): Promise<SafeDatabaseUser> => {
   const res = await api.post(`${USER_API_URL}/addEmail`, {
     username,
-    newEmail,
+    email,
   });
   if (res.status !== 200) {
     throw new Error('Error when adding email');
@@ -181,11 +181,11 @@ const deleteEmail = async (username: string, emailToDelete: string): Promise<Saf
 const replaceEmail = async (
   username: string,
   currEmail: string,
-  newEmail: string,
+  email: string,
 ): Promise<SafeDatabaseUser> => {
   const res = await api.patch(`${USER_API_URL}/${currEmail}/replaceEmail`, {
     username,
-    newEmail,
+    email,
   });
   if (res.status !== 200) {
     throw new Error('Error when replacing email');
