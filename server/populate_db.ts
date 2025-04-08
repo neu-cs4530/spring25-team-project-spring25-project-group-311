@@ -376,16 +376,26 @@ const populate = async () => {
       [c12],
     );
 
+    await challengeCreate('New Horizons', 'Asked a question', true, '2025-04-08T00:00:00.000Z');
     await challengeCreate(
-      'New Horizons', 'Asked a question', true, "2025-04-08T00:00:00.000Z",
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-09T00:00:00.000Z',
     );
     await challengeCreate(
-      'Conversationalist', 'Comment on a post', true, "2025-04-09T00:00:00.000Z",
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-10T00:00:00.000Z',
     );
+    await challengeCreate('New Horizons', 'Asked a question', true, '2025-04-11T00:00:00.000Z');
     await challengeCreate(
-      'Community Engager', 'Upvote 3 posts today', true, "2025-04-10T00:00:00.000Z",
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-12T00:00:00.000Z',
     );
-
 
     console.log('Database populated');
   } catch (err) {
