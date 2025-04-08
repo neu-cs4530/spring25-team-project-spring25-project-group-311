@@ -308,7 +308,7 @@ const populate = async () => {
       'I am a software engineer.',
       ['raisa16h21@gmail.com', 'baig.ar@northeastern.edu'],
       [],
-      ['red', 'lightblue', 'lightgreen', 'yellow', 'orange', 'purple'],
+      [],
       undefined,
       undefined,
       true,
@@ -327,6 +327,7 @@ const populate = async () => {
       'I am a chef.',
       undefined,
       ['/badge_images/First_Post_Badge.png'],
+      ['lightblue'],
     );
     await userCreate(
       'monkeyABC',
@@ -335,7 +336,7 @@ const populate = async () => {
       'I am a monkey.',
       ['raisa16h21@gmail.com', 'emcd.ny@gmail.com', 'bhuiyan.r@northeastern.edu'],
       ['/badge_images/First_Post_Badge.png'],
-      ['red', 'lightblue'],
+      ['lightblue'],
       [new Date('2025-04-07T18:32:05.527Z')],
       {},
       true,
@@ -361,6 +362,7 @@ const populate = async () => {
       'I like Jurassic Park.',
       undefined,
       ['/badge_images/First_Post_Badge.png'],
+      ['lightblue'],
     );
     await userCreate(
       'abaya',
@@ -387,6 +389,7 @@ const populate = async () => {
       'I am an elephant lover.',
       undefined,
       ['/badge_images/First_Post_Badge.png'],
+      ['lightblue'],
     );
     await userCreate('asdf', 'asdf', new Date('2025-03-14T21:42:53.585Z'));
     await userCreate(
