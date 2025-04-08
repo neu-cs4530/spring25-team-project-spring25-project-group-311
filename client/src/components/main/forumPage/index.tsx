@@ -61,7 +61,7 @@ const ForumPage = () => {
             Sort by Date {isDateSortedAsc ? '▼' : '▲'}
           </button>
           <button className='greybtn' onClick={handlePopularSort}>
-            Sort by Popularity {isPopSortedAsc ? '▼' : '▲'}
+            Sort by Recommended {isPopSortedAsc ? '▼' : '▲'}
           </button>
         </div>
       </div>
