@@ -7,10 +7,11 @@ import {
   Comment,
   DatabaseAnswer,
   DatabaseComment,
+  DatabaseForum,
   DatabaseQuestion,
   DatabaseTag,
   DatabaseUser,
-  Question,
+  Forum,
   Tag,
   User,
 } from './types/types';
@@ -58,6 +59,7 @@ import {
 } from './data/posts_strings';
 import CommentModel from './models/comments.model';
 import UserModel from './models/users.model';
+import ForumModel from './models/forum.model';
 
 // Pass URL of your mongoDB instance as first argument(e.g., mongodb://127.0.0.1:27017/fake_so)
 const userArgs = process.argv.slice(2);
@@ -211,6 +213,39 @@ async function userCreate(
   return await UserModel.create(userDetail);
 }
 
+async function forumCreate(
+  name: string,
+  description: string,
+  createdBy: string,
+  createDateTime: Date,
+  type: string,
+): Promise<DatabaseForum> {
+  if (
+    name === '' ||
+    description === '' ||
+    createdBy === '' ||
+    createDateTime === null ||
+    type === '' ||
+    (type !== 'public' && type !== 'private')
+  )
+    throw new Error('Invalid Question Format');
+
+  const newForum: Forum = {
+    name,
+    description,
+    createdBy,
+    createDateTime,
+    moderators: [createdBy],
+    members: [createdBy],
+    awaitingMembers: [],
+    bannedMembers: [],
+    questions: [],
+    type: type,
+  };
+
+  return await ForumModel.create(newForum);
+}
+
 /**
  * Populates the database with predefined data.
  * Logs the status of the operation to the console.
@@ -278,6 +313,22 @@ const populate = async () => {
       'ElephantPass123',
       new Date('2023-05-10T14:28:01'),
       'I am an elephant lover.',
+    );
+
+    await forumCreate(
+      'test-forum',
+      'hi this is a desc',
+      'max-test',
+      new Date('2025-03-26T22:33:44.398Z'),
+      'public',
+    );
+    await forumCreate('hi', 'boo', 'sana', new Date('2025-03-26T22:33:44.996Z'), 'public');
+    await forumCreate(
+      'TestForum',
+      'This is a test forum',
+      'sana',
+      new Date('2025-03-27T15:15:41.627Z'),
+      'public',
     );
 
     const t1 = await tagCreate(T1_NAME, T1_DESC);
