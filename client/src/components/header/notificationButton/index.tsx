@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
  * Notification component renders a page for direct messaging between users.
  * It includes a list of users and a chat window to send and receive messages.
  */
-const NotificationButton = () => {
+const NotificationButton = ({ count }: { count: number }) => {
   const navigate = useNavigate();
 
   return (
@@ -15,7 +15,7 @@ const NotificationButton = () => {
         className='dropdown-button'
         data-toggle='dropdown'
         onClick={() => navigate('/notifications')}>
-        Notifications
+        Notifications{count > 0 && ` (${count})`}
       </button>
     </div>
   );

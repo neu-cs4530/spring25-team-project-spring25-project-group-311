@@ -1,10 +1,10 @@
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
-import useNotification from '../../../hooks/useNotification';
 import NotificationCard from './notificationCard';
+import { useHeaderContext } from '../../../contexts/HeaderContext';
 
 const NotificationPage = () => {
-  const { unreadBrowserNotifs, error, handleReadNotification } = useNotification();
+  const { unreadBrowserNotifs, handleReadNotification } = useHeaderContext();
 
   const ansFilter = unreadBrowserNotifs.filter(notif =>
     notif.title.includes('New Answer to Your Post'),
@@ -40,7 +40,6 @@ const NotificationPage = () => {
 
   return (
     <>
-      {error && <p>{error}</p>}
       <Tabs defaultActiveKey='answers' id='justify-tab-example' justify>
         <Tab eventKey='answers' title={ansTitle}>
           {ansFilter.map(bNotif => (

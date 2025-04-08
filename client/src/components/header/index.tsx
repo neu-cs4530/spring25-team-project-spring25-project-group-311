@@ -15,7 +15,7 @@ import { useHeaderContext } from '../../contexts/HeaderContext';
 const Header = () => {
   const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
   const { user: currentUser } = useUserContext();
-  const { headerBackground } = useHeaderContext();
+  const { headerBackground, unreadBrowserNotifs } = useHeaderContext();
 
   const navigate = useNavigate();
   return (
@@ -36,7 +36,7 @@ const Header = () => {
       <button onClick={handleSignOut} className='logout-button'>
         Log out
       </button>
-      <NotificationButton />
+      <NotificationButton count={unreadBrowserNotifs.length} />
       <button
         className='view-profile-button'
         onClick={() => navigate(`/user/${currentUser.username}`)}>
