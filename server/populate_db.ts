@@ -330,6 +330,35 @@ const populate = async () => {
       new Date('2025-03-27T15:15:41.627Z'),
       'public',
     );
+    await forumCreate(
+      'A Private Forum...',
+      'This is a private forum how ominous',
+      'sana',
+      new Date('2025-03-27T15:16:04.488Z'),
+      'private',
+    );
+    await forumCreate('cat', 'meow', 'sana', new Date('2025-03-28T21:20:19.962'), 'public');
+    await forumCreate(
+      'this is a forum',
+      'this is a forum description',
+      'test4',
+      new Date('2025-04-01T02:49:58.928Z'),
+      'public',
+    );
+    await forumCreate(
+      'forum question test',
+      'my forum',
+      'monkeyABC',
+      new Date('2025-04-01T02:53:06.268Z'),
+      'private',
+    );
+    await forumCreate(
+      'apple',
+      'fruit',
+      'monkeyABC',
+      new Date('2025-04-01T03:00:04.719Z'),
+      'private',
+    );
 
     const t1 = await tagCreate(T1_NAME, T1_DESC);
     const t2 = await tagCreate(T2_NAME, T2_DESC);
