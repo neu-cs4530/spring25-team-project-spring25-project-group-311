@@ -225,6 +225,12 @@ async function userCreate(
   browserNotif?: boolean,
   emailNotif?: boolean,
   mutedTime?: Date,
+  challenges?: {
+    commentPosted?: boolean;
+    threeUpvotes?: boolean;
+    [key: string]: boolean | undefined;
+  },
+  challengeCompletions?: { challenge: string; date: string }[],
 ): Promise<DatabaseUser> {
   if (username === '' || password === '' || dateJoined === null) {
     throw new Error('Invalid User Format');
@@ -238,7 +244,7 @@ async function userCreate(
     emails: emails ?? [],
     badges: badges ?? [],
     banners: banners ?? [],
-    selectedBanner: '',
+    selectedBanner: '#dddddd',
     streak: streak ?? [new Date(0)],
     activityLog: activityLog ?? {},
     pinnedBadge: [],
@@ -249,6 +255,8 @@ async function userCreate(
     answersGiven: [],
     numUpvotesDownvotes: 0,
     mutedTime: mutedTime ?? new Date('December 17, 1995 03:24:00'),
+    challenges: challenges ?? {},
+    challengeCompletions: challengeCompletions ?? [],
   };
 
   return await UserModel.create(userDetail);
@@ -381,6 +389,143 @@ const populate = async () => {
       'I am an elephant lover.',
     );
     await userCreate('asdf', 'asdf', new Date('2025-03-14T21:42:53.585Z'));
+    await userCreate(
+      'bram',
+      'bram',
+      new Date('2025-03-17T19:40:24.720Z'),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      [new Date('2025-04-08T03:53:13.640Z')],
+      {
+        '2025-04-08': {
+          votes: 0,
+          questions: 1,
+          answers: 0,
+        },
+      },
+      false,
+      false,
+      undefined,
+      undefined,
+      [
+        {
+          challenge: 'commentPosted',
+          date: '2025-04-08',
+        },
+        {
+          challenge: 'questionPosted',
+          date: '2025-04-08',
+        },
+      ],
+    );
+    await userCreate('felix', 'abc', new Date('2025-03-18T20:17:32.354Z'));
+    await userCreate('felix3', 'abc', new Date('2025-03-20T21:55:44.098Z'));
+    await userCreate(
+      'test4',
+      'test4',
+      new Date('2025-03-21T19:05:36.403Z'),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      [new Date('2025-04-08T01:00:46.039Z')],
+      {
+        '2025-04-07': {
+          votes: 2,
+          questions: 3,
+          answers: 0,
+        },
+        '2025-04-08': {
+          votes: 0,
+          questions: 2,
+          answers: 0,
+        },
+      },
+      false,
+      false,
+      undefined,
+      undefined,
+      [
+        {
+          challenge: 'commentPosted',
+          date: '2025-04-08',
+        },
+        {
+          challenge: 'questionPosted',
+          date: '2025-04-08',
+        },
+      ],
+    );
+    await userCreate(
+      'felix_test',
+      'abc',
+      new Date('2025-03-25T16:07:47.395Z'),
+      'updated',
+      undefined,
+      [],
+      [],
+      [new Date('2025-04-08T02:02:42.885Z')],
+      {
+        '2025-04-05': {
+          votes: 2,
+          questions: 1,
+          answers: 0,
+        },
+        '2025-04-07': {
+          votes: 4,
+          questions: 0,
+          answers: 3,
+        },
+        '2025-04-08': {
+          votes: 5,
+          questions: 1,
+          answers: 0,
+        },
+      },
+      false,
+      false,
+      undefined,
+      undefined,
+      [
+        {
+          challenge: 'commentPosted',
+          date: '2025-04-08',
+        },
+        {
+          challenge: 'threeUpvotes',
+          date: '2025-04-08',
+        },
+        {
+          challenge: 'questionPosted',
+          date: '2025-04-08',
+        },
+      ],
+    );
+    await userCreate('max-test', 'password', new Date('2025-03-26T22:33:29.398Z'));
+    await userCreate('r_bhuiyan', '2025Neu', new Date('2025-04-01T18:53:47.182Z'));
+    await userCreate(
+      'j_peralta',
+      'bk99',
+      new Date('2025-04-01T18:55:26.031Z'),
+      'I am in Brooklyn 99',
+    );
+    await userCreate('new_acc', '12345', new Date('2025-04-02T00:05:10.734Z'));
+    await userCreate(
+      'five_hargreeve',
+      'umbrella',
+      new Date('2025-04-05T06:26:58.495Z'),
+      '',
+      ['bhuiyan.r@northeastern.edu'],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      false,
+      true,
+    );
+    await userCreate('r_bh', '01032003', new Date('2025-04-05T22:45:39.201Z'));
 
     await forumCreate(
       'test-forum',
@@ -532,16 +677,26 @@ const populate = async () => {
       [c12],
     );
 
+    await challengeCreate('New Horizons', 'Asked a question', true, '2025-04-08T00:00:00.000Z');
     await challengeCreate(
-      'New Horizons', 'Asked a question', true, "2025-04-08T00:00:00.000Z",
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-09T00:00:00.000Z',
     );
     await challengeCreate(
-      'Conversationalist', 'Comment on a post', true, "2025-04-09T00:00:00.000Z",
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-10T00:00:00.000Z',
     );
+    await challengeCreate('New Horizons', 'Asked a question', true, '2025-04-11T00:00:00.000Z');
     await challengeCreate(
-      'Community Engager', 'Upvote 3 posts today', true, "2025-04-10T00:00:00.000Z",
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-12T00:00:00.000Z',
     );
-
 
     console.log('Database populated');
   } catch (err) {
