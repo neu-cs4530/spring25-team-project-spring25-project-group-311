@@ -144,7 +144,7 @@ const updateBiography = async (
 const addEmail = async (username: string, newEmail: string): Promise<SafeDatabaseUser> => {
   const res = await api.post(`${USER_API_URL}/addEmail`, {
     username,
-    email: newEmail,
+    newEmail,
   });
   if (res.status !== 200) {
     throw new Error('Error when adding email');
@@ -185,7 +185,7 @@ const replaceEmail = async (
 ): Promise<SafeDatabaseUser> => {
   const res = await api.patch(`${USER_API_URL}/${currEmail}/replaceEmail`, {
     username,
-    email: newEmail,
+    newEmail,
   });
   if (res.status !== 200) {
     throw new Error('Error when replacing email');
@@ -303,6 +303,30 @@ const updateStreak = async (username: string, date: Date, activity: string) => {
   return res.data;
 };
 
+const getUpvoteDownvote = async (username: string) => {
+  const res = await api.get(`${USER_API_URL}/getVoteCount/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while getting upvote downvote');
+  }
+  return res.data;
+};
+
+const getQuestionsAsked = async (username: string) => {
+  const res = await api.get(`${USER_API_URL}/getQuestionsAsked/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while getting upvote downvote');
+  }
+  return res.data;
+};
+
+const getAnswersGiven = async (username: string) => {
+  const res = await api.get(`${USER_API_URL}/getAnswersGiven/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while getting upvote downvote');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -319,8 +343,11 @@ export {
   newActiveBanner,
   changeFreq,
   addPinnedBadge,
-  removePinnedBadge,
   updateStreak,
   deleteEmail,
   muteNotifictions,
+  removePinnedBadge,
+  getAnswersGiven,
+  getQuestionsAsked,
+  getUpvoteDownvote,
 };

@@ -22,6 +22,7 @@ import NewForumPage from './main/newForum';
 import FocusedForumPage from './main/focusedForumPage';
 import LeaderboardListPage from './main/leaderboardPage';
 import NotificationPage from './main/notificationPage';
+import RecommendedForums from './recommendedForums';
 
 const ProtectedRoute = ({
   user,
@@ -77,6 +78,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='/games/:gameID' element={<GamePage />} />
             <Route path='/leaderboard' element={<LeaderboardListPage />} />
             <Route path='/notifications' element={<NotificationPage />} />
+            <Route path='/recommendedForums' element={<RecommendedForums />} />
           </Route>
         }
       </Routes>

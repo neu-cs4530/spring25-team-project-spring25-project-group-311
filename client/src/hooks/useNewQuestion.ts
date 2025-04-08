@@ -4,7 +4,7 @@ import { validateHyperlink } from '../tool';
 import { addQuestion } from '../services/questionService';
 import useUserContext from './useUserContext';
 import { Question } from '../types/types';
-import { updateStreak } from '../services/userService';
+import { getQuestionsAsked, updateStreak, awardBadges } from '../services/userService';
 
 /**
  * Custom hook to handle question submission and form validation
@@ -117,6 +117,25 @@ const useNewQuestion = () => {
     const userRes = await updateStreak(user.username, question.askDateTime, 'questions');
     user.streak = userRes.streak;
     user.activityLog = userRes.activityLog;
+
+    if (
+      user.streak &&
+      user.streak.length >= 5 &&
+      !user.badges.includes('/badge_images/Five_Day_Streak_Badge.png')
+    ) {
+      const updatedUser = await awardBadges(user.username, [
+        '/badge_images/Five_Day_Streak_Badge.png',
+      ]);
+      user.badges = updatedUser.badges;
+    }
+
+    // Award badges if the user has 1 question
+    const questionRes = await getQuestionsAsked(user.username);
+
+    if (questionRes.length >= 1 && !user.badges.includes('/badge_images/First_Post_Badge.png')) {
+      const updatedUser = await awardBadges(user.username, ['/badge_images/First_Post_Badge.png']);
+      user.badges = updatedUser.badges;
+    }
 
     if (res && res._id && !fid) {
       navigate('/home');

@@ -60,6 +60,12 @@ const SideBarNav = () => {
         </div>
       )}
       <NavLink
+        to='/recommendedForums'
+        id='menu_recommended_forums'
+        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
+        Recommended Forums
+      </NavLink>
+      <NavLink
         to='/forums'
         id='menu_forum'
         className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>

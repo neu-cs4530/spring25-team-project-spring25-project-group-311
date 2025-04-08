@@ -6,7 +6,7 @@ import useUserContext from './useUserContext';
 import { Answer } from '../types/types';
 import { getQuestionById } from '../services/questionService';
 import { getForumById } from '../services/forumService';
-import { updateStreak } from '../services/userService';
+import { updateStreak, awardBadges } from '../services/userService';
 
 /**
  * Custom hook for managing the state and logic of an answer submission form.
@@ -89,6 +89,17 @@ const useAnswerForm = () => {
     const userRes = await updateStreak(user.username, answer.ansDateTime, 'answers');
     user.streak = userRes.streak;
     user.activityLog = userRes.activityLog;
+
+    if (
+      user.streak &&
+      user.streak.length >= 5 &&
+      !user.badges.includes('/badge_images/Five_Day_Streak_Badge.png')
+    ) {
+      const updatedUser = await awardBadges(user.username, [
+        '/badge_images/Five_Day_Streak_Badge.png',
+      ]);
+      user.badges = updatedUser.badges;
+    }
 
     if (res && res._id) {
       // navigate to the question that was answered

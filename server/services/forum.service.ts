@@ -68,7 +68,21 @@ export const getForumsList = async (): Promise<PopulatedDatabaseForum[]> => {
   try {
     const forums: PopulatedDatabaseForum[] = await ForumModel.find().populate<{
       questions: PopulatedDatabaseQuestion[];
-    }>([{ path: 'questions', model: QuestionModel }]);
+    }>([
+      {
+        path: 'questions',
+        model: QuestionModel,
+        populate: [
+          { path: 'tags', model: TagModel },
+          {
+            path: 'answers',
+            model: AnswerModel,
+            populate: { path: 'comments', model: CommentModel },
+          },
+          { path: 'comments', model: CommentModel },
+        ],
+      },
+    ]);
     return forums;
   } catch (error) {
     return [];
