@@ -191,6 +191,14 @@ async function userCreate(
   password: string,
   dateJoined: Date,
   biography?: string,
+  emails?: string[],
+  badges?: string[],
+  banners?: string[],
+  streak?: Date[],
+  activityLog?: { [date: string]: { votes: number; questions: number; answers: number } },
+  browserNotif?: boolean,
+  emailNotif?: boolean,
+  mutedTime?: Date,
 ): Promise<DatabaseUser> {
   if (username === '' || password === '' || dateJoined === null) {
     throw new Error('Invalid User Format');
@@ -201,13 +209,20 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
-    emails: [],
-    badges: [],
-    browserNotif: false,
-    emailNotif: false,
+    emails: emails ?? [],
+    badges: badges ?? [],
+    banners: banners ?? [],
+    selectedBanner: '',
+    streak: streak ?? [new Date(0)],
+    activityLog: activityLog ?? {},
+    pinnedBadge: [],
+    browserNotif: browserNotif ?? false,
+    emailNotif: emailNotif ?? false,
+    emailFrequency: 'weekly',
     questionsAsked: [],
     answersGiven: [],
     numUpvotesDownvotes: 0,
+    mutedTime: mutedTime ?? new Date('December 17, 1995 03:24:00'),
   };
 
   return await UserModel.create(userDetail);
@@ -257,6 +272,13 @@ const populate = async () => {
       'sanaPassword',
       new Date('2023-12-11T03:30:00'),
       'I am a software engineer.',
+      ['raisa16h21@gmail.com', 'baig.ar@northeastern.edu'],
+      ['/badge_images/First_Post_Badge.png'],
+      ['red', 'lightblue', 'lightgreen', 'yellow', 'orange', 'purple'],
+      undefined,
+      undefined,
+      true,
+      true,
     );
     await userCreate(
       'ihba001',
@@ -270,7 +292,25 @@ const populate = async () => {
       new Date('2023-12-11T03:30:00'),
       'I am a chef.',
     );
-    await userCreate('monkeyABC', 'password', new Date('2023-11-11T03:30:00'), 'I am a monkey.');
+    await userCreate(
+      'monkeyABC',
+      'password',
+      new Date('2023-11-11T03:30:00'),
+      'I am a monkey.',
+      ['raisa16h21@gmail.com', 'emcd.ny@gmail.com', 'bhuiyan.r@northeastern.edu'],
+      ['/badge_images/First_Post_Badge.png'],
+      ['red', 'lightblue'],
+      [new Date('2025-04-07T18:32:05.527Z')],
+      {
+        '2025-04-07': {
+          votes: 0,
+          questions: 2,
+          answers: 0,
+        },
+      },
+      true,
+      false,
+    );
     await userCreate('hamkalo', 'redapplecar', new Date('2023-12-02T03:30:00'), 'I am a hamster.');
     await userCreate(
       'azad',
@@ -314,6 +354,7 @@ const populate = async () => {
       new Date('2023-05-10T14:28:01'),
       'I am an elephant lover.',
     );
+    await userCreate('asdf', 'asdf', new Date('2025-03-14T21:42:53.585Z'));
 
     await forumCreate(
       'test-forum',
@@ -358,6 +399,41 @@ const populate = async () => {
       'monkeyABC',
       new Date('2025-04-01T03:00:04.719Z'),
       'private',
+    );
+    await forumCreate(
+      'macbook users',
+      'a forum for ppl who use macs',
+      'test4',
+      new Date('2025-04-01T16:43:23.974Z'),
+      'public',
+    );
+    await forumCreate(
+      'linux',
+      'a place to discuss linux',
+      'test4',
+      new Date('2025-04-01T16:44:09.486Z'),
+      'public',
+    );
+    await forumCreate(
+      'this is a forum 2',
+      'example forum',
+      'sana',
+      new Date('2025-04-01T16:55:15.966Z'),
+      'public',
+    );
+    await forumCreate(
+      'Mitochondria',
+      'The mitochondria is what?',
+      'test4',
+      new Date('2025-04-07T19:06:58.860Z'),
+      'private',
+    );
+    await forumCreate(
+      'Wicked Fans',
+      'For those of us fans of the wicket movie...the musical who knows?',
+      'sana',
+      new Date('2025-04-07T22:45:05.443Z'),
+      'public',
     );
 
     const t1 = await tagCreate(T1_NAME, T1_DESC);
