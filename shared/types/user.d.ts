@@ -25,6 +25,7 @@ export interface UserCredentials {
  * - `banners`: A list of banner images for the user (optional).
  * - `selectedBanner`: The selected banner image for the user (optional).
  * - `streak`: The user's current streak. (optional)
+ *   `activityLog`: A log of user activity, including votes, questions, and answers.
  * - `pinnedBadge`: The user's current pinned badge. (optional)
  * - `browserNotif`: A boolean representing whether the user has opted for browser notifications
  * - `emailNotif`: A boolean representing whether the user has opted for email notifications
@@ -33,6 +34,7 @@ export interface UserCredentials {
  * - `numUpvotesDownvotes`: The number of upvotes/downvotes given by the user
  * - `mutedTime`: The time when notifications should be unmuted.
  * - `challenges`: A list of challenges completed by the user (optional).
+ * - `challengeCompletions`: A list of completed challenges (optional).
  */
 export interface User extends UserCredentials {
   dateJoined: Date;
