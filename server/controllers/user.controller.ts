@@ -65,6 +65,12 @@ const userController = (socket: FakeSOSocket) => {
     req.body.username.trim() !== '' &&
     req.body.biography !== undefined;
 
+  const isUpdateStreakBodyValid = (req: UpdateStreakRequest): boolean =>
+    req.body !== undefined &&
+    req.body.activity !== undefined &&
+    req.body.username !== undefined &&
+    req.body.date !== undefined;
+
   /**
    * Validates that the request body contains all required fields to add or replace an email.
    * @param req The incoming request containing user data.
@@ -839,6 +845,11 @@ const userController = (socket: FakeSOSocket) => {
     try {
       const { username, date, activity } = req.body;
 
+      if (!isUpdateStreakBodyValid(req)) {
+        res.status(400).send('Body invalid');
+        return;
+      }
+
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
@@ -899,11 +910,7 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
-      res
-        .status(500)
-        .send(
-          `Error updating user streak: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
-        );
+      res.status(500).send(`Error updating user streak: ${error}`);
     }
   };
 

@@ -1203,4 +1203,116 @@ describe('Test userController', () => {
       expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
     });
   });
+
+  describe('PATCH /updateStreak', () => {
+    it('should successfully update the user streak and activity log', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        date: new Date().toISOString(),
+        activity: 'votes',
+      };
+
+      const mockUserWithStreak = {
+        ...mockSafeUser,
+        streak: [new Date('2025-04-01')],
+        activityLog: {},
+      };
+
+      const updatedUser = {
+        ...mockUserWithStreak,
+        streak: [new Date('2025-04-01'), new Date(mockReqBody.date)],
+        activityLog: {
+          [mockReqBody.date.split('T')[0]]: { votes: 1, questions: 0, answers: 0 },
+        },
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUserWithStreak);
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        ...mockUserJSONResponse,
+        streak: updatedUser.streak.map(date => date.toISOString()),
+        activityLog: updatedUser.activityLog,
+      });
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should return 400 if username is missing', async () => {
+      const mockReqBody = {
+        date: new Date().toISOString(),
+        activity: 'votes',
+      };
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Body invalid');
+    });
+
+    it('should return 400 if activity is invalid', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        date: new Date().toISOString(),
+        activity: 'invalidActivity',
+      };
+
+      const mockUserWithStreak = {
+        ...mockSafeUser,
+        streak: [new Date('2024-12-02')],
+        activityLog: {},
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUserWithStreak);
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain(
+        'Error updating user streak: Error: Invalid activity type: invalidActivity',
+      );
+    });
+
+    it('should return 500 if user does not exist', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        date: new Date().toISOString(),
+        activity: 'votes',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce({ error: 'User not found' });
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual('Error updating user streak: Error: User not found');
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should return 500 if there is an error updating the user', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        date: new Date().toISOString(),
+        activity: 'votes',
+      };
+
+      const mockUserWithStreak = {
+        ...mockSafeUser,
+        streak: [new Date('2024-12-02')],
+        activityLog: {},
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUserWithStreak);
+      updatedUserSpy.mockResolvedValueOnce({ error: 'Error updating user' });
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual('Error updating user streak: Error: Error updating user');
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+      expect(updatedUserSpy).toHaveBeenCalledWith(mockReqBody.username, expect.any(Object));
+    });
+  });
 });
