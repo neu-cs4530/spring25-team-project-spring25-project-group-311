@@ -525,10 +525,10 @@ export const getTopFivePosts = async (forumName: string): Promise<PopulatedDatab
 
     const forumPosts = forum.questions.sort((a, b) => {
       if (a.upVotes > b.upVotes) {
-        return 1;
+        return -1;
       }
       if (a.upVotes < b.upVotes) {
-        return -1;
+        return 1;
       }
       return 0;
     });

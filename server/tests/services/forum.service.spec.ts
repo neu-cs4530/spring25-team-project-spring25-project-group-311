@@ -7,14 +7,28 @@ import {
   banUser,
   cancelUserJoinRequest,
   getForumById,
+  getForumQuestionsByOrder,
   getForumsList,
+  getTopFivePosts,
   getUserForums,
+  removeUserFromForum,
   saveForum,
   unbanUser,
   updateForumTypeSetting,
 } from '../../services/forum.service';
-import { DatabaseForum, PopulatedDatabaseForum } from '../../types/types';
-import { forum, FORUMS, POPULATED_FORUMS, POPULATED_QUESTIONS, QUESTIONS } from '../mockData.models';
+import {
+  DatabaseForum,
+  PopulatedDatabaseForum,
+  PopulatedDatabaseQuestion,
+} from '../../types/types';
+import {
+  forum,
+  FORUMS,
+  POPULATED_FORUMS,
+  POPULATED_QUESTIONS,
+  POPULATED_QUESTIONS_VOTES,
+  QUESTIONS,
+} from '../mockData.models';
 import exp from 'constants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -825,9 +839,208 @@ describe('Forum model', () => {
     });
   });
 
-  // describe('removeUserFromForum', () => {
-  //   beforeEach(() => {
-  //     mockingoose.resetAll();
-  //   });
-  // });
+  describe('removeUserFromForum', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
+    it('should return an error if getting forum errors', async () => {
+      mockingoose(ForumModel).toReturn(new Error('Forum not found'), 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await removeUserFromForum(
+        '67f550fb443cc714d61b7c66',
+        'user2',
+      )) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error:
+          'Error occurred when removing user from forum: Error: Error occurred when finding forum: Error: Forum not found',
+      });
+    });
+
+    it('should return the existing forum if user is not in the members', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await removeUserFromForum(
+        '67f550fb443cc714d61b7c66',
+        'thisUserIsNotInTheForum',
+      )) as PopulatedDatabaseForum;
+
+      expect(result.members).toEqual(forumExample.members);
+    });
+  });
+
+  it('should remove a user from forum if everything else is ok', async () => {
+    const forumExample = POPULATED_FORUMS.filter(
+      f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+    )[0];
+
+    mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+    ForumModel.schema.path('questions', Object);
+
+    mockingoose(ForumModel).toReturn({ ...forumExample, members: ['fby2'] }, 'findOneAndUpdate');
+    ForumModel.schema.path('questions', Object);
+
+    const result = (await removeUserFromForum(
+      '67f550fb443cc714d61b7c66',
+      'user2',
+    )) as PopulatedDatabaseForum;
+
+    expect(result.members.length).toEqual(1);
+    expect(result.members).toEqual(['fby2']);
+  });
+
+  it('handling null updated forum', async () => {
+    const forumExample = POPULATED_FORUMS.filter(
+      f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+    )[0];
+
+    mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+    ForumModel.schema.path('questions', Object);
+
+    mockingoose(ForumModel).toReturn(null, 'findOneAndUpdate');
+    ForumModel.schema.path('questions', Object);
+
+    const result = (await removeUserFromForum(
+      '67f550fb443cc714d61b7c66',
+      'user2',
+    )) as PopulatedDatabaseForum;
+
+    expect(result).toEqual({
+      error: 'Error occurred when removing user from forum: Error: Error updating forum',
+    });
+  });
+
+  describe('getForumQuestionsByOrder', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
+    it('should return an empty list if there is an error getting forum', async () => {
+      mockingoose(ForumModel).toReturn(new Error('Forum not found'), 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getForumQuestionsByOrder(
+        'active',
+        '67f550fb443cc714d61b7c66',
+      )) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return in active order', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+      mockingoose(ForumModel).toReturn(forumExample, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getForumQuestionsByOrder(
+        'active',
+        '67f55100a3e3397af21a72e9',
+      )) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([POPULATED_QUESTIONS[3], POPULATED_QUESTIONS[2]]);
+    });
+
+    it('should return in unanswered order', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+      mockingoose(ForumModel).toReturn(forumExample, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getForumQuestionsByOrder(
+        'unanswered',
+        '67f55100a3e3397af21a72e9',
+      )) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([POPULATED_QUESTIONS[3], POPULATED_QUESTIONS[2]]);
+    });
+
+    it('should return in newest order', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+      mockingoose(ForumModel).toReturn(forumExample, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getForumQuestionsByOrder(
+        'newest',
+        '67f55100a3e3397af21a72e9',
+      )) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([POPULATED_QUESTIONS[3], POPULATED_QUESTIONS[2]]);
+    });
+
+    it('should return in most viewed order', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+      mockingoose(ForumModel).toReturn(forumExample, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getForumQuestionsByOrder(
+        'mostViewed',
+        '67f55100a3e3397af21a72e9',
+      )) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([POPULATED_QUESTIONS[2], POPULATED_QUESTIONS[3]]);
+    });
+
+    it('null forum should return empty list', async () => {
+      mockingoose(ForumModel).toReturn(null, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getForumQuestionsByOrder(
+        'active',
+        '67f550fb443cc714d61b7c66',
+      )) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getTopFivePosts', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
+    it('should return empty list if forum is null', async () => {
+      mockingoose(ForumModel).toReturn(null, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getTopFivePosts(
+        'A forum for macbook enjoyers',
+      )) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return top 5 posts', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f68effb1251856a192f471',
+      )[0];
+      mockingoose(ForumModel).toReturn(forumExample, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await getTopFivePosts('Andriod users 2')) as PopulatedDatabaseQuestion[];
+
+      expect(result).toEqual([
+        POPULATED_QUESTIONS_VOTES[3],
+        POPULATED_QUESTIONS_VOTES[0],
+        POPULATED_QUESTIONS_VOTES[1],
+        POPULATED_QUESTIONS_VOTES[2],
+      ]);
+    });
+  });
 });
