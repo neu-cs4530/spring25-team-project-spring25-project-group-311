@@ -85,6 +85,11 @@ export const getAllAnswers = async (): Promise<PopulatedDatabaseAnswer[]> => {
     const alist: PopulatedDatabaseAnswer[] = await AnswerModel.find().populate<{
       comments: DatabaseComment[];
     }>([{ path: 'comments', model: CommentModel }]);
+
+    if (!alist) {
+      throw Error('error getting answers');
+    }
+
     return alist;
   } catch (error) {
     return [];

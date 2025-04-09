@@ -648,8 +648,6 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(updatedUser.error);
       }
 
-      console.log();
-
       socket.emit('userUpdate', {
         user: updatedUser,
         type: 'updated',

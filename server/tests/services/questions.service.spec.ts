@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import QuestionModel from '../../models/questions.model';
 import {
   filterQuestionsBySearch,
@@ -6,6 +7,8 @@ import {
   fetchAndIncrementQuestionViewsById,
   saveQuestion,
   addVoteToQuestion,
+  getUpvotesAndDownVotesBy,
+  getQuestionByID,
 } from '../../services/question.service';
 import { DatabaseQuestion, PopulatedDatabaseQuestion } from '../../types/types';
 import {
@@ -17,6 +20,7 @@ import {
   ans3,
   ans4,
   POPULATED_QUESTIONS,
+  tag3,
 } from '../mockData.models';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -471,6 +475,182 @@ describe('Question model', () => {
       const result = await addVoteToQuestion('someQuestionId', 'testUser', 'downvote');
 
       expect(result).toEqual({ error: 'Error when adding downvote to question' });
+    });
+  });
+
+  describe('getUpvotesandDownVotesBy', () => {
+    test('The user has upvotes and downvotes so we get the sum of both', async () => {
+      const q1 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'Quick question about storage on android',
+        text: 'I would like to know the best way to go about storing an array on an android phone so that even when the app/activity ended the data remains',
+        tags: [tag3._id, tag2._id],
+        answers: [ans1._id, ans2._id],
+        askedBy: 'q_by1',
+        askDateTime: new Date('2023-11-16T09:24:00'),
+        views: ['question1_user', 'question2_user', 'user1'],
+        upVotes: ['user1'],
+        downVotes: [],
+        comments: [],
+      };
+
+      const q2 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'Computer issues',
+        text: 'Why will my computer not work',
+        answers: [ans1._id, ans2._id],
+        askedBy: 'q_by2',
+        askDateTime: new Date(),
+        views: ['user1'],
+        upVotes: ['user1'],
+        downVotes: [],
+        comments: [],
+      };
+
+      const q3 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'How to write a test',
+        text: 'I want to know how to write a test in JEST',
+        answers: [],
+        askedBy: 'q_by3',
+        askDateTime: new Date(),
+        views: ['user1', 'user2'],
+        upVotes: [],
+        downVotes: ['user1'],
+        comments: [],
+      };
+
+      const q4 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'How to use NPM',
+        text: 'What even is NPM?',
+        answers: [],
+        askedBy: 'q_by3',
+        askDateTime: new Date(),
+        views: ['user1', 'user4'],
+        upVotes: [],
+        downVotes: ['user1'],
+        comments: [],
+      };
+
+      mockingoose(QuestionModel).toReturn([q1, q2, q3, q4], 'find');
+      const sumUpAndDown = await getUpvotesAndDownVotesBy('user1');
+      expect(sumUpAndDown).toBeDefined();
+      expect(sumUpAndDown).toEqual(4);
+    });
+
+    test('The user has upvotes so we just get the count of upvotes', async () => {
+      const q1 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'Quick question about storage on android',
+        text: 'I would like to know the best way to go about storing an array on an android phone so that even when the app/activity ended the data remains',
+        tags: [tag3._id, tag2._id],
+        answers: [ans1._id, ans2._id],
+        askedBy: 'q_by1',
+        askDateTime: new Date('2023-11-16T09:24:00'),
+        views: ['question1_user', 'question2_user', 'user1'],
+        upVotes: ['user1'],
+        downVotes: [],
+        comments: [],
+      };
+
+      const q2 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'Computer issues',
+        text: 'Why will my computer not work',
+        answers: [ans1._id, ans2._id],
+        askedBy: 'q_by2',
+        askDateTime: new Date(),
+        views: ['user1'],
+        upVotes: ['user1'],
+        downVotes: [],
+        comments: [],
+      };
+      mockingoose(QuestionModel).toReturn([q1, q2], 'find');
+
+      const sumUpAndDown = await getUpvotesAndDownVotesBy('user1');
+      expect(sumUpAndDown).toBeDefined();
+      expect(sumUpAndDown).toEqual(2);
+    });
+
+    test('The user has only downvotes so we just get the count of downvotes', async () => {
+      const q1 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'Quick question about storage on android',
+        text: 'I would like to know the best way to go about storing an array on an android phone so that even when the app/activity ended the data remains',
+        tags: [tag3._id, tag2._id],
+        answers: [ans1._id, ans2._id],
+        askedBy: 'q_by1',
+        askDateTime: new Date('2023-11-16T09:24:00'),
+        views: ['question1_user', 'question2_user', 'user1'],
+        upVotes: [],
+        downVotes: ['user1'],
+        comments: [],
+      };
+
+      mockingoose(QuestionModel).toReturn([q1], 'find');
+
+      const sumUpAndDown = await getUpvotesAndDownVotesBy('user1');
+      expect(sumUpAndDown).toBeDefined();
+      expect(sumUpAndDown).toEqual(1);
+    });
+
+    test('The user has no votes so we should get 0', async () => {
+      mockingoose(QuestionModel).toReturn([], 'find');
+
+      const sumUpAndDown = await getUpvotesAndDownVotesBy('user1');
+      expect(sumUpAndDown).toBeDefined();
+      expect(sumUpAndDown).toEqual(0);
+    });
+
+    test('Should return 0 if find returns null', async () => {
+      mockingoose(QuestionModel).toReturn(null, 'find');
+
+      const sumUpAndDown = await getUpvotesAndDownVotesBy('user1');
+      expect(sumUpAndDown).toBeDefined();
+      expect(sumUpAndDown).toEqual(0);
+    });
+
+    test('Should return 0 if find has an error', async () => {
+      mockingoose(QuestionModel).toReturn(Error('Error in database'), 'find');
+
+      const sumUpAndDown = await getUpvotesAndDownVotesBy('user1');
+      expect(sumUpAndDown).toBeDefined();
+      expect(sumUpAndDown).toEqual(0);
+    });
+  });
+
+  describe('getQuestionByID', () => {
+    test('Gets the question given the id', async () => {
+      const q1 = {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),
+        title: 'Quick question about storage on android',
+        text: 'I would like to know the best way to go about storing an array on an android phone so that even when the app/activity ended the data remains',
+        tags: [tag3._id, tag2._id],
+        answers: [ans1._id, ans2._id],
+        askedBy: 'q_by1',
+        askDateTime: new Date('2023-11-16T09:24:00'),
+        views: ['question1_user', 'question2_user', 'user1'],
+        upVotes: ['user1'],
+        downVotes: [],
+        comments: [],
+      };
+
+      mockingoose(QuestionModel).toReturn(q1, 'findOne');
+      const res = await getQuestionByID(q1._id.toString());
+      expect(res).toBeDefined();
+    });
+
+    test('Database returns null so get error', async () => {
+      mockingoose(QuestionModel).toReturn(null, 'findOne');
+      const res = await getQuestionByID(QUESTIONS[0]._id.toString());
+      expect(res).toHaveProperty('error');
+    });
+
+    test('Database returns error so get error', async () => {
+      mockingoose(QuestionModel).toReturn(new Error('Database error'), 'findOne');
+      const res = await getQuestionByID(QUESTIONS[0]._id.toString());
+      expect(res).toHaveProperty('error');
     });
   });
 });

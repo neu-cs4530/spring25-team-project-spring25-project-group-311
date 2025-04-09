@@ -1,9 +1,14 @@
 import mongoose from 'mongoose';
 import AnswerModel from '../../models/answers.model';
 import QuestionModel from '../../models/questions.model';
-import { saveAnswer, addAnswerToQuestion } from '../../services/answer.service';
-import { DatabaseAnswer, DatabaseQuestion } from '../../types/types';
-import { QUESTIONS, ans1, ans4 } from '../mockData.models';
+import {
+  saveAnswer,
+  addAnswerToQuestion,
+  getAllAnswers,
+  getAnswerById,
+} from '../../services/answer.service';
+import { DatabaseAnswer, DatabaseQuestion, PopulatedDatabaseAnswer } from '../../types/types';
+import { QUESTIONS, ans1, ans4, unpopAns1, unpopAns2 } from '../mockData.models';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -83,6 +88,66 @@ describe('Answer model', () => {
       expect(addAnswerToQuestion(qid, invalidAnswer as DatabaseAnswer)).resolves.toEqual({
         error: 'Error when adding answer to question',
       });
+    });
+  });
+
+  describe('getAllAnswers', () => {
+    test('The database has answers so we should get all the answers in the dataset', async () => {
+      mockingoose(AnswerModel).toReturn([unpopAns1, unpopAns2], 'find');
+      QuestionModel.schema.path('comments', Object);
+
+      const allAns = await getAllAnswers();
+      expect(allAns).toBeDefined();
+      expect(allAns.length).toEqual(2);
+      expect(allAns[0]._id.toString()).toEqual(unpopAns1._id.toString());
+      expect(allAns[1]._id.toString()).toEqual(unpopAns2._id.toString());
+    });
+
+    test('The database has no answers so we should get an empty array', async () => {
+      mockingoose(AnswerModel).toReturn([], 'find');
+
+      const allAns = await getAllAnswers();
+      expect(allAns).toBeDefined();
+      expect(allAns.length).toEqual(0);
+    });
+
+    test('The database returns null so we should get an empty array', async () => {
+      mockingoose(AnswerModel).toReturn(null, 'find');
+
+      const allAns = await getAllAnswers();
+      expect(allAns).toBeDefined();
+      expect(allAns.length).toEqual(0);
+    });
+
+    test('The database has an error so we should get an empty array', async () => {
+      mockingoose(AnswerModel).toReturn(Error('Error in Database'), 'find');
+
+      const allAns = await getAllAnswers();
+      expect(allAns).toBeDefined();
+      expect(allAns.length).toEqual(0);
+    });
+  });
+
+  describe('getAnswerById', () => {
+    test('Gets the answer given the id', async () => {
+      mockingoose(AnswerModel).toReturn(unpopAns1, 'findOne');
+
+      const allAns = await getAnswerById(unpopAns1._id.toString());
+      expect(allAns).toBeDefined();
+    });
+
+    test('The database returns null so we should get an empty array', async () => {
+      mockingoose(AnswerModel).toReturn(null, 'findOne');
+
+      const allAns = await getAnswerById(unpopAns1._id.toString());
+      expect(allAns).toHaveProperty('error');
+    });
+
+    test('The database has an error so we should get an empty array', async () => {
+      mockingoose(AnswerModel).toReturn(Error('Error in Database'), 'findOne');
+
+      const allAns = await getAnswerById(unpopAns1._id.toString());
+      expect(allAns).toHaveProperty('error');
     });
   });
 });

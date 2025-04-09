@@ -135,6 +135,62 @@ describe('POST /addComment', () => {
     });
   });
 
+  it('should return 500 if question cannot be found', async () => {
+    const validQid = new mongoose.Types.ObjectId();
+    const validCid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      id: validQid.toString(),
+      type: 'question',
+      comment: {
+        text: 'This is a test comment',
+        commentBy: 'dummyUserId',
+        commentDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockComment = {
+      _id: validCid,
+      text: 'This is a test comment',
+      commentBy: 'dummyUserId',
+      commentDateTime: new Date('2024-06-03'),
+    };
+
+    saveCommentSpy.mockResolvedValueOnce(mockComment);
+    addCommentSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: 'dummyUserId',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [],
+      comments: [mockComment._id],
+    });
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: 'dummyUserId',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [],
+      comments: [mockComment],
+    });
+
+    getQuestionByIDSpy.mockResolvedValueOnce({ error: 'Error getting question' });
+
+    const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
+
+    expect(response.status).toBe(500);
+  });
+
   it('should add a new comment to the answer', async () => {
     const validAid = new mongoose.Types.ObjectId();
     const validCid = new mongoose.Types.ObjectId();
@@ -239,6 +295,266 @@ describe('POST /addComment', () => {
       commentBy: 'dummyUserId',
       commentDateTime: mockComment.commentDateTime.toISOString(),
     });
+  });
+
+  it('should return 500 if answer cannot be found', async () => {
+    const validAid = new mongoose.Types.ObjectId();
+    const validCid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      id: validAid.toString(),
+      type: 'answer',
+      comment: {
+        text: 'This is a test comment',
+        commentBy: 'dummyUserId',
+        commentDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockComment = {
+      _id: validCid,
+      text: 'This is a test comment',
+      commentBy: 'dummyUserId',
+      commentDateTime: new Date('2024-06-03'),
+    };
+
+    saveCommentSpy.mockResolvedValueOnce(mockComment);
+
+    addCommentSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment],
+    });
+
+    getAnswerByIdSpy.mockResolvedValueOnce({
+      error: 'Error getting answer',
+    });
+
+    const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
+
+    expect(response.status).toBe(500);
+  });
+
+  it('should return 500 if the user cannot be found', async () => {
+    const validAid = new mongoose.Types.ObjectId();
+    const validCid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      id: validAid.toString(),
+      type: 'answer',
+      comment: {
+        text: 'This is a test comment',
+        commentBy: 'dummyUserId',
+        commentDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockComment = {
+      _id: validCid,
+      text: 'This is a test comment',
+      commentBy: 'dummyUserId',
+      commentDateTime: new Date('2024-06-03'),
+    };
+
+    saveCommentSpy.mockResolvedValueOnce(mockComment);
+
+    addCommentSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment],
+    });
+
+    getAnswerByIdSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    getUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error getting user' });
+
+    const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
+
+    expect(response.status).toBe(500);
+  });
+
+  it('should return 500 if notif cannot be saved', async () => {
+    const validAid = new mongoose.Types.ObjectId();
+    const validCid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      id: validAid.toString(),
+      type: 'answer',
+      comment: {
+        text: 'This is a test comment',
+        commentBy: 'dummyUserId',
+        commentDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockComment = {
+      _id: validCid,
+      text: 'This is a test comment',
+      commentBy: 'dummyUserId',
+      commentDateTime: new Date('2024-06-03'),
+    };
+
+    const validUser: SafeDatabaseUser = {
+      _id: new mongoose.Types.ObjectId(),
+      dateJoined: new Date(),
+      emails: [],
+      badges: [],
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [
+        {
+          text: 'This is a test answer',
+          ansBy: 'dummyUserId',
+          ansDateTime: new Date('2024-06-03'),
+          comments: [mockComment],
+        },
+      ],
+      numUpvotesDownvotes: 0,
+      username: 'dummyUserId',
+    };
+
+    saveCommentSpy.mockResolvedValueOnce(mockComment);
+
+    addCommentSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment],
+    });
+
+    getAnswerByIdSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    getUserByUsernameSpy.mockResolvedValueOnce(validUser);
+    saveNotificationSpy.mockResolvedValueOnce({ error: 'Error saving notif' });
+
+    const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
+
+    expect(response.status).toBe(500);
+  });
+
+  it('should return 500 if there is error populating notif', async () => {
+    const validAid = new mongoose.Types.ObjectId();
+    const validCid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      id: validAid.toString(),
+      type: 'answer',
+      comment: {
+        text: 'This is a test comment',
+        commentBy: 'dummyUserId',
+        commentDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockComment = {
+      _id: validCid,
+      text: 'This is a test comment',
+      commentBy: 'dummyUserId',
+      commentDateTime: new Date('2024-06-03'),
+    };
+
+    const validUser: SafeDatabaseUser = {
+      _id: new mongoose.Types.ObjectId(),
+      dateJoined: new Date(),
+      emails: [],
+      badges: [],
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [
+        {
+          text: 'This is a test answer',
+          ansBy: 'dummyUserId',
+          ansDateTime: new Date('2024-06-03'),
+          comments: [mockComment],
+        },
+      ],
+      numUpvotesDownvotes: 0,
+      username: 'dummyUserId',
+    };
+
+    const savedNotif: DatabaseNotification = {
+      _id: new mongoose.Types.ObjectId(),
+      user: validUser._id,
+      title: 'New Comment to Your Post',
+      text: 'A new comment has been given to your post: This is a test answer',
+      type: 'browser',
+      read: false,
+    };
+
+    saveCommentSpy.mockResolvedValueOnce(mockComment);
+
+    addCommentSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment],
+    });
+
+    getAnswerByIdSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: 'dummyUserId',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [mockComment._id],
+    });
+
+    getUserByUsernameSpy.mockResolvedValueOnce(validUser);
+    saveNotificationSpy.mockResolvedValueOnce(savedNotif);
+    popDocSpy.mockRejectedValue({
+      error: 'Error populting doc',
+    });
+
+    const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
+
+    expect(response.status).toBe(500);
   });
 
   it('should return bad request error if id property missing', async () => {

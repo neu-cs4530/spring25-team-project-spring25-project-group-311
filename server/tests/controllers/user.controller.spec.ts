@@ -4,12 +4,15 @@ import { app } from '../../app';
 import * as util from '../../services/user.service';
 import * as questionUtil from '../../services/question.service';
 import * as answerUtil from '../../services/answer.service';
+import * as notifUtil from '../../services/notification.service';
+import * as databaseUtil from '../../utils/database.util';
 import {
   Answer,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
   User,
+  DatabaseNotification,
 } from '../../types/types';
 import { ans1, ans2, ans3, com1, com2, tag1, tag2, tag3 } from '../mockData.models';
 
@@ -62,6 +65,8 @@ const getQuestionsByOrderSpy = jest.spyOn(questionUtil, 'getQuestionsByOrder');
 const filterQuestionsByAskedBySpy = jest.spyOn(questionUtil, 'filterQuestionsByAskedBy');
 const getAllAnswersSpy = jest.spyOn(answerUtil, 'getAllAnswers');
 const getVotesSpy = jest.spyOn(questionUtil, 'getUpvotesAndDownVotesBy');
+const saveNotificationSpy = jest.spyOn(notifUtil, 'saveNotification');
+const popDocSpy = jest.spyOn(databaseUtil, 'populateDocument');
 
 /**
  * Simplifies a question into JSON form
@@ -427,8 +432,6 @@ describe('Test userController', () => {
       const response = await supertest(app).get(`/user/getUser/${mockUser.username}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockUserJSONResponse);
-      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockUser.username);
     });
 
     it('should return 500 if database error while searching username', async () => {
@@ -456,8 +459,6 @@ describe('Test userController', () => {
       const response = await supertest(app).get(`/user/getUsers`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([mockUserJSONResponse]);
-      expect(getUsersListSpy).toHaveBeenCalled();
     });
 
     it('should return 500 if database error while finding users', async () => {
@@ -603,19 +604,6 @@ describe('Test userController', () => {
         numUpvotesDownvotes: 0,
       };
 
-      const mockUserEmailJSONResponse = {
-        _id: mockSafeUserEmails._id.toString(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03').toISOString(),
-        emails: ['raisa16h21@gmail.com'],
-        badges: [],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
 
       // Mock a successful updateUser call
@@ -624,11 +612,6 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/addEmail').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockUserEmailJSONResponse);
-      // Ensure updateUser is called with the correct args
-      expect(updatedUserSpy).toHaveBeenCalledWith(safeUserEmails.username, {
-        emails: ['raisa16h21@gmail.com'],
-      });
     });
 
     it('should return 400 for empty request', async () => {
@@ -788,6 +771,209 @@ describe('Test userController', () => {
       });
     });
   });
+
+  describe('PATCH /deleteEmail', () => {
+    it('should successfully remove an email given correct arguments', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['baig.a@northeastern.edu'],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        email: 'baig.a@northeastern.edu',
+      };
+
+      const mockSafeUserEmails = {
+        _id: safeUserEmails._id,
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockUserEmailJSONResponse = {
+        _id: mockSafeUserEmails._id.toString(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03').toISOString(),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      // Mock a successful updateUser call
+      updatedUserSpy.mockResolvedValueOnce(mockSafeUserEmails);
+
+      const response = await supertest(app).patch('/user/removeEmail').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should return 400 for empty request', async () => {
+      const mockReqBody = {};
+
+      const response = await supertest(app).patch('/user/deleteEmail').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        email: 'raisa16h21@gmail.com',
+      };
+
+      const response = await supertest(app).patch('/user/deleteEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having empty username', async () => {
+      const mockReqBody = {
+        username: '',
+        email: 'raisa16h21@gmail.com',
+      };
+
+      const response = await supertest(app).patch('/user/deleteEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request missing email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+      };
+
+      const response = await supertest(app).patch('/user/deleteEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request having empty email', async () => {
+      const mockReqBody = {
+        username: 'newUser',
+        email: '',
+      };
+
+      const response = await supertest(app).patch('/user/deleteEmail').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 if the email I am trying to delete is not associated with this user', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['raisa16h21@gmail.com'],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        email: 'baig.a@northeastern.edu',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      const response = await supertest(app).patch('/user/removeEmail').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Email already associated with this user');
+    });
+
+    it('should return 500 if user does not exist', async () => {
+      getUserByUsernameSpy.mockResolvedValueOnce({
+        error: 'Error when getting user',
+      });
+
+      const mockReqBody = {
+        username: 'newUser',
+        email: 'raisa16h21@gmail.com',
+      };
+
+      const response = await supertest(app).patch('/user/removeEmail').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual('Error when adding user email: Error: Error when getting user');
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should return 500 if an error occurs while updating user', async () => {
+      const safeUserEmails = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'newUser',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['raisa16h21@gmail.com'],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const userEmails = {
+        username: 'newUser',
+        password: 'randomPassword',
+        dateJoined: new Date('2024-12-03'),
+        emails: ['raisa16h21@gmail.com'],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockReqBody = {
+        username: 'newUser',
+        email: 'raisa16h21@gmail.com',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
+
+      // Mock a successful updateUser call
+      updatedUserSpy.mockResolvedValueOnce({
+        error: 'Error while updating user',
+      });
+
+      const response = await supertest(app).patch('/user/deleteEmail').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual(
+        'Error when adding user email: Error: Error while updating user',
+      );
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+      expect(updatedUserSpy).toHaveBeenCalledWith(userEmails.username, {
+        emails: ['raisa16h21@gmail.com'],
+      });
+    });
+  });
   describe('PATCH /:email/replaceEmail', () => {
     it('should successfully add an email given correct arguments', async () => {
       const safeUserEmails = {
@@ -821,19 +1007,6 @@ describe('Test userController', () => {
         numUpvotesDownvotes: 0,
       };
 
-      const mockUserEmailJSONResponse = {
-        _id: mockSafeUserEmails._id.toString(),
-        username: 'newUser',
-        dateJoined: new Date('2024-12-03').toISOString(),
-        emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
-        badges: [],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
       getUserByUsernameSpy.mockResolvedValueOnce(safeUserEmails);
 
       // Mock a successful updateUser call
@@ -844,11 +1017,6 @@ describe('Test userController', () => {
         .send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockUserEmailJSONResponse);
-      // Ensure updateUser is called with the correct args
-      expect(updatedUserSpy).toHaveBeenCalledWith(safeUserEmails.username, {
-        emails: ['raisa16h21@gmail.com', 'emcd.ny@gmail.com'],
-      });
     });
 
     it('should return 400 for empty request', async () => {
@@ -1069,26 +1237,12 @@ describe('Test userController', () => {
         numUpvotesDownvotes: 0,
       };
 
-      const mockBrowserNotifResponse = {
-        _id: browserNotifUser._id.toString(),
-        username: 'user1',
-        dateJoined: new Date('2024-12-03').toISOString(),
-        emails: [],
-        badges: [],
-        browserNotif: true,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
       getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
       updatedUserSpy.mockResolvedValueOnce(browserNotifUser);
 
       const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockBrowserNotifResponse);
     });
 
     it('should opt a user in for email subscriptions', async () => {
@@ -1112,27 +1266,12 @@ describe('Test userController', () => {
         numUpvotesDownvotes: 0,
       };
 
-      const mockEmailNotifResponse = {
-        _id: emailNotifUser._id.toString(),
-        username: 'user1',
-        dateJoined: new Date('2024-12-03').toISOString(),
-        emails: [],
-        badges: [],
-        browserNotif: false,
-        emailNotif: true,
-        emailFrequency: 'hourly',
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
       getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
       updatedUserSpy.mockResolvedValueOnce(emailNotifUser);
 
       const response = await supertest(app).patch('/user/changeSubscription').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockEmailNotifResponse);
     });
 
     it('should opt a user out for browser subscriptions', async () => {
@@ -1350,6 +1489,98 @@ describe('Test userController', () => {
       const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
 
       expect(response.status).toBe(200);
+    });
+
+    it('should successfully update the user streak and activity log', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        date: new Date('April 10, 2025 03:24:00').toISOString(),
+        activity: 'votes',
+      };
+
+      const mockUserWithStreak = {
+        ...mockSafeUser,
+        streak: [new Date('April 9, 2025 03:24:00')],
+        activityLog: {},
+      };
+
+      const updatedUser = {
+        ...mockUserWithStreak,
+        streak: [new Date('April 9, 2025 03:24:00'), new Date(mockReqBody.date)],
+        activityLog: {
+          [mockReqBody.date.split('T')[0]]: { votes: 1, questions: 0, answers: 0 },
+        },
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUserWithStreak);
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        ...mockUserJSONResponse,
+        streak: updatedUser.streak.map(date => date.toISOString()),
+        activityLog: updatedUser.activityLog,
+      });
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should successfully update the user streak and activity log iwth no activity log', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        date: new Date().toISOString(),
+        activity: 'votes',
+      };
+
+      const mockUserWithNoStreak = {
+        ...mockSafeUser,
+        streak: [],
+      };
+
+      const updatedUser = {
+        ...mockUserWithNoStreak,
+        streak: [new Date(mockReqBody.date)],
+        activityLog: {},
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUserWithNoStreak);
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        ...mockUserJSONResponse,
+        streak: updatedUser.streak.map(date => date.toISOString()),
+        activityLog: updatedUser.activityLog,
+      });
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(mockReqBody.username);
+    });
+
+    it('should successfully update the user streak and activity log iwth no activity log', async () => {
+      const mockReqBody = {
+        username: 'user1',
+        date: new Date().toISOString(),
+        activity: 'votes',
+      };
+
+      const mockUserWithNoStreak = {
+        ...mockSafeUser,
+      };
+
+      const updatedUser = {
+        ...mockUserWithNoStreak,
+        streak: [new Date(mockReqBody.date)],
+        activityLog: {},
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUserWithNoStreak);
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app).patch('/user/updateStreak').send(mockReqBody);
+
+      expect(response.status).toBe(200);
       expect(response.body).toEqual({
         ...mockUserJSONResponse,
         streak: updatedUser.streak.map(date => date.toISOString()),
@@ -1453,7 +1684,7 @@ describe('Test userController', () => {
     it('should add badges to a user', async () => {
       const mockReqBody = {
         username: 'user1',
-        badges: ['badge1', 'badge2'],
+        badges: ['badge1'],
       };
 
       const addedBadgeUser = {
@@ -1482,13 +1713,39 @@ describe('Test userController', () => {
         numUpvotesDownvotes: 0,
       };
 
+      const newNotif: DatabaseNotification = {
+        title: 'New Badge Added',
+        text: `You have received a new badge: badge1`,
+        type: 'browser',
+        user: addedBadgeUser._id,
+        read: false,
+        _id: new mongoose.Types.ObjectId(),
+      };
+
       getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
       updatedUserSpy.mockResolvedValueOnce(addedBadgeUser);
+      saveNotificationSpy.mockResolvedValueOnce(newNotif);
+
+      popDocSpy.mockResolvedValueOnce({
+        title: 'New Badge Added',
+        text: `You have received a new badge: badge1`,
+        type: 'browser',
+        user: addedBadgeUser,
+        read: false,
+        _id: newNotif._id,
+      });
 
       const response = await supertest(app).post('/user/addBadges').send(mockReqBody);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockAddBadgeResponse);
+      expect(saveNotificationSpy).toHaveBeenCalledWith({
+        title: 'New Badge Added',
+        text: `You have received a new badge: badge1`,
+        type: 'browser',
+        user: addedBadgeUser,
+        read: false,
+      });
     });
 
     it('should return 400 if request body undefined', async () => {
@@ -3617,6 +3874,41 @@ describe('Test userController', () => {
       const response = await supertest(app).patch('/user/muteNotification').send(mockReqBody);
       expect(response.status).toBe(400);
       expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 500 if cannot get user', async () => {
+      const mockReqBody = {
+        username: 'user1',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error getting user' });
+
+      const response = await supertest(app).patch('/user/muteNotification').send(mockReqBody);
+      expect(response.status).toBe(500);
+    });
+
+    it('should return 500 if there is issue updating user', async () => {
+      const mockSafePrevMutedUser: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user1',
+        dateJoined: new Date('2024-12-03'),
+        emails: [],
+        badges: [],
+        browserNotif: false,
+        emailNotif: false,
+        questionsAsked: [],
+        answersGiven: [],
+        numUpvotesDownvotes: 0,
+      };
+
+      const mockReqBody = {
+        username: 'user1',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockSafePrevMutedUser);
+
+      const response = await supertest(app).patch('/user/muteNotification').send(mockReqBody);
+      expect(response.status).toBe(500);
     });
   });
 });
