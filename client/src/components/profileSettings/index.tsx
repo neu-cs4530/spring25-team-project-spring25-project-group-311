@@ -467,6 +467,13 @@ const ProfileSettings: React.FC = () => {
                           </label>
                           {userData.browserNotif && (
                             <div style={{ marginTop: '1.5%', marginLeft: '7%' }}>
+                              <label style={{ marginLeft: '10px' }}>
+                                <strong>
+                                  Joining to a Forum means you also subscribe to notifications from
+                                  the forum. Leaving a forum means you are unsubcribing to
+                                  notifications from the forum.
+                                </strong>
+                              </label>
                               <input
                                 type='checkbox'
                                 checked={
