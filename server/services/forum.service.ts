@@ -300,7 +300,7 @@ export const approveUser = async (
     }
 
     if (!updatedForum) {
-      throw Error('Error');
+      throw Error('Error updating forum');
     }
 
     return updatedForum;
@@ -321,10 +321,6 @@ export const updateForumTypeSetting = async (
   type: string,
 ): Promise<PopulatedForumResponse> => {
   try {
-    if (!(type === 'private' || type === 'public')) {
-      throw new Error('Invalid type');
-    }
-
     const forum = await getForumById(fid);
     if ('error' in forum) {
       throw new Error(forum.error);
@@ -370,7 +366,7 @@ export const updateForumTypeSetting = async (
 
     return updatedForum;
   } catch (error) {
-    return { error: 'Error when updating forum type' };
+    return { error: `Error when updating forum type: ${error}` };
   }
 };
 
@@ -416,7 +412,7 @@ export const addQuestionToForum = async (
     }
     return result;
   } catch (error) {
-    return { error: 'Error when adding question to forum' };
+    return { error: `Error when adding question to forum: ${error}` };
   }
 };
 
