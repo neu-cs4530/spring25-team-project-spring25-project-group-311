@@ -112,7 +112,6 @@ async function scheduleWeeklyEmails() {
         schedule.scheduleJob('30 18 * * 5', async () => {
           await sendEmail(user.username);
         });
-        console.log('woo');
       }
     });
   } catch (error) {
