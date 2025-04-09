@@ -313,13 +313,16 @@ const ProfileSettings: React.FC = () => {
 
                   {/* ---- Heatmap Section ---- */}
                   {
-                    <div onMouseMove={handleMouseMove} style={{ position: 'relative' }}>
+                    <div
+                      className='calendar-heatmap-container'
+                      onMouseMove={handleMouseMove}
+                      style={{ position: 'relative', paddingBottom: '20px' }}>
                       <CalendarHeatmap
                         startDate={new Date('2025-01-01')}
                         endDate={new Date('2025-12-31')}
                         values={convertActivityToValues() || []}
                         classForValue={value => {
-                          if (!value || !value.count) return 'color-empty';
+                          if (!value || !value.count) return 'color-scale-0';
                           return getColorClass(value.count);
                         }}
                         onMouseOver={handleMouseOver}

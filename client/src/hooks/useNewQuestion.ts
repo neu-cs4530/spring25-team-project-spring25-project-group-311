@@ -4,7 +4,12 @@ import { validateHyperlink } from '../tool';
 import { addQuestion } from '../services/questionService';
 import useUserContext from './useUserContext';
 import { Question } from '../types/types';
-import { getQuestionsAsked, updateStreak, awardBadges } from '../services/userService';
+import {
+  getQuestionsAsked,
+  updateStreak,
+  awardBadges,
+  awardBanners,
+} from '../services/userService';
 
 /**
  * Custom hook to handle question submission and form validation
@@ -135,11 +140,15 @@ const useNewQuestion = () => {
     if (questionRes.length >= 1 && !user.badges.includes('/badge_images/First_Post_Badge.png')) {
       const updatedUser = await awardBadges(user.username, ['/badge_images/First_Post_Badge.png']);
       user.badges = updatedUser.badges;
+      const bannersUpdatedUser = await awardBanners(user.username, ['lightblue']);
+      user.banners = bannersUpdatedUser.banners;
     }
 
     if (questionRes.length >= 10 && !user.badges.includes('/badge_images/Ten_Posts_Badge.png')) {
       const updatedUser = await awardBadges(user.username, ['/badge_images/Ten_Posts_Badge.png']);
       user.badges = updatedUser.badges;
+      const bannersUpdatedUser = await awardBanners(user.username, ['lightgreen']);
+      user.banners = bannersUpdatedUser.banners;
     }
 
     if (res && res._id && !fid) {

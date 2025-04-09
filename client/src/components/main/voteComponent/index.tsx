@@ -3,7 +3,12 @@ import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
 import { PopulatedDatabaseQuestion } from '../../../types/types';
 import useVoteStatus from '../../../hooks/useVoteStatus';
-import { getUpvoteDownvote, updateStreak, awardBadges } from '../../../services/userService';
+import {
+  getUpvoteDownvote,
+  updateStreak,
+  awardBadges,
+  awardBanners,
+} from '../../../services/userService';
 
 /**
  * Interface represents the props for the VoteComponent.
@@ -61,6 +66,8 @@ const VoteComponent = ({ question }: VoteComponentProps) => {
             '/badge_images/Five_Day_Streak_Badge.png',
           ]);
           user.badges = updatedUser.badges;
+          const bannersUpdatedUser = await awardBanners(user.username, ['pink']);
+          user.banners = bannersUpdatedUser.banners;
         }
       }
     } catch (error) {

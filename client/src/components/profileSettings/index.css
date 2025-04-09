@@ -153,6 +153,14 @@
     background-color: #bbb;
   }
 
+  .calendar-heatmap-container svg {
+    overflow: visible; 
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .react-calendar-heatmap .color-scale-0 { fill: #cbcaca; }
   .react-calendar-heatmap .color-scale-1 { fill: #d6e685; }
   .react-calendar-heatmap .color-scale-2 { fill: #8cc665; }
   .react-calendar-heatmap .color-scale-3 { fill: #44a340; }
