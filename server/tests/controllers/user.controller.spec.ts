@@ -12,7 +12,6 @@ import {
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
   User,
-  DatabaseNotification,
 } from '../../types/types';
 import { ans1, ans2, ans3, com1, com2, tag1, tag2, tag3 } from '../mockData.models';
 
@@ -29,7 +28,7 @@ const mockUser: User = {
   numUpvotesDownvotes: 0,
 };
 
-let mockSafeUser: SafeDatabaseUser = {
+const mockSafeUser: SafeDatabaseUser = {
   _id: new mongoose.Types.ObjectId(),
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
