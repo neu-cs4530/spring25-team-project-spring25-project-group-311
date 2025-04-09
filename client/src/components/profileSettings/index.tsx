@@ -62,9 +62,6 @@ const ProfileSettings: React.FC = () => {
     handleRemovePinnedBadge,
   } = useProfileSettings();
 
-  console.log(userData);
-  console.log(progressTuples);
-
   const { setHeaderBackground } = useHeaderContext();
   const [dailyChallenge, setDailyChallenge] = useState<Challenge | null>(null);
   // const today = new Date().toISOString().split('T')[0];

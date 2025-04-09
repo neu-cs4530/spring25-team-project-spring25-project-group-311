@@ -17,8 +17,6 @@ import {
   deleteEmail,
   muteNotifictions,
   removePinnedBadge,
-  getUpvoteDownvote,
-  getQuestionsAsked,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -87,18 +85,7 @@ const useProfileSettings = () => {
     if (!userData) return;
 
     const fetchUserProgressBars = async () => {
-      const allPossibleProgressBadges = [
-        'badge_images/First_Post_Badge.png',
-        'badge_images/Five_Day_Streak_Badge.png',
-        'badge_images/Five_Votes_Badge.png',
-        'badge_images/Ten_Posts_Badge.png',
-      ];
-
       if (userData) {
-        const remainingBadges = allPossibleProgressBadges.filter(
-          item => !userData.badges.includes(item),
-        );
-
         const newProgressTuples: [string, number, number][] = [];
 
         let postCount = 0;
