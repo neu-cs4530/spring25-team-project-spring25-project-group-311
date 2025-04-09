@@ -45,13 +45,14 @@ const VoteComponent = ({ question }: VoteComponentProps) => {
         // Update streak and activity log
         const userRes = await updateStreak(user.username, new Date(), 'votes');
         const voteRes = await getUpvoteDownvote(user.username);
-
         // awarding badges if the user has 5 upvotes
         if (voteRes >= 5 && !user.badges.includes('/badge_images/Five_Votes_Badge.png')) {
           const updatedUser = await awardBadges(user.username, [
             '/badge_images/Five_Votes_Badge.png',
           ]);
           user.badges = updatedUser.badges;
+          const bannersUpdatedUser = await awardBanners(user.username, ['lightcoral']);
+          user.banners = bannersUpdatedUser.banners;
         }
 
         user.streak = userRes.streak;

@@ -99,7 +99,7 @@ const useAnswerForm = () => {
         '/badge_images/Five_Day_Streak_Badge.png',
       ]);
       user.badges = updatedUser.badges;
-      const bannersUpdatedUser = await awardBanners(user.username, ['lightpurple']);
+      const bannersUpdatedUser = await awardBanners(user.username, ['pink']);
       user.banners = bannersUpdatedUser.banners;
     }
 
