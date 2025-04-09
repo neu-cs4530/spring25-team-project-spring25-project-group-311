@@ -29,7 +29,6 @@ import {
   POPULATED_QUESTIONS_VOTES,
   QUESTIONS,
 } from '../mockData.models';
-import exp from 'constants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
