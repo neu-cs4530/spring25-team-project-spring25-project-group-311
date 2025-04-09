@@ -278,7 +278,7 @@ export const unbanUser = async (fid: string, username: string): Promise<Populate
 
     return updatedForum;
   } catch (error) {
-    return { error: `Error occurred when banning user from forum: ${error}` };
+    return { error: `Error occurred when unbanning user from forum: ${error}` };
   }
 };
 
@@ -314,7 +314,7 @@ export const approveUser = async (
     }
 
     if (!updatedForum) {
-      throw Error('Error');
+      throw Error('Error updating forum');
     }
 
     return updatedForum;
@@ -335,10 +335,6 @@ export const updateForumTypeSetting = async (
   type: string,
 ): Promise<PopulatedForumResponse> => {
   try {
-    if (!(type === 'private' || type === 'public')) {
-      throw new Error('Invalid type');
-    }
-
     const forum = await getForumById(fid);
     if ('error' in forum) {
       throw new Error(forum.error);
@@ -384,7 +380,7 @@ export const updateForumTypeSetting = async (
 
     return updatedForum;
   } catch (error) {
-    return { error: 'Error when updating forum type' };
+    return { error: `Error when updating forum type: ${error}` };
   }
 };
 
@@ -430,7 +426,7 @@ export const addQuestionToForum = async (
     }
     return result;
   } catch (error) {
-    return { error: 'Error when adding question to forum' };
+    return { error: `Error when adding question to forum: ${error}` };
   }
 };
 
@@ -543,10 +539,10 @@ export const getTopFivePosts = async (forumName: string): Promise<PopulatedDatab
 
     const forumPosts = forum.questions.sort((a, b) => {
       if (a.upVotes > b.upVotes) {
-        return 1;
+        return -1;
       }
       if (a.upVotes < b.upVotes) {
-        return -1;
+        return 1;
       }
       return 0;
     });
