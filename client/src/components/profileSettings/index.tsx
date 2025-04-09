@@ -4,10 +4,10 @@ import './index.css';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
 import CalendarHeatmap from 'react-calendar-heatmap';
-import useProfileSettings from '../../hooks/useProfileSettings';
 import EmailDisplayItem from './emailDisplayItem';
 import { useHeaderContext } from '../../contexts/HeaderContext';
 import { Challenge } from '../../types/types';
+import useProfileSettings from '../../hooks/useProfileSettings';
 
 const PROFILE_API_URL = `${process.env.REACT_APP_SERVER_URL}/challenges`;
 
@@ -31,6 +31,7 @@ const ProfileSettings: React.FC = () => {
     convertActivityToValues,
     getColorClass,
     floatingContent,
+    progressTuples,
 
     setEditBioMode,
     setEmailToReplace,
@@ -60,6 +61,9 @@ const ProfileSettings: React.FC = () => {
     handleDeleteEmail,
     handleRemovePinnedBadge,
   } = useProfileSettings();
+
+  console.log(userData);
+  console.log(progressTuples);
 
   const { setHeaderBackground } = useHeaderContext();
   const [dailyChallenge, setDailyChallenge] = useState<Challenge | null>(null);
@@ -310,6 +314,24 @@ const ProfileSettings: React.FC = () => {
                       <strong>Contribution Statistics </strong>
                     </h6>
                   }
+
+                  {/* ---- Progress Bar Section ---- */}
+                  <h6 style={{ paddingTop: '20px' }}>
+                    <strong>Upcoming Badges </strong>
+                  </h6>
+                  {progressTuples.map((tuple, index) => (
+                    <div key={index} className='progress-item'>
+                      <div>
+                        {tuple[0]}: {tuple[1]}/{tuple[2]}
+                      </div>
+                      <progress
+                        value={tuple[1]}
+                        max={tuple[2]}
+                        style={{ width: '100%', height: '20px' }}>
+                        {Math.round((tuple[1] / tuple[2]) * 100)}%
+                      </progress>
+                    </div>
+                  ))}
 
                   {/* ---- Heatmap Section ---- */}
                   {

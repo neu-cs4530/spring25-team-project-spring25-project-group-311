@@ -17,6 +17,8 @@ import {
   deleteEmail,
   muteNotifictions,
   removePinnedBadge,
+  getUpvoteDownvote,
+  getQuestionsAsked,
 } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
@@ -56,12 +58,14 @@ const useProfileSettings = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const [progressTuples, setProgressTuples] = useState<[string, number, number][]>([]);
+
   const canEditProfile =
     currentUser.username && userData?.username ? currentUser.username === userData.username : false;
 
   useEffect(() => {
+    // fetching user
     if (!username) return;
-
     const fetchUserData = async () => {
       try {
         setLoading(true);
@@ -77,6 +81,63 @@ const useProfileSettings = () => {
 
     fetchUserData();
   }, [username]);
+
+  useEffect(() => {
+    // setting up badge progress
+    if (!userData) return;
+
+    const fetchUserProgressBars = async () => {
+      const allPossibleProgressBadges = [
+        'badge_images/First_Post_Badge.png',
+        'badge_images/Five_Day_Streak_Badge.png',
+        'badge_images/Five_Votes_Badge.png',
+        'badge_images/Ten_Posts_Badge.png',
+      ];
+
+      if (userData) {
+        const remainingBadges = allPossibleProgressBadges.filter(
+          item => !userData.badges.includes(item),
+        );
+
+        const newProgressTuples: [string, number, number][] = [];
+
+        let postCount = 0;
+        let voteCount = 0;
+        if (userData.activityLog) {
+          for (const dailyData of Object.values(userData.activityLog)) {
+            voteCount += dailyData.votes;
+            postCount += dailyData.questions;
+          }
+        }
+
+        if (postCount < 1) {
+          const tuple: [string, number, number] = ['First post', 0, 1];
+          newProgressTuples.push(tuple);
+        }
+        if (!userData.streak || userData.streak.length < 5) {
+          let tuple: [string, number, number] = ['5 day activity streak', 0, 5];
+          if (userData.streak) {
+            tuple = ['5 day activity streak', userData.streak.length, 5];
+          }
+          newProgressTuples.push(tuple);
+        }
+        if (voteCount < 5) {
+          const tuple: [string, number, number] = ['5 votes', voteCount, 5];
+          newProgressTuples.push(tuple);
+        }
+        if (postCount < 10) {
+          if (!(typeof postCount === 'number')) {
+            postCount = 0;
+          }
+          const tuple: [string, number, number] = ['10 posts', postCount, 10];
+          newProgressTuples.push(tuple);
+        }
+        setProgressTuples(newProgressTuples);
+      }
+    };
+
+    fetchUserProgressBars();
+  }, [userData]);
 
   /**
    * Toggles the visibility of the password fields.
@@ -668,6 +729,7 @@ const useProfileSettings = () => {
     verifyUpvoteChallenge,
     updateChallengeStatus,
     handleRemovePinnedBadge,
+    progressTuples,
   };
 };
 
