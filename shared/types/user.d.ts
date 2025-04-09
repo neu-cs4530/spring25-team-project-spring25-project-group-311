@@ -80,8 +80,6 @@ export interface User extends UserCredentials {
  */
 export interface DatabaseUser extends User {
   _id: ObjectId;
-  questionsAsked: ObjectId[];
-  answersGiven: ObjectId[];
 }
 
 /**

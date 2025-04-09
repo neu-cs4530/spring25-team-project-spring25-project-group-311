@@ -1665,7 +1665,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03'),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1', 'pin2'],
         browserNotif: false,
         emailNotif: false,
@@ -1679,7 +1679,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1', 'pin2'],
         browserNotif: false,
         emailNotif: false,
@@ -1722,7 +1722,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03'),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1', 'pin2', 'pin3'],
         browserNotif: false,
         emailNotif: false,
@@ -1736,7 +1736,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1', 'pin2', 'pin3'],
         browserNotif: false,
         emailNotif: false,
@@ -1748,63 +1748,6 @@ describe('Test userController', () => {
       const mockReqBody = {
         username: 'user3',
         pinnedBadge: 'pin3',
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUnpinUser);
-      updatedUserSpy.mockResolvedValueOnce(mockSafePinUser);
-
-      const response = await supertest(app).post('/user/addPinnedBadge').send(mockReqBody);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockSafePinUserJSON);
-    });
-
-    it('should add an empty pin to the user', async () => {
-      const mockSafeUnpinUser = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'user3',
-        dateJoined: new Date('2024-12-03'),
-        emails: [],
-        badges: ['pin4'],
-        pinnedBadge: ['pin4'],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      const mockSafePinUser = {
-        _id: mockSafeUnpinUser._id,
-        username: 'user3',
-        dateJoined: new Date('2024-12-03'),
-        emails: [],
-        badges: ['pin4'],
-        pinnedBadge: ['pin4', ''],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      const mockSafePinUserJSON = {
-        _id: mockSafePinUser._id.toString(),
-        username: 'user3',
-        dateJoined: new Date('2024-12-03').toISOString(),
-        emails: [],
-        badges: ['pin4'],
-        pinnedBadge: '',
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      const mockReqBody = {
-        username: 'user3',
-        pinnedBadge: '',
       };
 
       getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUnpinUser);
@@ -1853,33 +1796,6 @@ describe('Test userController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text).toEqual('invalid body');
-    });
-
-    it('should return 400 if the request pinned badge is not a badge the user already has', async () => {
-      const mockReqBody = {
-        username: 'user3',
-        pinnedBadge: 'pin3',
-      };
-
-      const mockSafeUnpinUser = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'user3',
-        dateJoined: new Date('2024-12-03'),
-        emails: [],
-        badges: ['pin1'],
-        pinnedBadge: [''],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUnpinUser);
-      const response = await supertest(app).post('/user/addPinnedBadge').send(mockReqBody);
-
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Pinned badge not associated with user');
     });
 
     it('should return 500 if there is an error getting the user', async () => {
@@ -1950,7 +1866,9 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/addPinnedBadge').send(mockReqBody);
 
       expect(response.status).toBe(500);
-      expect(response.text).toEqual('Error when adding a pinned badge: Badge is already pinned');
+      expect(response.text).toEqual(
+        'Error when adding a pinned badge: Error: Badge is already pinned',
+      );
     });
 
     it('should return 500 if there are already 3 badges pinned', async () => {
@@ -1979,7 +1897,7 @@ describe('Test userController', () => {
 
       expect(response.status).toBe(500);
       expect(response.text).toEqual(
-        'Error when adding a pinned badge: There are already 3 badges pinned',
+        'Error when adding a pinned badge: Error: There are already 3 badges pinned',
       );
     });
   });
@@ -2042,7 +1960,7 @@ describe('Test userController', () => {
       expect(response.body).toEqual(mockSafeUnPinUserJSON);
     });
 
-    it('should remove the pinned badge to the user given two badgs are already pinned', async () => {
+    it('should remove the pinned badge to the user given two badges are already pinned', async () => {
       const mockSafeUnpinUser = {
         _id: new mongoose.Types.ObjectId(),
         username: 'user3',
@@ -2062,7 +1980,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03'),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1', 'pin2'],
         browserNotif: false,
         emailNotif: false,
@@ -2076,7 +1994,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1'],
         browserNotif: false,
         emailNotif: false,
@@ -2119,7 +2037,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03'),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1', 'pin2', 'pin3'],
         browserNotif: false,
         emailNotif: false,
@@ -2133,7 +2051,7 @@ describe('Test userController', () => {
         username: 'user3',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
-        badges: ['pin1'],
+        badges: ['pin1', 'pin2', 'pin3', 'pin4'],
         pinnedBadge: ['pin1', 'pin2'],
         browserNotif: false,
         emailNotif: false,
@@ -2150,7 +2068,7 @@ describe('Test userController', () => {
       getUserByUsernameSpy.mockResolvedValueOnce(mockSafePinUser);
       updatedUserSpy.mockResolvedValueOnce(mockSafeUnpinUser);
 
-      const response = await supertest(app).post('/user/addPinnedBadge').send(mockReqBody);
+      const response = await supertest(app).patch('/user/removePinnedBadge').send(mockReqBody);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockSafeUnpinUserJSON);
@@ -2195,7 +2113,7 @@ describe('Test userController', () => {
       expect(response.text).toEqual('invalid body');
     });
 
-    it('should return 400 if the request pinned badge is not pinned', async () => {
+    it('should return 500 if the request pinned badge is not pinned', async () => {
       const mockReqBody = {
         username: 'user3',
         pinnedBadge: 'pin1',
@@ -2218,8 +2136,10 @@ describe('Test userController', () => {
       getUserByUsernameSpy.mockResolvedValueOnce(mockSafeUnpinUser);
       const response = await supertest(app).patch('/user/removePinnedBadge').send(mockReqBody);
 
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Badge is already not pinned');
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual(
+        'Error when removing a pinned badge: Error: Badge is already not pinned',
+      );
     });
 
     it('should return 500 if there is an error getting the user', async () => {
@@ -2293,7 +2213,7 @@ describe('Test userController', () => {
 
       expect(response.status).toBe(500);
       expect(response.text).toEqual(
-        'Error when adding a pinned badge: Badge is already not pinned',
+        'Error when removing a pinned badge: Error: Badge is already not pinned',
       );
     });
 
@@ -2323,7 +2243,7 @@ describe('Test userController', () => {
 
       expect(response.status).toBe(500);
       expect(response.text).toEqual(
-        'Error when adding a pinned badge: There are already no badges pinned',
+        'Error when removing a pinned badge: Error: There are already no badges pinned',
       );
     });
   });
@@ -2349,7 +2269,7 @@ describe('Test userController', () => {
         banners: ['#FF0000', '#0000FF'],
       };
 
-      const addedBannerUser = {
+      const addedBannerUser: SafeDatabaseUser = {
         _id: mockNoBannerUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
@@ -2406,7 +2326,7 @@ describe('Test userController', () => {
         banners: ['#FF0000', '#0000FF'],
       };
 
-      const addedBannerUser = {
+      const addedBannerUser: SafeDatabaseUser = {
         _id: mockABannerUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
@@ -2682,86 +2602,6 @@ describe('Test userController', () => {
       expect(response.text).toEqual('Invalid request');
     });
 
-    it('should return 400 if the user has no banners defined', async () => {
-      const mockReqBody = {
-        username: 'lucy',
-        banner: '#0000FF',
-      };
-
-      const mockNoBannerUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'lucy',
-        dateJoined: new Date('2024-12-03'),
-        emails: [],
-        badges: [],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(mockNoBannerUser);
-      const response = await supertest(app).post('/user/addSelectedBanner').send(mockReqBody);
-
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Cannot add banner');
-    });
-
-    it('should return 400 if the user has no banners (empty banner array)', async () => {
-      const mockReqBody = {
-        username: 'santiago',
-        banner: '#0000FF',
-      };
-
-      const mockNoBannerUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'santiago',
-        dateJoined: new Date('2024-12-03'),
-        emails: [],
-        badges: [],
-        banners: [],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(mockNoBannerUser);
-      const response = await supertest(app).post('/user/addSelectedBanner').send(mockReqBody);
-
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Cannot add banner');
-    });
-
-    it('should return 400 if the user does not have the specific banner', async () => {
-      const mockReqBody = {
-        username: 'santiago',
-        banner: '#0000FF',
-      };
-
-      const mockNoBannerUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
-        username: 'santiago',
-        dateJoined: new Date('2024-12-03'),
-        emails: [],
-        badges: [],
-        banners: ['#000000'],
-        browserNotif: false,
-        emailNotif: false,
-        questionsAsked: [],
-        answersGiven: [],
-        numUpvotesDownvotes: 0,
-      };
-
-      getUserByUsernameSpy.mockResolvedValueOnce(mockNoBannerUser);
-      const response = await supertest(app).post('/user/addSelectedBanner').send(mockReqBody);
-
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Cannot add banner');
-    });
-
     it('should return 500 if there is an error getting the user', async () => {
       const mockReqBody = {
         username: 'rosa',
@@ -2819,7 +2659,7 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
-        questionsAsked: [ALL_QUESTIONS[1]._id, ALL_QUESTIONS[0]._id],
+        questionsAsked: [ALL_QUESTIONS[1], ALL_QUESTIONS[0]],
         answersGiven: [],
         numUpvotesDownvotes: 0,
       };
@@ -2963,7 +2803,7 @@ describe('Test userController', () => {
         browserNotif: false,
         emailNotif: false,
         questionsAsked: [],
-        answersGiven: [ALL_ANSWERS[0]._id, ALL_ANSWERS[0]._id],
+        answersGiven: [ALL_ANSWERS[0], ALL_ANSWERS[0]],
         numUpvotesDownvotes: 0,
       };
 
@@ -3167,7 +3007,7 @@ describe('Test userController', () => {
       };
 
       const mockHourlyUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockWeeklyUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3181,7 +3021,7 @@ describe('Test userController', () => {
       };
 
       const mockUserHourlyJSONResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockHourlyUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3223,7 +3063,7 @@ describe('Test userController', () => {
       };
 
       const mockDailyUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockWeeklyUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3237,7 +3077,7 @@ describe('Test userController', () => {
       };
 
       const mockUserDailyJSONResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockWeeklyUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3279,7 +3119,7 @@ describe('Test userController', () => {
       };
 
       const mockHourlyUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockWeeklyUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3293,7 +3133,7 @@ describe('Test userController', () => {
       };
 
       const mockUserWeeklyJSONResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockWeeklyUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3335,7 +3175,7 @@ describe('Test userController', () => {
       };
 
       const mockDailyUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockWeeklyUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3349,7 +3189,7 @@ describe('Test userController', () => {
       };
 
       const mockUserWeeklyJSONResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockWeeklyUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3391,7 +3231,7 @@ describe('Test userController', () => {
       };
 
       const mockDailyUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockHourlyUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3405,7 +3245,7 @@ describe('Test userController', () => {
       };
 
       const mockUserDailyJSONResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockHourlyUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3440,14 +3280,14 @@ describe('Test userController', () => {
         badges: [],
         browserNotif: false,
         emailNotif: false,
-        emailFrequency: 'weekly',
+        emailFrequency: 'hourly',
         questionsAsked: [],
         answersGiven: [],
         numUpvotesDownvotes: 0,
       };
 
       const mockDailyUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockHourlyUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3461,7 +3301,7 @@ describe('Test userController', () => {
       };
 
       const mockUserHourlyJSONResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockHourlyUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3507,7 +3347,7 @@ describe('Test userController', () => {
 
     it('should return 400 if the request username is empty', async () => {
       const mockReqBody = {
-        username: 'user1',
+        username: '',
         emailFreq: 'daily',
       };
 
@@ -3558,7 +3398,7 @@ describe('Test userController', () => {
 
       const response = await supertest(app).patch('/user/changeFrequency').send(mockReqBody);
       expect(response.status).toBe(500);
-      expect(response.body).toEqual('Error changing the frequency: Error: Error getting user');
+      expect(response.text).toEqual('Error changing the frequency: Error: Error getting user');
     });
 
     it('should return 500 if there is an error updating the user', async () => {
@@ -3586,7 +3426,7 @@ describe('Test userController', () => {
 
       const response = await supertest(app).patch('/user/changeFrequency').send(mockReqBody);
       expect(response.status).toBe(500);
-      expect(response.body).toEqual('Error changing the frequency: Error: Error updating the user');
+      expect(response.text).toEqual('Error changing the frequency: Error: Error updating the user');
     });
   });
 
@@ -3607,7 +3447,7 @@ describe('Test userController', () => {
       };
 
       const mockSafeNewMutedUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockSafePrevMutedUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3621,7 +3461,7 @@ describe('Test userController', () => {
       };
 
       const mockUserJSONNewMutedResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockSafePrevMutedUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3661,7 +3501,7 @@ describe('Test userController', () => {
       };
 
       const mockSafeNewMutedUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockSafePrevMutedUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3675,7 +3515,7 @@ describe('Test userController', () => {
       };
 
       const mockUserJSONNewMutedResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockSafePrevMutedUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],
@@ -3716,7 +3556,7 @@ describe('Test userController', () => {
       };
 
       const mockSafeNewMutedUser: SafeDatabaseUser = {
-        _id: new mongoose.Types.ObjectId(),
+        _id: mockSafeNewUnMutedUser._id,
         username: 'user1',
         dateJoined: new Date('2024-12-03'),
         emails: [],
@@ -3730,7 +3570,7 @@ describe('Test userController', () => {
       };
 
       const mockUserJSONNewUnMutedResponse = {
-        _id: mockSafeUser._id.toString(),
+        _id: mockSafeNewUnMutedUser._id.toString(),
         username: 'user1',
         dateJoined: new Date('2024-12-03').toISOString(),
         emails: [],

@@ -153,7 +153,10 @@ const userController = (socket: FakeSOSocket) => {
    * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
    */
   const isAddOrRemovePinnedBadgeRequestValid = (req: AddOrRemoveBadgeRequest): boolean =>
-    req.body !== undefined && req.body.username !== undefined && req.body.pinnedBadge !== undefined;
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.pinnedBadge !== undefined;
 
   /**
    * Validates that the request body contains all required fields to add a selected banner.
@@ -645,6 +648,8 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(updatedUser.error);
       }
 
+      console.log();
+
       socket.emit('userUpdate', {
         user: updatedUser,
         type: 'updated',
@@ -703,6 +708,12 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds banners to a user
+   * @param req The request to add banners to the user
+   * @param res The response either containing the updated user or an error
+   * @returns A promise resolving to void
+   */
   const addBanners = async (req: AddBannerRequest, res: Response): Promise<void> => {
     try {
       if (
@@ -746,6 +757,7 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
+      console.log(`error: ${error}`);
       res.status(500).send(`Error when adding user banner: ${error}`);
     }
   };
