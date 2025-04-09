@@ -6,6 +6,12 @@ import { getUserByUsername, updateUser } from '../services/user.service';
 const challengeController = (socket: FakeSOSocket) => {
   const router = express.Router();
 
+  const fallbackChallenges = [
+    { type: 'upvotes', count: 3, description: 'Receive 3 upvotes on any of your posts.' },
+    { type: 'answer', count: 1, description: 'Provide 1 answer to any question.' },
+    { type: 'comment', count: 1, description: 'Leave 1 comment on any post.' },
+  ];
+
   /**
    * Fetch the daily challenge for the current day.
    */
@@ -24,11 +30,19 @@ const challengeController = (socket: FakeSOSocket) => {
         isActive: true,
       });
 
+      console.log('Challenge found:', dailyChallenge);
+
+      let challenge = dailyChallenge;
       if (!dailyChallenge) {
-        res.status(404).json({ message: 'No challenge available for today' });
-        return;
+        const randomIndex = Math.floor(Math.random() * fallbackChallenges.length);
+        console.log(fallbackChallenges);
+        challenge = {
+          ...fallbackChallenges[randomIndex],
+          date: utcToday, // today's date
+          isActive: true, // now active
+        };
       }
-      res.json(dailyChallenge);
+      res.json(challenge);
     } catch (error) {
       res.status(500).json({ message: 'Error fetching daily challenge' });
     }
