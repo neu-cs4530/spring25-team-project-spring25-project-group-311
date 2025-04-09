@@ -65,6 +65,17 @@ const userController = (socket: FakeSOSocket) => {
     req.body.biography !== undefined;
 
   /**
+   * Validates that the request body contains all required fields to update a streak.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isUpdateStreakBodyValid = (req: UpdateStreakRequest): boolean =>
+    req.body !== undefined &&
+    req.body.activity !== undefined &&
+    req.body.username !== undefined &&
+    req.body.date !== undefined;
+
+  /**
    * Validates that the request body contains all required fields to add or replace an email.
    * @param req The incoming request containing user data.
    * @returns `true` if the body contains valid user fields; otherwise, `false`.
@@ -78,8 +89,28 @@ const userController = (socket: FakeSOSocket) => {
     req.body.email !== undefined &&
     req.body.email.trim() !== '';
 
+  /**
+   * Validates that the request body contains all required fields to add badges to a user.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddBadgesBodyValid = (req: AddBadgesRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    !!req.body.badges &&
+    Array.isArray(req.body.badges) &&
+    req.body.badges.length > 0;
+  // Checks that there are actually badges being added
+
+  /**
+   * Validates that the request to mute notifications is valid.
+   * @param req The incoming request
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
   const isMuteNotifBodyValid = (req: MuteUserNotif): boolean =>
     req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
+
   /**
    * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
    * and does it have an @ symbol and ends with a . something)?
@@ -111,10 +142,33 @@ const userController = (socket: FakeSOSocket) => {
     req.body !== undefined &&
     req.body.username !== undefined &&
     req.body.username.trim() !== '' &&
-    req.body.emailFreq !== undefined;
+    req.body.emailFreq !== undefined &&
+    (req.body.emailFreq === 'weekly' ||
+      req.body.emailFreq === 'hourly' ||
+      req.body.emailFreq === 'daily');
 
+  /**
+   * Is the request to pin/unpin a badge valid
+   * @param req The incoming request
+   * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
+   */
   const isAddOrRemovePinnedBadgeRequestValid = (req: AddOrRemoveBadgeRequest): boolean =>
-    req.body !== undefined && req.body.username !== undefined && req.body.pinnedBadge !== undefined;
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.pinnedBadge !== undefined;
+
+  /**
+   * Validates that the request body contains all required fields to add a selected banner.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddSelectedBannerBodyValid = (req: AddSelectedBannerRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.banner !== undefined &&
+    req.body.banner !== '';
 
   /**
    * Handles the creation of a new user account.
@@ -488,6 +542,11 @@ const userController = (socket: FakeSOSocket) => {
    */
   const addBadges = async (req: AddBadgesRequest, res: Response): Promise<void> => {
     try {
+      if (!isAddBadgesBodyValid(req)) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+
       const { username, badges } = req.body;
 
       const foundUser = await getUserByUsername(username);
@@ -615,11 +674,6 @@ const userController = (socket: FakeSOSocket) => {
         return;
       }
 
-      if (!pinnedBadge) {
-        res.status(400).send(`Error when removing a pinned badge: ${pinnedBadge}`);
-        return;
-      }
-
       const foundUser = await getUserByUsername(username);
       if ('error' in foundUser) {
         throw Error(foundUser.error);
@@ -652,8 +706,22 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds banners to a user
+   * @param req The request to add banners to the user
+   * @param res The response either containing the updated user or an error
+   * @returns A promise resolving to void
+   */
   const addBanners = async (req: AddBannerRequest, res: Response): Promise<void> => {
     try {
+      if (
+        req.body.username === undefined ||
+        req.body.username.trim() === '' ||
+        req.body.banners === undefined
+      ) {
+        res.status(400).send('Invalid request');
+        return;
+      }
       const { username, banners } = req.body;
 
       if (!Array.isArray(banners) || banners.length === 0) {
@@ -687,12 +755,18 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
+      console.log(`error: ${error}`);
       res.status(500).send(`Error when adding user banner: ${error}`);
     }
   };
 
   const addSelectedBanner = async (req: AddSelectedBannerRequest, res: Response): Promise<void> => {
     try {
+      if (!isAddSelectedBannerBodyValid(req)) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+
       const { username, banner } = req.body;
 
       const foundUser = await getUserByUsername(username);
@@ -889,6 +963,11 @@ const userController = (socket: FakeSOSocket) => {
    */
   const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
     try {
+      if (!isUpdateStreakBodyValid(req)) {
+        res.status(400).send('Body invalid');
+        return;
+      }
+
       const { username, date, activity } = req.body;
 
       const foundUser = await getUserByUsername(username);
@@ -951,11 +1030,7 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
-      res
-        .status(500)
-        .send(
-          `Error updating user streak: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
-        );
+      res.status(500).send(`Error updating user streak: ${error}`);
     }
   };
 
@@ -1014,7 +1089,7 @@ const userController = (socket: FakeSOSocket) => {
   const muteNotifications = async (req: MuteUserNotif, res: Response): Promise<void> => {
     try {
       if (!isMuteNotifBodyValid(req)) {
-        res.status(400).send('Email not associated with this user');
+        res.status(400).send('Invalid user body');
         return;
       }
 
@@ -1048,7 +1123,7 @@ const userController = (socket: FakeSOSocket) => {
 
       res.status(200).json(updatedUser);
     } catch (error) {
-      res.status(500).send(`Error changing the frequency: ${error}`);
+      res.status(500).send(`Error muting notifications: ${error}`);
     }
   };
 

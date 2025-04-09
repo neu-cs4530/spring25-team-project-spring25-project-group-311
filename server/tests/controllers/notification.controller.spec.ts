@@ -272,14 +272,14 @@ describe('Test notificationController', () => {
       expect(response.status).toBe(404);
     });
 
-    // it('should return a 500 error if there is an error populating notifications', async () => {
-    //   getUserNotifsSpy.mockResolvedValueOnce([databaseNotifOne, databaseNotifTwo]);
-    //   populateDocumentSpy.mockResolvedValueOnce({ error: 'Error populating document' });
+    it('should return a 500 error if there is an error populating notifications', async () => {
+      getUserNotifsSpy.mockResolvedValueOnce([databaseNotifOne, databaseNotifTwo]);
+      populateDocumentSpy.mockResolvedValue({ error: 'Error populating document' });
 
-    //   const response = await supertest(app).get(`/notification/getUserNotifs/${safeUser.username}`);
-    //   expect(response.status).toBe(500);
-    //   expect(getUserNotifsSpy).toHaveBeenCalledWith(safeUser.username);
-    // });
+      const response = await supertest(app).get(`/notification/getUserNotifs/${safeUser.username}`);
+      expect(response.status).toBe(500);
+      expect(getUserNotifsSpy).toHaveBeenCalledWith(safeUser.username);
+    });
   });
 
   describe('PATCH /readNotif/:notifID', () => {

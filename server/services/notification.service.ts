@@ -15,11 +15,6 @@ import {
 export const saveNotification = async (notif: Notification): Promise<NotificationResponse> => {
   try {
     const result: DatabaseNotification = await NotificationModel.create(notif);
-
-    if (!result) {
-      throw Error('Failed to create notification');
-    }
-
     return result;
   } catch (error) {
     return { error: `Error occurred when saving notification: ${error}` };

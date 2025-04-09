@@ -143,6 +143,14 @@ describe('Notification model', () => {
       const retrievedNotifs = await getUserNotifs(safeUser.username);
       expect(retrievedNotifs.length).toEqual(0);
     });
+
+    it('should return an empty list if find returns null', async () => {
+      mockingoose(UserModel).toReturn(safeUser, 'findOne');
+      mockingoose(NotificationModel).toReturn(null, 'find');
+
+      const retrievedNotifs = await getUserNotifs(safeUser.username);
+      expect(retrievedNotifs.length).toEqual(0);
+    });
   });
 
   describe('readNotification', () => {

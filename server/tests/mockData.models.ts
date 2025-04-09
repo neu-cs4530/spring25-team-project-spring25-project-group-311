@@ -37,6 +37,13 @@ export const com1: DatabaseComment = {
   commentDateTime: new Date('2023-11-18T09:25:00'),
 };
 
+export const com2: DatabaseComment = {
+  _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+  text: 'wowza',
+  commentBy: 'user2',
+  commentDateTime: new Date('2023-09-18T09:25:00'),
+};
+
 export const ans1: DatabaseAnswer = {
   _id: new ObjectId('65e9b58910afe6e94fc6e6dc'),
   text: 'ans1',
@@ -67,6 +74,22 @@ export const ans4: DatabaseAnswer = {
   ansBy: 'ansBy4',
   ansDateTime: new Date('2023-11-19T09:24:00'),
   comments: [],
+};
+
+export const unpopAns1: DatabaseAnswer = {
+  _id: new ObjectId('65e9b58910afe6e94fc6e6af'),
+  text: '2 + 2 = 4',
+  ansBy: 'user1',
+  ansDateTime: new Date('2023-11-19T09:24:00'),
+  comments: [com1._id, com2._id],
+};
+
+export const unpopAns2: DatabaseAnswer = {
+  _id: new ObjectId('65e9b58910afe6e94fc6e6bf'),
+  text: '1 + 1 = 2',
+  ansBy: 'user3',
+  ansDateTime: new Date('2023-10-19T09:24:00'),
+  comments: [com2._id],
 };
 
 export const QUESTIONS: DatabaseQuestion[] = [
