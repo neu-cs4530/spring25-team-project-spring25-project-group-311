@@ -92,6 +92,7 @@ const useFocusedForumPage = () => {
       try {
         const res = await getForumById(forumID);
         setForum(res || null);
+        setType(res?.type || 'public');
       } catch (error) {
         // console.error('Error fetching forum:', error);
       }
