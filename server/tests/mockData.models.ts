@@ -37,6 +37,13 @@ export const com1: DatabaseComment = {
   commentDateTime: new Date('2023-11-18T09:25:00'),
 };
 
+export const com2: DatabaseComment = {
+  _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+  text: 'wowza',
+  commentBy: 'user2',
+  commentDateTime: new Date('2023-09-18T09:25:00'),
+};
+
 export const ans1: DatabaseAnswer = {
   _id: new ObjectId('65e9b58910afe6e94fc6e6dc'),
   text: 'ans1',
