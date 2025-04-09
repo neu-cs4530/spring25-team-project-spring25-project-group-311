@@ -117,25 +117,6 @@ const userController = (socket: FakeSOSocket) => {
   const isAddOrRemovePinnedBadgeRequestValid = (req: AddOrRemoveBadgeRequest): boolean =>
     req.body !== undefined && req.body.username !== undefined && req.body.pinnedBadge !== undefined;
 
-  const areDatesSequential = (dates: Date[]): boolean => {
-    if (dates.length <= 1) {
-      return true;
-    }
-
-    for (let i = 1; i < dates.length; i++) {
-      const prevDate = dates[i - 1];
-      const curDate = dates[i];
-      const expectedDate = new Date(prevDate);
-      expectedDate.setDate(prevDate.getDate() + 1);
-
-      if (curDate.getTime() !== expectedDate.getTime()) {
-        return false;
-      }
-    }
-
-    return true;
-  };
-
   /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
@@ -841,6 +822,19 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * makes all dates hour and minute the same time
+   * @param date Date
+   * @returns new Date with the same hour and mintue times
+   */
+  const normalizeDate = (date: Date): Date =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  /**
+   * Updates a users daily streak and activity log
+   * @param req username as astring, date as a Date object, and activity as string
+   * @param res the updated user object
+   */
   const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
     try {
       const { username, date, activity } = req.body;
@@ -874,18 +868,19 @@ const userController = (socket: FakeSOSocket) => {
         throw new Error(`Invalid activity type: ${activity}`);
       }
 
-      // if the user doesnt have a streak update the streak with the date
-      if (!foundUser.streak || foundUser.streak.length === 0) {
-        foundUser.streak = [date];
-      }
-      // if the user does have a streak
-      else if (!foundUser.streak.includes(date)) {
-        // if the user streak does not include this date push the date onto its streak
-        foundUser.streak.push(date);
-        // if the dates are not sequential reset the streak to just this date
-        if (!areDatesSequential(foundUser.streak)) {
-          foundUser.streak = [date];
+      if (foundUser.streak) {
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        const lastDate = normalizeDate(new Date(foundUser.streak[foundUser.streak.length - 1]));
+        const newDate = normalizeDate(new Date(date));
+
+        // if the user doesnt have a streak update the streak with the date
+        if (newDate.getTime() === lastDate.getTime() + oneDayMs) {
+          foundUser.streak.push(newDate);
+        } else {
+          foundUser.streak = [newDate];
         }
+      } else {
+        foundUser.streak = [date];
       }
 
       const updatedUser = await updateUser(username, {

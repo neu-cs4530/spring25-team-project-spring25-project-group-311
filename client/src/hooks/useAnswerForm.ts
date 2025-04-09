@@ -6,7 +6,7 @@ import useUserContext from './useUserContext';
 import { Answer } from '../types/types';
 import { getQuestionById } from '../services/questionService';
 import { getForumById } from '../services/forumService';
-import { updateStreak, awardBadges } from '../services/userService';
+import { updateStreak, awardBadges, awardBanners } from '../services/userService';
 
 /**
  * Custom hook for managing the state and logic of an answer submission form.
@@ -99,6 +99,8 @@ const useAnswerForm = () => {
         '/badge_images/Five_Day_Streak_Badge.png',
       ]);
       user.badges = updatedUser.badges;
+      const bannersUpdatedUser = await awardBanners(user.username, ['lightpurple']);
+      user.banners = bannersUpdatedUser.banners;
     }
 
     if (res && res._id) {

@@ -475,7 +475,7 @@ const useProfileSettings = () => {
    * @returns a string representing the color class
    */
   const getColorClass = (count: number) => {
-    if (count === 0) return 'color-empty';
+    if (count === 0) return 'color-scale-0';
     const level = Math.min(count, 4);
     return `color-scale-${level}`;
   };
