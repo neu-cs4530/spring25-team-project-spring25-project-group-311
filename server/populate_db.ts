@@ -700,6 +700,120 @@ const populate = async () => {
       true,
       '2025-04-12T00:00:00.000Z',
     );
+    await challengeCreate(
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-13T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'New Horizons',
+      'Asked a question',
+      true,
+      '2025-04-14T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-15T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-16T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'New Horizons',
+      'Asked a question',
+      true,
+      '2025-04-17T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-18T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-19T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'New Horizons',
+      'Asked a question',
+      true,
+      '2025-04-20T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-21T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-22T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'New Horizons',
+      'Asked a question',
+      true,
+      '2025-04-23T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-24T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-25T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'New Horizons',
+      'Asked a question',
+      true,
+      '2025-04-26T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-27T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-04-28T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'New Horizons',
+      'Asked a question',
+      true,
+      '2025-04-29T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Conversationalist',
+      'Comment on a post',
+      true,
+      '2025-04-30T00:00:00.000Z',
+    );
+    await challengeCreate(
+      'Community Engager',
+      'Upvote 3 posts today',
+      true,
+      '2025-05-01T00:00:00.000Z',
+    );
 
     console.log('Database populated');
   } catch (err) {
