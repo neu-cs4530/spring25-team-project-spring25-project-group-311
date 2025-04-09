@@ -2,10 +2,13 @@ import mongoose from 'mongoose';
 import ForumModel from '../../models/forum.model';
 import {
   addUserToForum,
+  banUser,
+  cancelUserJoinRequest,
   getForumById,
   getForumsList,
   getUserForums,
   saveForum,
+  unbanUser,
 } from '../../services/forum.service';
 import { DatabaseForum, PopulatedDatabaseForum } from '../../types/types';
 import { forum, FORUMS, POPULATED_FORUMS, POPULATED_QUESTIONS } from '../mockData.models';
@@ -163,5 +166,391 @@ describe('Forum model', () => {
       expect(result.members.length).toEqual(3);
       expect(result.members).toEqual(['user5', ...forumExample.members]);
     });
+
+    it('addUserToForum should return an error if the forum is not found', async () => {
+      mockingoose(ForumModel).toReturn(new Error('error'), 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await addUserToForum(
+        '67f5505718865f92b7bcd0a0',
+        'user5',
+      )) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error:
+          'Error occurred when adding user to forum: Error: Error occurred when finding forum: Error: Forum not found',
+      });
+    });
+
+    it('addUserToForum should just return the forum if the user is already in it', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f5505718865f92b7bcd0a0',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await addUserToForum(
+        '67f5505718865f92b7bcd0a0',
+        'fby1',
+      )) as PopulatedDatabaseForum;
+
+      expect(result.members.length).toEqual(2);
+      expect(result.members).toEqual(POPULATED_FORUMS[0].members);
+    });
+
+    it('addUserToForum should add the user to awaiting if private', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn(
+        { ...forumExample, awaitingMembers: ['fby1'] },
+        'findOneAndUpdate',
+      );
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await addUserToForum(
+        '67f5505718865f92b7bcd0a0',
+        'fby1',
+      )) as PopulatedDatabaseForum;
+
+      expect(result.awaitingMembers.length).toEqual(1);
+      expect(result.awaitingMembers).toEqual(['fby1']);
+    });
+
+    it('handling invalid forum type', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample, type: 'invalid' }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn(
+        { ...forumExample, awaitingMembers: ['fby1'] },
+        'findOneAndUpdate',
+      );
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await addUserToForum(
+        '67f5505718865f92b7bcd0a0',
+        'fby1',
+      )) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error: 'Error occurred when adding user to forum: Error: Invalid forum type',
+      });
+    });
+
+    it('handling null updated forum', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn(null, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await addUserToForum(
+        '67f5505718865f92b7bcd0a0',
+        'fby1',
+      )) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error: 'Error occurred when adding user to forum: Error: Error updating forum',
+      });
+    });
+  });
+
+  describe('cancelUserJoinRequest', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
+    it('should cancel a user join request', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn(
+        { ...forumExample, awaitingMembers: [] },
+        'findOneAndUpdate',
+      );
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await cancelUserJoinRequest(
+        '67f550fb443cc714d61b7c66',
+        'user3',
+      )) as PopulatedDatabaseForum;
+
+      expect(result.awaitingMembers.length).toEqual(0);
+      expect(result.awaitingMembers).toEqual([]);
+    });
+
+    it('should return an error if getting forum errors', async () => {
+      mockingoose(ForumModel).toReturn(new Error('Forum not found'), 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await cancelUserJoinRequest(
+        '67f550fb443cc714d61b7c66',
+        'user3',
+      )) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error:
+          'Error occurred when adding user to forum: Error: Error occurred when finding forum: Error: Forum not found',
+      });
+    });
+
+    it('nothing should happen if it is public or if awaiting members does not have the user', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f5505718865f92b7bcd0a0',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await cancelUserJoinRequest(
+        '67f5505718865f92b7bcd0a0',
+        'user3',
+      )) as PopulatedDatabaseForum;
+
+      expect(result.awaitingMembers.length).toEqual(0);
+      expect(result.awaitingMembers).toEqual([]);
+    });
+
+    it('handling null updated forum', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f550fb443cc714d61b7c66',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn(null, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await cancelUserJoinRequest(
+        '67f550fb443cc714d61b7c66',
+        'user3',
+      )) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error: 'Error occurred when adding user to forum: Error: Error updating forum',
+      });
+    });
+  });
+
+  describe('banUser', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
+    it('should ban a user from a forum', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f5505718865f92b7bcd0a0',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn(
+        { ...forumExample, members: ['fby1'], bannedMembers: ['user1'] },
+        'findOneAndUpdate',
+      );
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await banUser('67f550fb443cc714d61b7c66', 'user1')) as PopulatedDatabaseForum;
+
+      expect(result.members.length).toEqual(1);
+      expect(result.members).toEqual(['fby1']);
+      expect(result.bannedMembers.length).toEqual(1);
+      expect(result.bannedMembers).toEqual(['user1']);
+    });
+
+    it('should return an error if getting forum errors', async () => {
+      mockingoose(ForumModel).toReturn(new Error('Forum not found'), 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await banUser('67f550fb443cc714d61b7c66', 'user3')) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error:
+          'Error occurred when banning user from forum: Error: Error occurred when finding forum: Error: Forum not found',
+      });
+    });
+
+    it('nothing should happen if they are already banned or awaiting', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await banUser('67f55100a3e3397af21a72e9', 'user4')) as PopulatedDatabaseForum;
+
+      expect(result.members.length).toEqual(2);
+      expect(result.members).toEqual(['fby3', 'user3']);
+      expect(result.bannedMembers.length).toEqual(1);
+      expect(result.bannedMembers).toEqual(['user4']);
+    });
+
+    it('nothing should happen if they arent a member', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await banUser('67f55100a3e3397af21a72e9', 'user8')) as PopulatedDatabaseForum;
+
+      expect(result.members.length).toEqual(2);
+      expect(result.members).toEqual(['fby3', 'user3']);
+      expect(result.bannedMembers.length).toEqual(1);
+      expect(result.bannedMembers).toEqual(['user4']);
+    });
+
+    it('handling null updated forum', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn(null, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await banUser('67f55100a3e3397af21a72e9', 'user3')) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error: 'Error occurred when banning user from forum: Error: Error updating forum',
+      });
+    });
+  });
+
+  describe('unbanUser', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
+    it('should unban a user from a forum', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn({ ...forumExample, bannedMembers: [] }, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await unbanUser(
+        '67f55100a3e3397af21a72e9',
+        'user4',
+      )) as PopulatedDatabaseForum;
+
+      expect(result.members.length).toEqual(2);
+      expect(result.members).toEqual(['fby3', 'user3']);
+      expect(result.bannedMembers.length).toEqual(0);
+      expect(result.bannedMembers).toEqual([]);
+    });
+
+    it('should return an error if getting forum errors', async () => {
+      mockingoose(ForumModel).toReturn(new Error('Forum not found'), 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await unbanUser(
+        '67f55100a3e3397af21a72e9',
+        'user4',
+      )) as PopulatedDatabaseForum;
+
+      expect(result).toEqual({
+        error:
+          'Error occurred when unbanning user from forum: Error: Error occurred when finding forum: Error: Forum not found',
+      });
+    });
+
+    it('nothing should happen if they arent banned', async () => {
+      const forumExample = POPULATED_FORUMS.filter(
+        f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+      )[0];
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+      ForumModel.schema.path('questions', Object);
+
+      mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOneAndUpdate');
+      ForumModel.schema.path('questions', Object);
+
+      const result = (await banUser(
+        '67f55100a3e3397af21a72e9',
+        'userDoesntExist',
+      )) as PopulatedDatabaseForum;
+
+      expect(result.members.length).toEqual(2);
+      expect(result.members).toEqual(['fby3', 'user3']);
+      expect(result.bannedMembers.length).toEqual(1);
+      expect(result.bannedMembers).toEqual(['user4']);
+    });
+
+    // it('nothing should happen if they arent a member', async () => {
+    //   const forumExample = POPULATED_FORUMS.filter(
+    //     f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+    //   )[0];
+
+    //   mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+    //   ForumModel.schema.path('questions', Object);
+
+    //   mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOneAndUpdate');
+    //   ForumModel.schema.path('questions', Object);
+
+    //   const result = (await banUser('67f55100a3e3397af21a72e9', 'user8')) as PopulatedDatabaseForum;
+
+    //   expect(result.members.length).toEqual(2);
+    //   expect(result.members).toEqual(['fby3', 'user3']);
+    //   expect(result.bannedMembers.length).toEqual(1);
+    //   expect(result.bannedMembers).toEqual(['user4']);
+    // });
+
+    // it('handling null updated forum', async () => {
+    //   const forumExample = POPULATED_FORUMS.filter(
+    //     f => f._id && f._id.toString() === '67f55100a3e3397af21a72e9',
+    //   )[0];
+
+    //   mockingoose(ForumModel).toReturn({ ...forumExample }, 'findOne');
+    //   ForumModel.schema.path('questions', Object);
+
+    //   mockingoose(ForumModel).toReturn(null, 'findOneAndUpdate');
+    //   ForumModel.schema.path('questions', Object);
+
+    //   const result = (await banUser('67f55100a3e3397af21a72e9', 'user3')) as PopulatedDatabaseForum;
+
+    //   expect(result).toEqual({
+    //     error: 'Error occurred when banning user from forum: Error: Error updating forum',
+    //   });
+    // });
   });
 });

@@ -264,7 +264,7 @@ export const unbanUser = async (fid: string, username: string): Promise<Populate
 
     return updatedForum;
   } catch (error) {
-    return { error: `Error occurred when banning user from forum: ${error}` };
+    return { error: `Error occurred when unbanning user from forum: ${error}` };
   }
 };
 
