@@ -683,7 +683,7 @@ const populate = async () => {
     await challengeCreate('New Horizons', 'Asked a question', true, '2025-04-08T00:00:00.000Z');
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-09T00:00:00.000Z',
     );
@@ -696,7 +696,7 @@ const populate = async () => {
     await challengeCreate('New Horizons', 'Asked a question', true, '2025-04-11T00:00:00.000Z');
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-12T00:00:00.000Z',
     );
@@ -714,7 +714,7 @@ const populate = async () => {
     );
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-15T00:00:00.000Z',
     );
@@ -732,7 +732,7 @@ const populate = async () => {
     );
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-18T00:00:00.000Z',
     );
@@ -750,7 +750,7 @@ const populate = async () => {
     );
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-21T00:00:00.000Z',
     );
@@ -768,7 +768,7 @@ const populate = async () => {
     );
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-24T00:00:00.000Z',
     );
@@ -786,7 +786,7 @@ const populate = async () => {
     );
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-27T00:00:00.000Z',
     );
@@ -804,7 +804,7 @@ const populate = async () => {
     );
     await challengeCreate(
       'Conversationalist',
-      'Comment on a post',
+      'Answer a question',
       true,
       '2025-04-30T00:00:00.000Z',
     );
