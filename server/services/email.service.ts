@@ -27,8 +27,8 @@ const sendEmail = async (username: string) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'raisa16h21@gmail.com',
-        pass: 'uqby iszq gtfa chld',
+        user: process.env.EMAIL,
+        pass: process.env.PASS,
       },
     });
 
@@ -45,7 +45,7 @@ const sendEmail = async (username: string) => {
 
     // Email content
     const mailOptions = {
-      from: 'raisa16h21@gmail.com',
+      from: process.env.EMAIL,
       to: foundUser.emails[0],
       subject: 'CodeTGT Email Digest',
       text: forumItems,
