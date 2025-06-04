@@ -1,4 +1,5 @@
 import express, { Request, Response, Router } from 'express';
+import { ActivityType } from '@fake-stack-overflow/shared/types/activity';
 import {
   UserRequest,
   User,
@@ -6,6 +7,19 @@ import {
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
+  UpdateEmailRequest,
+  AddOrDeleteEmailRequest,
+  AddBadgesRequest,
+  AddOrRemoveBadgeRequest,
+  AddBannerRequest,
+  AddSelectedBannerRequest,
+  SubscribeToNotification,
+  UserResponse,
+  ChangeFreqRequest,
+  Notification,
+  UpdateStreakRequest,
+  PopulatedDatabaseNotification,
+  MuteUserNotif,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -15,6 +29,14 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
+import {
+  getQuestionsByOrder,
+  filterQuestionsByAskedBy,
+  getUpvotesAndDownVotesBy,
+} from '../services/question.service';
+import { getAllAnswers } from '../services/answer.service';
+import { saveNotification } from '../services/notification.service';
+import { populateDocument } from '../utils/database.util';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -43,6 +65,112 @@ const userController = (socket: FakeSOSocket) => {
     req.body.biography !== undefined;
 
   /**
+   * Validates that the request body contains all required fields to update a streak.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isUpdateStreakBodyValid = (req: UpdateStreakRequest): boolean =>
+    req.body !== undefined &&
+    req.body.activity !== undefined &&
+    req.body.username !== undefined &&
+    req.body.date !== undefined;
+
+  /**
+   * Validates that the request body contains all required fields to add or replace an email.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddDeleteOrUpdateEmailBodyValid = (
+    req: AddOrDeleteEmailRequest | UpdateEmailRequest,
+  ): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.email !== undefined &&
+    req.body.email.trim() !== '';
+
+  /**
+   * Validates that the request body contains all required fields to add badges to a user.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddBadgesBodyValid = (req: AddBadgesRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    !!req.body.badges &&
+    Array.isArray(req.body.badges) &&
+    req.body.badges.length > 0;
+  // Checks that there are actually badges being added
+
+  /**
+   * Validates that the request to mute notifications is valid.
+   * @param req The incoming request
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isMuteNotifBodyValid = (req: MuteUserNotif): boolean =>
+    req.body !== undefined && req.body.username !== undefined && req.body.username.trim() !== '';
+
+  /**
+   * Uses regex testing to determine whether an email is valid or not (does it contain letters, numbers and specific symbols
+   * and does it have an @ symbol and ends with a . something)?
+   * @param em The email to validate
+   * @returns `true` if the email is valid; otherwise, `false`.
+   */
+  const isEmailValid = (em: string): boolean => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(em);
+  };
+
+  /**
+   * Validates that the request body contains all required fields to change a subscription.
+   * @param req The incoming request containing user data. d
+   * @returns `true` if the body contains valid user fields; otherwise, `false`cd.
+   */
+  const isChangeSubscriptionBodyValid = (req: SubscribeToNotification): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.notifType !== undefined;
+
+  /**
+   * Validates that the request body contains all required fields to change the frequency of a subscription.
+   * @param req The incoming request containing user data.
+   * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
+   */
+  const isChangeFreqBodyValid = (req: ChangeFreqRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.emailFreq !== undefined &&
+    (req.body.emailFreq === 'weekly' ||
+      req.body.emailFreq === 'hourly' ||
+      req.body.emailFreq === 'daily');
+
+  /**
+   * Is the request to pin/unpin a badge valid
+   * @param req The incoming request
+   * @returns 'true' if the body contains valid user fields; otherwise, 'false`.
+   */
+  const isAddOrRemovePinnedBadgeRequestValid = (req: AddOrRemoveBadgeRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.pinnedBadge !== undefined;
+
+  /**
+   * Validates that the request body contains all required fields to add a selected banner.
+   * @param req The incoming request containing user data.
+   * @returns `true` if the body contains valid user fields; otherwise, `false`.
+   */
+  const isAddSelectedBannerBodyValid = (req: AddSelectedBannerRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.banner !== undefined &&
+    req.body.banner !== '';
+
+  /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
    * @param res The response, either returning the created user or an error.
@@ -60,6 +188,14 @@ const userController = (socket: FakeSOSocket) => {
       ...requestUser,
       dateJoined: new Date(),
       biography: requestUser.biography ?? '',
+      emails: requestUser.emails ?? [],
+      badges: [],
+      banners: [],
+      browserNotif: false,
+      emailNotif: false,
+      questionsAsked: [],
+      answersGiven: [],
+      numUpvotesDownvotes: 0,
     };
 
     try {
@@ -120,9 +256,58 @@ const userController = (socket: FakeSOSocket) => {
       const { username } = req.params;
 
       const user = await getUserByUsername(username);
-
       if ('error' in user) {
         throw Error(user.error);
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const activity = user.activityLog?.[today];
+      const updatedChallenges: { challenge: string; date: string }[] = Array.isArray(
+        user.challengeCompletions,
+      )
+        ? user.challengeCompletions.map(entry =>
+            typeof entry === 'string' ? { challenge: entry, date: today } : entry,
+          )
+        : [];
+
+      const hasCommented = (activity?.answers ?? 0) > 0 || (activity?.questions ?? 0) > 0;
+      const hasUpvotes = activity?.votes ?? 0;
+      const hasAskedQuestion = (activity?.questions ?? 0) > 0;
+
+      let modified = false;
+
+      // Check if the user has commented today
+      if (
+        hasCommented &&
+        !updatedChallenges.some(c => c.challenge === 'commentPosted' && c.date === today)
+      ) {
+        updatedChallenges.push({ challenge: 'commentPosted', date: today });
+        modified = true;
+      }
+
+      // Check if the user has 3 or more upvotes today
+      if (
+        hasUpvotes &&
+        !updatedChallenges.some(c => c.challenge === 'threeUpvotes' && c.date === today)
+      ) {
+        updatedChallenges.push({ challenge: 'threeUpvotes', date: today });
+        modified = true;
+      }
+
+      // Check if the user has asked a question today
+      if (
+        hasAskedQuestion &&
+        !updatedChallenges.some(c => c.challenge === 'questionPosted' && c.date === today)
+      ) {
+        updatedChallenges.push({ challenge: 'questionPosted', date: today });
+        modified = true;
+      }
+
+      if (modified) {
+        const updatedUser = await updateUser(username, { challengeCompletions: updatedChallenges });
+        if ('error' in updatedUser) throw Error(updatedUser.error);
+        res.status(200).json(updatedUser);
+        return;
       }
 
       res.status(200).json(user);
@@ -236,6 +421,712 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Adds an emal to a user's account
+   * @param req The request containing the username and the email to add.
+   * @param res The response, either confirming the addition or returning an error.
+   * @returns A promise resolving to void
+   */
+  const addEmail = async (req: AddOrDeleteEmailRequest, res: Response): Promise<void> => {
+    try {
+      // Check that the given request is valid
+      if (!isAddDeleteOrUpdateEmailBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username, email } = req.body;
+
+      const validateEmail = await isEmailValid(email);
+
+      if (!validateEmail) {
+        res.status(400).send(`Invalid email`);
+        return;
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userEmails = foundUser.emails;
+
+      if (userEmails.includes(email)) {
+        res.status(400).send('Email already associated with this user');
+        return;
+      }
+
+      userEmails.push(email);
+
+      const updatedUser = await updateUser(username, { emails: userEmails });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding user email: ${error}`);
+    }
+  };
+
+  /**
+   * Replaces an existing email on a user's account with a new email
+   * @param req The request containing the username, the email to add, and the email to replace
+   * @param res The response, either confirming the replacement or returning an error.
+   * @returns A promise resolving to void
+   */
+  const replaceEmail = async (req: UpdateEmailRequest, res: Response): Promise<void> => {
+    try {
+      // Check that the given request is valid
+      if (!isAddDeleteOrUpdateEmailBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username, email } = req.body;
+      const { currEmail } = req.params;
+
+      const validateEmail = await isEmailValid(email);
+
+      if (!validateEmail) {
+        res.status(400).send('Invalid email');
+        return;
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userEmails = foundUser.emails;
+      if (userEmails.includes(currEmail) === false) {
+        res.status(400).send('Provided email is not associated with user');
+        return;
+      }
+
+      if (userEmails.includes(email)) {
+        res.status(400).send('Email already associated with this user');
+        return;
+      }
+
+      const currEmailIndx = userEmails.indexOf(currEmail);
+      userEmails[currEmailIndx] = email;
+
+      const updatedUser = await updateUser(username, { emails: userEmails });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when replacing user email: ${error}`);
+    }
+  };
+
+  /**
+   * Adds a badge to the user's account
+   * @param req The request containing the username and the badge to add
+   * @param res The response, either confirming the new badge or an error.
+   * @returns A promise resolving to void.
+   */
+  const addBadges = async (req: AddBadgesRequest, res: Response): Promise<void> => {
+    try {
+      if (!isAddBadgesBodyValid(req)) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+
+      const { username, badges } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userBadges = foundUser.badges;
+      if (badges.some(badge => userBadges.includes(badge))) {
+        res.status(400).send('Badge(s) already associated with this user');
+        return;
+      }
+
+      userBadges.push(...badges);
+
+      const updatedUser = await updateUser(username, { badges: userBadges });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      badges.forEach(async badge => {
+        const newNotif: Notification = {
+          title: 'New Badge Added',
+          text: `You have received a new badge: ${badge}`,
+          type: 'browser',
+          user: updatedUser,
+          read: false,
+        };
+
+        const createdNotif = await saveNotification(newNotif);
+        if ('error' in createdNotif) {
+          throw new Error(createdNotif.error);
+        }
+
+        const populatedNotification = await populateDocument(
+          createdNotif._id.toString(),
+          'notification',
+        );
+
+        if ('error' in populatedNotification) {
+          throw new Error(populatedNotification.error);
+        }
+
+        socket.emit('notificationUpdate', {
+          notification: populatedNotification as PopulatedDatabaseNotification,
+          type: 'created',
+        });
+      });
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding user badge: ${error}`);
+    }
+  };
+
+  /**
+   * Adds a pinned badge to a user
+   * @param req The request containing the username and the badge the user would like pinned
+   * @param res The response containing either the user or an error
+   * @returns A promise resolving to void.
+   */
+  const addPinnedBadge = async (req: AddOrRemoveBadgeRequest, res: Response): Promise<void> => {
+    try {
+      const { username, pinnedBadge } = req.body;
+
+      if (!isAddOrRemovePinnedBadgeRequestValid(req)) {
+        res.status(400).send(`invalid body`);
+        return;
+      }
+
+      if (!pinnedBadge) {
+        res.status(400).send(`Error when adding a pinned badge: ${pinnedBadge}`);
+        return;
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userPinnedBadges = foundUser.pinnedBadge ? foundUser.pinnedBadge : [];
+      if (userPinnedBadges.length < 3) {
+        if (!userPinnedBadges.includes(pinnedBadge)) {
+          userPinnedBadges.push(pinnedBadge);
+        } else {
+          throw Error('Badge is already pinned');
+        }
+      } else {
+        throw Error('There are already 3 badges pinned');
+      }
+
+      const updatedUser = await updateUser(username, { pinnedBadge: userPinnedBadges });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding a pinned badge: ${error}`);
+    }
+  };
+
+  /**
+   * Removes a pinned badge from a user
+   * @param req The request containing the username and the badge the user would like unpinned
+   * @param res The response containing either the user or an error
+   * @returns A promise resolving to void.
+   */
+  const removePinnedBadge = async (req: AddOrRemoveBadgeRequest, res: Response): Promise<void> => {
+    try {
+      const { username, pinnedBadge } = req.body;
+
+      if (!isAddOrRemovePinnedBadgeRequestValid(req)) {
+        res.status(400).send(`invalid body`);
+        return;
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let userPinnedBadges = foundUser.pinnedBadge ? foundUser.pinnedBadge : [];
+      if (userPinnedBadges.length > 0) {
+        if (userPinnedBadges.includes(pinnedBadge)) {
+          userPinnedBadges = userPinnedBadges.filter(pb => pb !== pinnedBadge);
+        } else {
+          throw Error('Badge is already not pinned');
+        }
+      } else {
+        throw Error('There are already no badges pinned');
+      }
+
+      const updatedUser = await updateUser(username, { pinnedBadge: userPinnedBadges });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when removing a pinned badge: ${error}`);
+    }
+  };
+
+  /**
+   * Adds banners to a user
+   * @param req The request to add banners to the user
+   * @param res The response either containing the updated user or an error
+   * @returns A promise resolving to void
+   */
+  const addBanners = async (req: AddBannerRequest, res: Response): Promise<void> => {
+    try {
+      if (
+        req.body.username === undefined ||
+        req.body.username.trim() === '' ||
+        req.body.banners === undefined
+      ) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+      const { username, banners } = req.body;
+
+      if (!Array.isArray(banners) || banners.length === 0) {
+        res.status(400).send(`Invalid banner data: ${banners}`);
+        return;
+      }
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userBanners = foundUser.banners ?? [];
+      if (userBanners.length !== 0 && banners.some(banner1 => userBanners.includes(banner1))) {
+        res.status(400).send('Banner(s) already associated with this user');
+        return;
+      }
+
+      userBanners.push(...banners);
+
+      const updatedUser = await updateUser(username, { banners: userBanners });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      console.log(`error: ${error}`);
+      res.status(500).send(`Error when adding user banner: ${error}`);
+    }
+  };
+
+  const addSelectedBanner = async (req: AddSelectedBannerRequest, res: Response): Promise<void> => {
+    try {
+      if (!isAddSelectedBannerBodyValid(req)) {
+        res.status(400).send('Invalid request');
+        return;
+      }
+
+      const { username, banner } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const updatedUser = await updateUser(username, { selectedBanner: banner });
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding selected banner: ${error}`);
+    }
+  };
+
+  /**
+   * Subscribes/unsubscribe a user to notifications
+   * @param req The request containing the username and the notification type
+   * @param res The response, either confirming the subscription or an error.
+   * @returns A promise resolving to void.
+   */
+  const changeNotifSubscription = async (
+    req: SubscribeToNotification,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      if (!isChangeSubscriptionBodyValid(req)) {
+        res.status(400).send(`Invalid user body`);
+        return;
+      }
+
+      const { username } = req.body;
+      const { notifType } = req.body;
+      const { emailFrequency } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let updatedUser: UserResponse;
+      if (notifType === 'browser') {
+        updatedUser = await updateUser(username, { browserNotif: !foundUser.browserNotif });
+      } else {
+        updatedUser = await updateUser(username, {
+          emailNotif: !foundUser.emailNotif,
+          emailFrequency,
+        });
+      }
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when changing subscription to notification: ${error}`);
+    }
+  };
+
+  /**
+   * Gets a list of all questions asked by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a list of questions or an error.
+   * @returns A promise resolving to void.
+   */
+  const getQuestionsAsked = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const allQuestions = await getQuestionsByOrder('newest');
+      const userQuestions = await filterQuestionsByAskedBy(allQuestions, username);
+      res.status(200).send(userQuestions);
+    } catch (error) {
+      res.status(500).send(`Error when getting questions asked: ${error}`);
+    }
+  };
+
+  /**
+   * Gets a list of all the answers given by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a list of answers or an error
+   * @returns A promise resolving to void.
+   */
+  const getAnswersGiven = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const allAnswers = await getAllAnswers();
+      const userAnswers = allAnswers.filter(a => a.ansBy === username);
+      res.status(200).send(userAnswers);
+    } catch (error) {
+      res.status(500).send(`Error when getting answers given: ${error}`);
+    }
+  };
+
+  /**
+   * Gets the count of all votes (up and down votes) made by the user
+   * @param req The request containing the username
+   * @param res The response, either providing a count of votes or an error
+   * @returns A promise resolving to void.
+   */
+  const getUpvotesAndDownVotes = async (
+    req: UserByUsernameRequest,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const upAndDownVoteCount = await getUpvotesAndDownVotesBy(username);
+      res.status(200).send(`${upAndDownVoteCount}`);
+    } catch (error) {
+      res.status(500).send(`Error when getting number of up and down votes: ${error}`);
+    }
+  };
+
+  /**
+   * Changes the frequency of a user's email notifications.
+   * @param req The request containing the username and the frequency
+   * @param res The response, either providing the updated user or an error
+   */
+  const changeFrequency = async (req: ChangeFreqRequest, res: Response): Promise<void> => {
+    try {
+      if (!isChangeFreqBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username, emailFreq } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const updatedUser = await updateUser(username, { emailFrequency: emailFreq });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error changing the frequency: ${error}`);
+    }
+  };
+
+  /**
+   * makes all dates hour and minute the same time
+   * @param date Date
+   * @returns new Date with the same hour and mintue times
+   */
+  const normalizeDate = (date: Date): Date =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  /**
+   * Updates a users daily streak and activity log
+   * @param req username as astring, date as a Date object, and activity as string
+   * @param res the updated user object
+   */
+  const updateUserStreak = async (req: UpdateStreakRequest, res: Response): Promise<void> => {
+    try {
+      if (!isUpdateStreakBodyValid(req)) {
+        res.status(400).send('Body invalid');
+        return;
+      }
+
+      const { username, date, activity } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const dateStr = new Date(date).toISOString().split('T')[0];
+
+      // if the user doesnt have an activty log give it an empty one
+      if (!foundUser.activityLog) {
+        foundUser.activityLog = {};
+      }
+
+      const activityLog = foundUser.activityLog as Record<
+        string,
+        { votes: number; questions: number; answers: number }
+      >;
+      // if the date is not found in the activity log
+      if (!activityLog[dateStr]) {
+        activityLog[dateStr] = { votes: 0, questions: 0, answers: 0 };
+      }
+
+      // if the date is found in the activity log
+      const validActivities: ActivityType[] = ['votes', 'questions', 'answers'];
+      if (validActivities.includes(activity as ActivityType)) {
+        activityLog[dateStr][activity as ActivityType] += 1;
+      } else {
+        throw new Error(`Invalid activity type: ${activity}`);
+      }
+
+      if (foundUser.streak) {
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        const lastDate = normalizeDate(new Date(foundUser.streak[foundUser.streak.length - 1]));
+        const newDate = normalizeDate(new Date(date));
+
+        // if the user doesnt have a streak update the streak with the date
+        if (newDate.getTime() === lastDate.getTime() + oneDayMs) {
+          foundUser.streak.push(newDate);
+        } else {
+          foundUser.streak = [newDate];
+        }
+      } else {
+        foundUser.streak = [date];
+      }
+
+      const updatedUser = await updateUser(username, {
+        streak: foundUser.streak,
+        activityLog: foundUser.activityLog,
+      });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error updating user streak: ${error}`);
+    }
+  };
+
+  /**
+   * Deletes an emal from a user's account
+   * @param req The request containing the username and the email to remove.
+   * @param res The response, either confirming the removal or returning an error.
+   * @returns A promise resolving to void
+   */
+  const deleteEmail = async (req: AddOrDeleteEmailRequest, res: Response): Promise<void> => {
+    try {
+      // Check that the given request is valid
+      if (!isAddDeleteOrUpdateEmailBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username, email } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      const userEmails = foundUser.emails;
+
+      if (!userEmails.includes(email)) {
+        res.status(400).send('Email not associated with this user');
+        return;
+      }
+
+      const updatedEmails = userEmails.filter(em => em !== email);
+
+      const updatedUser = await updateUser(username, { emails: updatedEmails });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding user email: ${error}`);
+    }
+  };
+
+  /**
+   * Mutes a user's notifications for an hour.
+   * @param req The request containing the username
+   * @param res The response, either providing the updated user or an error
+   */
+  const muteNotifications = async (req: MuteUserNotif, res: Response): Promise<void> => {
+    try {
+      if (!isMuteNotifBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      const { username } = req.body;
+
+      const foundUser = await getUserByUsername(username);
+      if ('error' in foundUser) {
+        throw Error(foundUser.error);
+      }
+
+      let endMuteTime;
+      if (!foundUser.mutedTime || (foundUser.mutedTime && new Date() > foundUser.mutedTime)) {
+        // User is choosing to mute
+        endMuteTime = new Date(Date.now() + 60 * 60 * 1000);
+      } else {
+        endMuteTime = new Date('December 17, 1995 03:24:00');
+      }
+
+      const updatedUser = await updateUser(username, {
+        mutedTime: endMuteTime,
+      });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error muting notifications: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -244,6 +1135,21 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
+  router.patch('/:currEmail/replaceEmail', replaceEmail);
+  router.post('/addEmail', addEmail);
+  router.post('/addBadges', addBadges);
+  router.post('/addPinnedBadge', addPinnedBadge);
+  router.patch('/removePinnedBadge', removePinnedBadge);
+  router.post('/addBanners', addBanners);
+  router.post('/addSelectedBanner', addSelectedBanner);
+  router.patch('/changeSubscription', changeNotifSubscription);
+  router.get('/getQuestionsAsked/:username', getQuestionsAsked);
+  router.get('/getAnswersGiven/:username', getAnswersGiven);
+  router.get('/getVoteCount/:username', getUpvotesAndDownVotes);
+  router.patch('/changeFrequency', changeFrequency);
+  router.patch('/updateStreak', updateUserStreak);
+  router.patch('/deleteEmail', deleteEmail);
+  router.patch('/muteNotification', muteNotifications);
   return router;
 };
 

@@ -14,10 +14,16 @@ import questionController from './controllers/question.controller';
 import tagController from './controllers/tag.controller';
 import commentController from './controllers/comment.controller';
 import { FakeSOSocket } from './types/types';
+import forumController from './controllers/forum.controller';
 import userController from './controllers/user.controller';
 import messageController from './controllers/message.controller';
 import chatController from './controllers/chat.controller';
 import gameController from './controllers/game.controller';
+import readStatusController from './controllers/readStatus.controller';
+import notificationController from './controllers/notification.controller';
+import { getUsersList } from './services/user.service';
+import sendEmail from './services/email.service';
+import challengeController from './controllers/challenges.controller';
 
 dotenv.config();
 
@@ -31,6 +37,10 @@ const socket: FakeSOSocket = new Server(server, {
   cors: { origin: '*' },
 });
 
+// This package does not support EMCA import types
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const schedule = require('node-schedule');
+
 function connectDatabase() {
   return mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
 }
@@ -40,6 +50,73 @@ function startServer() {
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
+}
+
+/**
+ * Schedules all the hourly email jobs
+ */
+async function scheduleHourlyEmails() {
+  try {
+    const allUsers = await getUsersList();
+    if ('error' in allUsers) {
+      throw Error('error getting users');
+    }
+    allUsers.forEach(user => {
+      // Sends email at half past an hour.
+      if (user.emailNotif && user.emailFrequency == 'hourly') {
+        schedule.scheduleJob('30 * * * *', async () => {
+          console.log('Hourly email sending scheduled.');
+          await sendEmail(user.username);
+        });
+      }
+    });
+  } catch (error) {
+    console.log('Error sending emails');
+  }
+}
+
+/**
+ * Schedules all the daily email jobs
+ */
+async function scheduleDailyEmails() {
+  try {
+    const allUsers = await getUsersList();
+    if ('error' in allUsers) {
+      throw Error('error getting users');
+    }
+    allUsers.forEach(user => {
+      // Sends every day at 6:30PM
+      if (user.emailNotif && user.emailFrequency == 'daily') {
+        schedule.scheduleJob('30 18 * * *', async () => {
+          await sendEmail(user.username);
+        });
+      }
+    });
+  } catch (error) {
+    console.log('Error sending emails');
+  }
+}
+
+/**
+ * Schedules all the weekly email jobs
+ */
+async function scheduleWeeklyEmails() {
+  try {
+    const allUsers = await getUsersList();
+    if ('error' in allUsers) {
+      throw Error('error getting users');
+    }
+    allUsers.forEach(user => {
+      // Sends out every Friday at 6:30 PM
+      if (user.emailNotif && user.emailFrequency == 'weekly') {
+        schedule.scheduleJob('30 18 * * 5', async () => {
+          await sendEmail(user.username);
+        });
+      }
+    });
+  } catch (error) {
+    console.log('Error sending emails');
+  }
 }
 
 socket.on('connection', socket => {
@@ -76,12 +153,23 @@ app.get('/', (_: Request, res: Response) => {
 
 app.use('/question', questionController(socket));
 app.use('/tag', tagController());
+app.use('/forum', forumController(socket));
 app.use('/answer', answerController(socket));
 app.use('/comment', commentController(socket));
 app.use('/messaging', messageController(socket));
 app.use('/user', userController(socket));
 app.use('/chat', chatController(socket));
 app.use('/games', gameController(socket));
+app.use('/read-status', readStatusController());
+app.use('/notification', notificationController(socket));
+app.use('/challenges', challengeController(socket));
 
 // Export the app instance
-export { app, server, startServer };
+export {
+  app,
+  server,
+  startServer,
+  scheduleHourlyEmails,
+  scheduleDailyEmails,
+  scheduleWeeklyEmails,
+};

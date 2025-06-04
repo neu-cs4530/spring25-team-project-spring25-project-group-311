@@ -195,6 +195,26 @@ describe('updateUser', () => {
     _id: new mongoose.Types.ObjectId(),
     username: user.username,
     dateJoined: user.dateJoined,
+    emails: [],
+    badges: [],
+    browserNotif: false,
+    emailNotif: false,
+    questionsAsked: [],
+    answersGiven: [],
+    numUpvotesDownvotes: 0,
+  };
+
+  const safeUpdatedUserWithEmails: SafeDatabaseUser = {
+    _id: new mongoose.Types.ObjectId(),
+    username: user.username,
+    dateJoined: user.dateJoined,
+    emails: ['johnDoe@gmail.com', 'janeDoe@gmail.com'],
+    badges: [],
+    browserNotif: false,
+    emailNotif: false,
+    questionsAsked: [],
+    answersGiven: [],
+    numUpvotesDownvotes: 0,
   };
 
   const updates: Partial<User> = {
@@ -250,6 +270,48 @@ describe('updateUser', () => {
     }
   });
 
+  it('should update the emails (adding an email) if the user is found', async () => {
+    const newEmail = 'johnnyAppleseed@gmail.com';
+    // Make a new partial updates object just for biography
+    const addEmailUpdates: Partial<User> = { emails: [newEmail] };
+
+    // Mock the DB to return a safe user (i.e., no password in results)
+    mockingoose(UserModel).toReturn({ ...safeUpdatedUser, emails: [newEmail] }, 'findOneAndUpdate');
+
+    const result = await updateUser(user.username, addEmailUpdates);
+
+    // Check that the result is a SafeUser and the biography got updated
+    if ('username' in result) {
+      expect(result.emails).toHaveLength(1);
+      expect(result.emails).toEqual([newEmail]);
+    } else {
+      throw new Error('Expected a safe user, got an error object.');
+    }
+  });
+
+  it('should update the emails (replacing an email) if the user is found', async () => {
+    const newEmail = 'johnnySmith@gmail.com';
+    const keptEmail = safeUpdatedUserWithEmails.emails[1];
+    // Make a new partial updates object just for biography
+    const replaceEmailUpdates: Partial<User> = { emails: [newEmail, keptEmail] };
+
+    // Mock the DB to return a safe user (i.e., no password in results)
+    mockingoose(UserModel).toReturn(
+      { ...safeUpdatedUserWithEmails, emails: [newEmail, keptEmail] },
+      'findOneAndUpdate',
+    );
+
+    const result = await updateUser(user.username, replaceEmailUpdates);
+
+    // Check that the result is a SafeUser and the biography got updated
+    if ('username' in result) {
+      expect(result.emails).toHaveLength(2);
+      expect(result.emails).toEqual([newEmail, keptEmail]);
+    } else {
+      throw new Error('Expected a safe user, got an error object.');
+    }
+  });
+
   it('should return an error if biography update fails because user not found', async () => {
     // Simulate user not found
     mockingoose(UserModel).toReturn(null, 'findOneAndUpdate');
@@ -257,6 +319,17 @@ describe('updateUser', () => {
     const newBio = 'No user found test';
     const biographyUpdates: Partial<User> = { biography: newBio };
     const updatedError = await updateUser(user.username, biographyUpdates);
+
+    expect('error' in updatedError).toBe(true);
+  });
+
+  it('should return an error if email update fails because user not found', async () => {
+    // Simulate user not found
+    mockingoose(UserModel).toReturn(null, 'findOneAndUpdate');
+
+    const newEmail = 'noUser@gmail.com';
+    const addEmailUpdates: Partial<User> = { emails: [newEmail] };
+    const updatedError = await updateUser(user.username, addEmailUpdates);
 
     expect('error' in updatedError).toBe(true);
   });

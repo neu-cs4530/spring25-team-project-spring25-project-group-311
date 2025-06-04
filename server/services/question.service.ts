@@ -260,3 +260,36 @@ export const addVoteToQuestion = async (
     };
   }
 };
+
+/**
+ * Gets the number of upvotes and downvotes made by a person
+ * @param username - The username of the person whose upvotes/downvotes we want to count
+ * @returns {Promise<number>} - The number of upvotes + downvotes
+ */
+export const getUpvotesAndDownVotesBy = async (username: string): Promise<number> => {
+  try {
+    const upAnddown = await QuestionModel.find({
+      $or: [{ upVotes: { $in: [username] } }, { downVotes: { $in: [username] } }],
+    });
+    return upAnddown.length;
+  } catch (error) {
+    return 0;
+  }
+};
+
+/**
+ * Gets a question given the question ID
+ * @param qid the ID of the question
+ * @returns {Promise<QuestionResponse>} - The found question or an error.
+ */
+export const getQuestionByID = async (qid: string): Promise<QuestionResponse> => {
+  try {
+    const foundQuestion = await QuestionModel.findOne({ _id: qid });
+    if (!foundQuestion) {
+      throw Error('Error getting question');
+    }
+    return foundQuestion;
+  } catch (error) {
+    return { error: `Error occurred when finding user: ${error}` };
+  }
+};

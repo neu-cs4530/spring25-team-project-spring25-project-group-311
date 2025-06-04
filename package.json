@@ -6,5 +6,19 @@
     "client",
     "server",
     "shared"
-  ]
+  ],
+  "dependencies": {
+    "@react-email/components": "^0.0.34",
+    "bootstrap": "^5.3.5",
+    "node-schedule": "^2.1.1",
+    "nodemailer": "^6.10.0",
+    "progress": "^2.0.3",
+    "react-bootstrap": "^2.10.9",
+    "react-calendar-heatmap": "^1.10.0",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/progress": "^2.0.7",
+    "@types/react-calendar-heatmap": "^1.9.0"
+  }
 }

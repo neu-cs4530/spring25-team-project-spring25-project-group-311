@@ -1,0 +1,41 @@
+.notification-card {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    margin: auto;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    width: 98%;
+ }
+
+.notification-card.notification-title {
+  align-self: flex-end;
+  background-color: #d1e7ff;
+}
+
+.notification-card:hover {
+  cursor: pointer;
+ }
+
+ .notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #666;
+ }
+
+ .notification-title {
+  font-weight: bold;
+  color: #333;
+ }
+
+ .notification-text {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  word-wrap: break-word;
+ }

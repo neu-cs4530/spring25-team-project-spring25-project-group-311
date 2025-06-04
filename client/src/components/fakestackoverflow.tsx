@@ -12,11 +12,17 @@ import NewAnswerPage from './main/newAnswer';
 import AnswerPage from './main/answerPage';
 import MessagingPage from './main/messagingPage';
 import DirectMessage from './main/directMessage';
+import ForumPage from './main/forumPage';
 import Signup from './auth/signup';
 import UsersListPage from './main/usersListPage';
 import ProfileSettings from './profileSettings';
 import AllGamesPage from './main/games/allGamesPage';
 import GamePage from './main/games/gamePage';
+import NewForumPage from './main/newForum';
+import FocusedForumPage from './main/focusedForumPage';
+import LeaderboardListPage from './main/leaderboardPage';
+import NotificationPage from './main/notificationPage';
+import RecommendedForums from './recommendedForums';
 
 const ProtectedRoute = ({
   user,
@@ -52,13 +58,17 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
           <Route
             element={
               <ProtectedRoute user={user} socket={socket}>
-                <Layout />
+                <Layout userBanner={user?.selectedBanner ?? '#ddddd'} />
               </ProtectedRoute>
             }>
             <Route path='/home' element={<QuestionPage />} />
             <Route path='tags' element={<TagPage />} />
             <Route path='/messaging' element={<MessagingPage />} />
             <Route path='/messaging/direct-message' element={<DirectMessage />} />
+            <Route path='/forums' element={<ForumPage />} />
+            <Route path='/forum/:fid' element={<FocusedForumPage />} />
+            <Route path='/forum/:fid/new/question' element={<NewQuestionPage />} />
+            <Route path='/new/forum' element={<NewForumPage />} />
             <Route path='/question/:qid' element={<AnswerPage />} />
             <Route path='/new/question' element={<NewQuestionPage />} />
             <Route path='/new/answer/:qid' element={<NewAnswerPage />} />
@@ -66,6 +76,9 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='/user/:username' element={<ProfileSettings />} />
             <Route path='/games' element={<AllGamesPage />} />
             <Route path='/games/:gameID' element={<GamePage />} />
+            <Route path='/leaderboard' element={<LeaderboardListPage />} />
+            <Route path='/notifications' element={<NotificationPage />} />
+            <Route path='/recommendedForums' element={<RecommendedForums />} />
           </Route>
         }
       </Routes>

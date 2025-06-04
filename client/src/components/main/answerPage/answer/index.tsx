@@ -2,7 +2,7 @@ import React from 'react';
 import { handleHyperlink } from '../../../../tool';
 import CommentSection from '../../commentSection';
 import './index.css';
-import { Comment, DatabaseComment } from '../../../../types/types';
+import { Comment, DatabaseComment, DatabaseForum } from '../../../../types/types';
 
 /**
  * Interface representing the props for the AnswerView component.
@@ -18,6 +18,7 @@ interface AnswerProps {
   ansBy: string;
   meta: string;
   comments: DatabaseComment[];
+  forum?: DatabaseForum;
   handleAddComment: (comment: Comment) => void;
 }
 
@@ -31,7 +32,7 @@ interface AnswerProps {
  * @param comments An array of comments associated with the answer.
  * @param handleAddComment Function to handle adding a new comment.
  */
-const AnswerView = ({ text, ansBy, meta, comments, handleAddComment }: AnswerProps) => (
+const AnswerView = ({ text, ansBy, meta, comments, forum, handleAddComment }: AnswerProps) => (
   <div className='answer right_padding'>
     <div id='answerText' className='answerText'>
       {handleHyperlink(text)}
@@ -40,7 +41,11 @@ const AnswerView = ({ text, ansBy, meta, comments, handleAddComment }: AnswerPro
       <div className='answer_author'>{ansBy}</div>
       <div className='answer_question_meta'>{meta}</div>
     </div>
-    <CommentSection comments={comments} handleAddComment={handleAddComment} />
+    <CommentSection
+      comments={comments}
+      handleAddComment={handleAddComment}
+      forum={forum || undefined}
+    />
   </div>
 );
 

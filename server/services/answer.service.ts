@@ -2,6 +2,7 @@ import {
   Answer,
   AnswerResponse,
   DatabaseAnswer,
+  DatabaseComment,
   DatabaseQuestion,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseQuestion,
@@ -9,6 +10,7 @@ import {
 } from '../types/types';
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
+import CommentModel from '../models/comments.model';
 
 /**
  * Records the most recent answer time for a given question based on its answers.
@@ -71,5 +73,42 @@ export const addAnswerToQuestion = async (
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };
+  }
+};
+
+/**
+ * Gets all the answers from the model.
+ * @returns {Promise<PopulatedDatabaseAnswer[]>} - A promise resolving to a list of populated questions.
+ */
+export const getAllAnswers = async (): Promise<PopulatedDatabaseAnswer[]> => {
+  try {
+    const alist: PopulatedDatabaseAnswer[] = await AnswerModel.find().populate<{
+      comments: DatabaseComment[];
+    }>([{ path: 'comments', model: CommentModel }]);
+
+    if (!alist) {
+      throw Error('error getting answers');
+    }
+
+    return alist;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Gets an answer given the ID
+ * @param aid The ID of the given answer
+ * @returns {Promise<AnswerResponse>}Either the found answer or an error.
+ */
+export const getAnswerById = async (aid: string): Promise<AnswerResponse> => {
+  try {
+    const foundAnswer = await AnswerModel.findOne({ _id: aid });
+    if (!foundAnswer) {
+      throw Error('Error getting answer');
+    }
+    return foundAnswer;
+  } catch (error) {
+    return { error: `Error getting answer: ${error}` };
   }
 };

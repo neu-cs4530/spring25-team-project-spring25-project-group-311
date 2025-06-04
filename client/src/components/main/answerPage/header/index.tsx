@@ -1,6 +1,5 @@
 import React from 'react';
 import './index.css';
-import AskQuestionButton from '../../askQuestionButton';
 
 /**
  * Interface representing the props for the AnswerHeader component.
@@ -11,6 +10,7 @@ import AskQuestionButton from '../../askQuestionButton';
 interface AnswerHeaderProps {
   ansCount: number;
   title: string;
+  forumTitle?: string;
 }
 
 /**
@@ -20,11 +20,15 @@ interface AnswerHeaderProps {
  * @param ansCount The number of answers to display.
  * @param title The title of the question or discussion thread.
  */
-const AnswerHeader = ({ ansCount, title }: AnswerHeaderProps) => (
+const AnswerHeader = ({ ansCount, title, forumTitle }: AnswerHeaderProps) => (
   <div id='answersHeader' className='space_between right_padding'>
     <div className='bold_title'>{ansCount} answers</div>
-    <div className='bold_title answer_question_title'>{title}</div>
-    <AskQuestionButton />
+    <div>
+      <div className='bold_title answer_question_title'>{title}</div>
+      {forumTitle && <div className='centered'> [Posted in {forumTitle}]</div>}
+    </div>
+    <div></div>
+    <div></div>
   </div>
 );
 

@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 /**
  * Mongoose schema for the User collection.
@@ -8,6 +8,9 @@ import { Schema } from 'mongoose';
  * - `username`: The username of the user.
  * - `password`: The encrypted password securing the user's account.
  * - `dateJoined`: The date the user joined the platform.
+ * - `biography`: A short biography of the user.
+ * - `emails`: The emails associated with this user (in the form of a list to allow for multiple emails)
+ * - `badges`: The badges the user has earned.
  */
 const userSchema: Schema = new Schema(
   {
@@ -25,6 +28,50 @@ const userSchema: Schema = new Schema(
     biography: {
       type: String,
       default: '',
+    },
+    emails: [{ type: String }],
+    badges: {
+      type: [String],
+      default: [],
+    },
+    pinnedBadge: {
+      type: [String],
+      default: [],
+    },
+    banners: {
+      type: [String],
+      default: [],
+    },
+    streak: {
+      type: [Date],
+      default: 0,
+    },
+    activityLog: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+    selectedBanner: {
+      type: String,
+      default: '#dddddd',
+    },
+    browserNotif: {
+      type: Boolean,
+    },
+    emailNotif: {
+      type: Boolean,
+    },
+    emailFrequency: { type: String, default: 'weekly' },
+    mutedTime: { type: Date, default: new Date('December 17, 1995 03:24:00') },
+    questionsAsked: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
+    answersGiven: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
+    challengeCompletions: [
+      {
+        challenge: { type: String, required: true },
+        date: { type: String, required: true },
+      },
+    ],
+    numUpvotesDownvotes: {
+      type: Number,
     },
   },
   { collection: 'User' },

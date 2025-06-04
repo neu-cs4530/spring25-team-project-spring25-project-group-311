@@ -37,6 +37,7 @@ export interface Question {
   upVotes: string[];
   downVotes: string[];
   comments: Comment[];
+  forumId?: string;
 }
 
 /**
@@ -118,6 +119,18 @@ export interface FindQuestionByIdRequest extends Request {
  */
 export interface AddQuestionRequest extends Request {
   body: Question;
+}
+
+/**
+ * Interface for the request body when adding a new question to a forum.
+ * - `fid`: The unqiue identified of the forum where the question is being added.
+ * - `question`: The question being added.
+ */
+export interface AddForumQuestionRequest extends Request {
+  body: {
+    fid: string;
+    question: Question;
+  };
 }
 
 /**

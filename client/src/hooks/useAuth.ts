@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChangeEvent, useState } from 'react';
 import useLoginContext from './useLoginContext';
-import { createUser, loginUser } from '../services/userService';
+import { createUser, loginUser, awardBadges, awardBanners } from '../services/userService';
 
 /**
  * Custom hook to manage authentication logic, including handling input changes,
@@ -94,6 +94,10 @@ const useAuth = (authType: 'login' | 'signup') => {
     try {
       if (authType === 'signup') {
         user = await createUser({ username, password });
+        const userRes = await awardBadges(username, ['/badge_images/New_User_Badge.png']);
+        user.badges = userRes.badges;
+        const bannersUpdatedUser = await awardBanners(user.username, ['blue']);
+        user.banners = bannersUpdatedUser.banners;
       } else if (authType === 'login') {
         user = await loginUser({ username, password });
       } else {
@@ -101,7 +105,11 @@ const useAuth = (authType: 'login' | 'signup') => {
       }
 
       setUser(user);
-      navigate('/home');
+      if (authType === 'signup') {
+        navigate('/recommendedForums');
+      } else {
+        navigate('/home');
+      }
     } catch (error) {
       setErr((error as Error).message);
     }

@@ -1,9 +1,15 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { validateHyperlink } from '../tool';
 import { addQuestion } from '../services/questionService';
 import useUserContext from './useUserContext';
 import { Question } from '../types/types';
+import {
+  getQuestionsAsked,
+  updateStreak,
+  awardBadges,
+  awardBanners,
+} from '../services/userService';
 
 /**
  * Custom hook to handle question submission and form validation
@@ -19,6 +25,7 @@ import { Question } from '../types/types';
 const useNewQuestion = () => {
   const navigate = useNavigate();
   const { user } = useUserContext();
+  const { fid } = useParams();
   const [title, setTitle] = useState<string>('');
   const [text, setText] = useState<string>('');
   const [tagNames, setTagNames] = useState<string>('');
@@ -104,10 +111,50 @@ const useNewQuestion = () => {
       comments: [],
     };
 
-    const res = await addQuestion(question);
+    let res;
+    if (!fid) {
+      res = await addQuestion(question);
+    } else {
+      res = await addQuestion(question, fid);
+    }
 
-    if (res && res._id) {
+    // Update user streak and activity log
+    const userRes = await updateStreak(user.username, question.askDateTime, 'questions');
+    user.streak = userRes.streak;
+    user.activityLog = userRes.activityLog;
+
+    if (
+      user.streak &&
+      user.streak.length >= 5 &&
+      !user.badges.includes('/badge_images/Five_Day_Streak_Badge.png')
+    ) {
+      const updatedUser = await awardBadges(user.username, [
+        '/badge_images/Five_Day_Streak_Badge.png',
+      ]);
+      user.badges = updatedUser.badges;
+    }
+
+    // Award badges if the user has 1 question
+    const questionRes = await getQuestionsAsked(user.username);
+
+    if (questionRes.length >= 1 && !user.badges.includes('/badge_images/First_Post_Badge.png')) {
+      const updatedUser = await awardBadges(user.username, ['/badge_images/First_Post_Badge.png']);
+      user.badges = updatedUser.badges;
+      const bannersUpdatedUser = await awardBanners(user.username, ['lightblue']);
+      user.banners = bannersUpdatedUser.banners;
+    }
+
+    if (questionRes.length >= 10 && !user.badges.includes('/badge_images/Ten_Posts_Badge.png')) {
+      const updatedUser = await awardBadges(user.username, ['/badge_images/Ten_Posts_Badge.png']);
+      user.badges = updatedUser.badges;
+      const bannersUpdatedUser = await awardBanners(user.username, ['lightgreen']);
+      user.banners = bannersUpdatedUser.banners;
+    }
+
+    if (res && res._id && !fid) {
       navigate('/home');
+    } else if (res && res._id && fid) {
+      navigate(`/forum/${fid}`);
     }
   };
 

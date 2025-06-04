@@ -1,8 +1,16 @@
 // // Run this script to launch the server.
 
-import {server, app, startServer} from './app'
+import {
+  server,
+  app,
+  startServer,
+  scheduleDailyEmails,
+  scheduleHourlyEmails,
+  scheduleWeeklyEmails,
+} from './app';
 
 startServer();
-export {app, server};
-
-
+scheduleDailyEmails();
+scheduleHourlyEmails();
+scheduleWeeklyEmails();
+export { app, server };

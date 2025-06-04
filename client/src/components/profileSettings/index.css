@@ -2,19 +2,23 @@
    using padding instead of forced vertical centering */
    .page-container {
     width: 100%;
-    min-height: 100vh;
+    min-height: auto;
     background: #f7f7f7;
     display: flex;
     justify-content: center; /* horizontally center the card */
     padding: 40px 0;         /* top & bottom spacing */
     box-sizing: border-box;
   }
-  
+
+  .confirm-text {
+    padding-top: 20px;
+  }
+
   /* A card-like container that holds the actual profile content */
   .profile-card {
     width: 100%;
     max-width: 600px;        /* limit the card width */
-    max-height: 700px;       
+    max-height: auto;       
     overflow-y: auto;
     background: #fff;        /* white background */
     border-radius: 5px;      /* slight rounding on edges */
@@ -32,26 +36,15 @@
     color: #333;
     text-align: left;        /* left-align the headings */
   }
-  
-  /* Subheadings for each section (General Info, Reset Password, Danger Zone) */
-  .profile-card h4 {
-    margin-top: 24px;
-    margin-bottom: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #555;
-    text-align: left;
+
+  .notification-display {
+    margin-top: 3%;
   }
-  
-  /* Basic paragraph styling */
-  .profile-card p {
-    margin-bottom: 10px;
-    font-size: 15px;
-    line-height: 1.4;
-    color: #666;
-    text-align: left;
+
+  .badge-image:hover {
+    cursor: pointer;
   }
-  
+
   /* The input styles remain similar to your existing design; 
      just ensure they're sized well within the card */
   .input-text {
@@ -74,7 +67,9 @@
   /* Buttons: 
      Adjust margins so they're not all bunched up horizontally */
   .login-button,
-  .delete-button {
+  .delete-button, 
+  .replace-email-button, 
+  .add-email-button{
     margin-top: 15px;
     margin-right: 10px;
     padding: 10px 20px;
@@ -97,6 +92,15 @@
   .login-button:active {
     background-color: #003f7f;
   }
+
+  .badge {
+    margin-top: 15px;
+    margin-right: 10px;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+  }
   
   /* Destructive action button (Delete) */
   .delete-button {
@@ -110,6 +114,18 @@
   
   .delete-button:active {
     background-color: #990000;
+  }
+
+  /* Button to replace email */
+  .replace-email-button {
+    background-color: grey;
+    color: white;
+  }
+
+  /* Button to add email */
+  .add-email-button {
+    background-color: purple;
+    color: white;
   }
 
   .profile-card .success-message {
@@ -136,3 +152,34 @@
   .toggle-password-button:hover {
     background-color: #bbb;
   }
+
+  .calendar-heatmap-container svg {
+    overflow: visible; 
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .react-calendar-heatmap .color-scale-0 { fill: #cbcaca; }
+  .react-calendar-heatmap .color-scale-1 { fill: #d6e685; }
+  .react-calendar-heatmap .color-scale-2 { fill: #8cc665; }
+  .react-calendar-heatmap .color-scale-3 { fill: #44a340; }
+  .react-calendar-heatmap .color-scale-4 { fill: #1e6823; }
+
+  .challenge-status {
+    display: inline-block;
+    margin-left: 20px;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .challenge-completed {
+    background-color: green;
+  }
+  
+  .challenge-pending {
+    background-color: gray;
+  }
+  

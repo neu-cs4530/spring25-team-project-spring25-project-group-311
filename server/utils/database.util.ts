@@ -6,7 +6,10 @@ import {
   MessageInChat,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseChat,
+  PopulatedDatabaseForum,
+  PopulatedDatabaseNotification,
   PopulatedDatabaseQuestion,
+  SafeDatabaseUser,
 } from '../types/types';
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
@@ -15,6 +18,8 @@ import CommentModel from '../models/comments.model';
 import ChatModel from '../models/chat.model';
 import UserModel from '../models/users.model';
 import MessageModel from '../models/messages.model';
+import NotificationModel from '../models/notifications.model';
+import ForumModel from '../models/forum.model';
 
 /**
  * Fetches and populates a question document with its related tags, answers, and comments.
@@ -50,6 +55,38 @@ const populateAnswer = async (answerID: string): Promise<PopulatedDatabaseAnswer
   const result = await AnswerModel.findOne({ _id: answerID }).populate<{
     comments: DatabaseComment[];
   }>([{ path: 'comments', model: CommentModel }]);
+
+  return result;
+};
+
+/**
+ * Fetches and populates a forum document with its related questions.
+ * @param {string} forumId - The ID of the forum to fetch
+ * @returns {Promise<PopulatedDatabaseForum | null>} - The populated forum document, or null if not found.
+ */
+const populateForum = async (forumId: string): Promise<PopulatedDatabaseForum | null> => {
+  const result = await ForumModel.findOne({ _id: forumId }).populate<{
+    questions: PopulatedDatabaseQuestion[];
+  }>([{ path: 'questions', model: QuestionModel }]);
+
+  return result;
+};
+
+/**
+ * Fetches and populates a notification document with its related user.
+ * @param notificationID The ID of the notification to fetch.
+ * @returns {Promise<PopulatedDatabaseNotification | null>} - The populated notifcation document or null if not found.
+ */
+const populateNotification = async (
+  notificationID: string,
+): Promise<PopulatedDatabaseNotification | null> => {
+  const result = await NotificationModel.findOne({ _id: notificationID }).populate<{
+    user: SafeDatabaseUser;
+  }>([{ path: 'user', model: UserModel }]);
+
+  if (!result) {
+    throw new Error('Chat not found');
+  }
 
   return result;
 };
@@ -117,9 +154,14 @@ const populateChat = async (chatID: string): Promise<PopulatedDatabaseChat | nul
 // eslint-disable-next-line import/prefer-default-export
 export const populateDocument = async (
   id: string,
-  type: 'question' | 'answer' | 'chat',
+  type: 'question' | 'answer' | 'chat' | 'notification' | 'forum',
 ): Promise<
-  PopulatedDatabaseAnswer | PopulatedDatabaseChat | PopulatedDatabaseQuestion | { error: string }
+  | PopulatedDatabaseAnswer
+  | PopulatedDatabaseChat
+  | PopulatedDatabaseQuestion
+  | PopulatedDatabaseNotification
+  | PopulatedDatabaseForum
+  | { error: string }
 > => {
   try {
     if (!id) {
@@ -137,6 +179,12 @@ export const populateDocument = async (
         break;
       case 'chat':
         result = await populateChat(id);
+        break;
+      case 'notification':
+        result = await populateNotification(id);
+        break;
+      case 'forum':
+        result = await populateForum(id);
         break;
       default:
         throw new Error('Invalid type provided.');
